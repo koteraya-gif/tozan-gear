@@ -460,6 +460,34 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   }
 }
 
+
+
+/* Ver8.6.9 統計カード モバイル修正 */
+@media (max-width:768px){
+  /* ②③ フォント縮小・3カード均等幅 */
+  .summary{
+    grid-template-columns:repeat(3,1fr)!important;
+    gap:6px!important;
+  }
+  .summary-item{
+    min-width:0!important;
+    padding:10px 6px!important;
+    overflow:hidden!important;
+  }
+  .summary-item .label{
+    font-size:10px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .summary-item .value{
+    font-size:1.3rem!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    margin-top:4px!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1344,7 +1372,7 @@ function renderSummary() {
   els.summary.totalPrice.textContent = '¥' + formatNumber(sum(state.items, 'paid'));
   const gearWeight = sum(state.items, 'weight');
   const supplyWeight = (state.supplies || []).reduce((a, s) => a + (Number(s.weight) || 0), 0);
-  els.summary.totalWeight.textContent = formatNumber(gearWeight + supplyWeight) + ' g';
+  els.summary.totalWeight.textContent = formatWeightKg(gearWeight + supplyWeight);
 }
 
 function renderViewToggle() {
@@ -1548,6 +1576,7 @@ function sum(items, field) {
 }
 function formatNumber(n) { const x = Number(n) || 0; return x.toLocaleString('ja-JP'); }
 function formatWeight(n) { return formatNumber(Number(n) || 0) + ' g'; }
+function formatWeightKg(g) { return (Number(g) / 1000).toFixed(1) + 'kg'; }
 
 function openModal(id) {
   resetForm();
@@ -1851,9 +1880,9 @@ function renderEquipmentSets(){
     stats.className = 'set-stats';
     stats.innerHTML =
       mark + ' 準備状況: ' + packedCount + ' / ' + gears.length + ' (' + rate + '%)' +
-      '<br>⚙️ 装備重量: ' + formatWeight(wt.baseWeight) +
-      '<br>🍙 消耗品重量: ' + formatWeight(wt.consumablesWeight) +
-      '<br>🎒 総重量: ' + formatWeight(wt.packWeight) +
+      '<br>⚙️ 装備重量: ' + formatWeightKg(wt.baseWeight) +
+      '<br>🍙 消耗品重量: ' + formatWeightKg(wt.consumablesWeight) +
+      '<br>🎒 総重量: ' + formatWeightKg(wt.packWeight) +
       '<br>ギア数: ' + (s.gearIds?.length || 0) + '点 / 消耗品数: ' + (s.supplyIds?.length || 0) + '点' +
       '<br>購入額: ¥' + formatNumber(paid) + ' / 定価: ¥' + formatNumber(msrp);
     card.appendChild(stats);
@@ -1977,9 +2006,9 @@ function openSetEditor(setId){
     },0);
     box.querySelector('#setStats').innerHTML =
       'ギア数 ' + gearIds.length + '点 ｜ 消耗品数 ' + supplyIds.length + '点' +
-      ' ｜ 装備重量 ' + formatWeight(baseWeight) +
-      ' ｜ 消耗品重量 ' + formatWeight(consumablesWeight) +
-      ' ｜ 総重量 ' + formatWeight(baseWeight + consumablesWeight);
+      ' ｜ 装備重量 ' + formatWeightKg(baseWeight) +
+      ' ｜ 消耗品重量 ' + formatWeightKg(consumablesWeight) +
+      ' ｜ 総重量 ' + formatWeightKg(baseWeight + consumablesWeight);
   }
 
   updateStats();
@@ -2205,11 +2234,11 @@ function renderSupplies(){
   });
 
   els.supplyCountValue.textContent = count + '件';
-  els.supplyTotalWeightValue.textContent = formatNumber(total) + ' g';
-  els.supplyAvgWeightValue.textContent = formatNumber(avg) + ' g';
+  els.supplyTotalWeightValue.textContent = formatWeightKg(total);
+  els.supplyAvgWeightValue.textContent = formatWeightKg(avg);
 
   sumEl.textContent='検索結果: ' + count + '件';
-  statsEl.textContent='総重量 ' + formatNumber(total) + 'g / 平均重量 ' + formatNumber(avg) + 'g';
+  statsEl.textContent='総重量 ' + formatWeightKg(total) + ' / 平均重量 ' + formatWeightKg(avg);
 
   if(els.supplyCategorySummary){
     els.supplyCategorySummary.innerHTML = '';
