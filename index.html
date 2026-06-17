@@ -382,6 +382,84 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   }
 }
 
+
+/* Ver8.6.8 mobile modal — compact inputs, centered buttons, small preview */
+@media (max-width:768px){
+  /* ① 入力欄の高さをコンパクトに */
+  #gearModal input,
+  #gearModal select{
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    padding:0 10px!important;
+    font-size:16px!important;
+    box-sizing:border-box!important;
+  }
+  #gearModal textarea{
+    height:80px!important;
+    min-height:80px!important;
+    max-height:80px!important;
+    padding:8px 10px!important;
+    font-size:16px!important;
+    box-sizing:border-box!important;
+  }
+
+  /* ② 入力欄の横幅に余白 */
+  #gearForm .form-row input,
+  #gearForm .form-row select,
+  #gearForm .form-row textarea{
+    width:90%!important;
+    max-width:90%!important;
+    margin:0 auto!important;
+    display:block!important;
+  }
+
+  /* ③ 保存・キャンセルボタンをコンパクト化・中央寄せ */
+  #gearModal .form-actions{
+    position:sticky!important;
+    bottom:0!important;
+    background:#fff!important;
+    padding:10px 14px!important;
+    border-top:1px solid #ddd!important;
+    display:flex!important;
+    flex-direction:row!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:12px!important;
+  }
+  #gearModal .form-actions .spacer{display:none!important;}
+  #gearModal .form-actions button[type="submit"],
+  #gearModal .form-actions button#cancelBtn{
+    width:auto!important;
+    min-width:100px!important;
+    max-width:140px!important;
+    padding:10px 16px!important;
+    font-size:15px!important;
+    margin:0!important;
+  }
+  #gearModal .form-actions button#deleteGearBtn{
+    width:auto!important;
+    min-width:80px!important;
+    padding:10px 12px!important;
+    font-size:14px!important;
+    margin:0!important;
+  }
+
+  /* ④ プレビュー画像を約110px */
+  #gearModal .photo-preview{
+    max-width:110px!important;
+  }
+  #gearModal .photo-preview img,
+  #photoPreview{
+    width:110px!important;
+    height:110px!important;
+    max-width:110px!important;
+    max-height:110px!important;
+    object-fit:cover!important;
+    border-radius:8px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -580,8 +658,8 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
         <label for="gearPhoto">写真</label>
         <input type="file" id="gearPhoto" accept="image/*" />
         <div class="photo-preview">
-          <img id="photoPreview" alt="プレビュー"
-            src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='140' height='105' viewBox='0 0 640 480'><rect width='640' height='480' fill='%23eef2ee'/><path d='M80 360 L200 240 L280 320 L360 200 L560 360 Z' fill='%23cfe3d7'/><circle cx='520' cy='120' r='36' fill='%23d8e9de'/><path d='M300 320 L340 380 L260 380 Z' fill='%2399c5ae'/></svg>" />
+          <img id="photoPreview" alt="画像なし"
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'><rect width='110' height='110' rx='10' fill='%23eef2ee'/><text x='55' y='62' text-anchor='middle' font-size='40'>📷</text><text x='55' y='90' text-anchor='middle' font-size='12' fill='%23667a6b'>画像なし</text></svg>" />
         </div>
       </div>
       <div class="form-row">
@@ -1562,13 +1640,7 @@ function onDelete() {
   closeModal();
 }
 function placeholderDataURL(){
-  const svg = `
-  <svg xmlns="[w3.org](http://www.w3.org/2000/svg)" width="640" height="480" viewBox="0 0 640 480">
-    <rect width="640" height="480" fill="#eef2ee"/>
-    <path d="M80 360 L200 240 L280 320 L360 200 L560 360 Z" fill="#cfe3d7"/>
-    <circle cx="520" cy="120" r="36" fill="#d8e9de"/>
-    <path d="M300 320 L340 380 L260 380 Z" fill="#99c5ae"/>
-  </svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110"><rect width="110" height="110" rx="10" fill="#eef2ee"/><text x="55" y="62" text-anchor="middle" font-size="40">📷</text><text x="55" y="90" text-anchor="middle" font-size="12" fill="#667a6b">画像なし</text></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 function isPlaceholder(src){ return src && src.startsWith('data:image/svg+xml') && src.includes('%23eef2ee'); }
