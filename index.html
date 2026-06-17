@@ -1915,7 +1915,6 @@ function renderEquipmentSets(){
       '<br>🎒 パック重量: ' + formatWeightKg(wt.packWeight) +
       '<br>🍙 消耗品重量: ' + formatWeightKg(wt.consumablesWeight) +
       '<br>🏔️ 総重量: ' + formatWeightKg(wt.totalWeight) +
-      '<br>Base Weight: ' + formatWeightKg(wt.packWeight) +
       '<br>ギア数: ' + (s.gearIds?.length || 0) + '点 / 消耗品数: ' + (s.supplyIds?.length || 0) + '点' +
       '<br>購入額: ¥' + formatNumber(paid) + ' / 定価: ¥' + formatNumber(msrp);
     card.appendChild(stats);
@@ -2173,7 +2172,6 @@ function openPackingMode(setId){
         '<br>🎒 パック重量: ' + (packW2/1000).toFixed(1) + 'kg' +
         '<br>🍙 消耗品重量: ' + (totalSupplyWeight/1000).toFixed(1) + 'kg' +
         '<br>🏔️ 総重量: ' + ((totalGearWeight + totalSupplyWeight)/1000).toFixed(1) + 'kg' +
-        '<br>Base Weight: ' + (packW2/1000).toFixed(1) + 'kg' +
         '<br>パッキング済ギア重量: ' + packedWeight.toLocaleString() + 'g' +
         ' / 未収納ギア重量: ' + (totalGearWeight - packedWeight).toLocaleString() + 'g';
     };
