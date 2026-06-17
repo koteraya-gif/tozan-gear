@@ -488,6 +488,27 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
     margin-top:4px!important;
   }
 }
+
+/* Ver9.1 着用/パック重量管理 */
+.gear-check-row{
+  display:flex;align-items:center;gap:8px;margin:4px 0;
+}
+.gear-check-row label{
+  flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;
+}
+.gear-check-row label span{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.loc-toggle{
+  border:1px solid #ccc;border-radius:8px;padding:4px 10px;
+  font-size:18px;cursor:pointer;background:#f0f4ff;
+  min-width:44px;min-height:36px;flex-shrink:0;line-height:1;
+}
+.loc-toggle[data-loc="worn"]{background:#fff3e8;}
+.loc-toggle:active{opacity:0.7;}
+@media(max-width:768px){
+  .loc-toggle{min-width:44px;min-height:44px;font-size:20px;}
+}
 </style>
 </head>
 <body>
@@ -976,6 +997,7 @@ function normalizeEquipmentSet(set){
     gearIds: Array.isArray(set?.gearIds) ? set.gearIds.map(Number).filter(Number.isFinite) : [],
     supplyIds: Array.isArray(set?.supplyIds) ? set.supplyIds.map(Number).filter(Number.isFinite) : [],
     supplyQuantities: set?.supplyQuantities || {},
+    gearLocations: (set?.gearLocations && typeof set.gearLocations === 'object') ? set.gearLocations : {},
     memo: set?.memo || ''
   };
 }
@@ -1830,16 +1852,25 @@ function sumByIds(items, ids, key='weight'){
 }
 
 function getEquipmentSetWeights(set){
-  const baseWeight = sumByIds(state.items, set.gearIds || [], 'weight');
+  const locations = set.gearLocations || {};
+  let wornWeight = 0, packWeight = 0;
+  (set.gearIds || []).forEach(gid => {
+    const item = state.items.find(x => x.id === gid);
+    if(!item) return;
+    const w = Number(item.weight) || 0;
+    if(locations[gid] === 'worn') wornWeight += w;
+    else packWeight += w;
+  });
   const consumablesWeight = state.supplies.reduce((a,sp)=>{
     if(!(set.supplyIds||[]).includes(sp.id)) return a;
     const qty = Number((set.supplyQuantities||{})[sp.id] || 1);
     return a + ((Number(sp.weight)||0) * qty);
   },0);
   return {
-    baseWeight,
+    wornWeight,
+    packWeight,
     consumablesWeight,
-    packWeight: baseWeight + consumablesWeight
+    totalWeight: wornWeight + packWeight + consumablesWeight
   };
 }
 
@@ -1880,9 +1911,11 @@ function renderEquipmentSets(){
     stats.className = 'set-stats';
     stats.innerHTML =
       mark + ' 準備状況: ' + packedCount + ' / ' + gears.length + ' (' + rate + '%)' +
-      '<br>⚙️ 装備重量: ' + formatWeightKg(wt.baseWeight) +
+      '<br>👕 着用重量: ' + formatWeightKg(wt.wornWeight) +
+      '<br>🎒 パック重量: ' + formatWeightKg(wt.packWeight) +
       '<br>🍙 消耗品重量: ' + formatWeightKg(wt.consumablesWeight) +
-      '<br>🎒 総重量: ' + formatWeightKg(wt.packWeight) +
+      '<br>🏔️ 総重量: ' + formatWeightKg(wt.totalWeight) +
+      '<br>Base Weight: ' + formatWeightKg(wt.packWeight) +
       '<br>ギア数: ' + (s.gearIds?.length || 0) + '点 / 消耗品数: ' + (s.supplyIds?.length || 0) + '点' +
       '<br>購入額: ¥' + formatNumber(paid) + ' / 定価: ¥' + formatNumber(msrp);
     card.appendChild(stats);
@@ -1962,7 +1995,9 @@ function openSetEditor(setId){
       h += '<h4>▼ ' + escapeHtml(cat) + '（' + gearGroups[cat].length + '）</h4>';
       gearGroups[cat].forEach(g=>{
         const checked=(s.gearIds||[]).includes(g.id)?'checked':'';
-        h += '<label class="checkbox-item"><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '> ' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</label>';
+        const loc=(s.gearLocations||{})[g.id]||'pack';
+        const locEmoji=loc==='worn'?'👕':'🎒';
+        h += '<div class="gear-check-row"><label><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '><span>' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</span></label><button type="button" class="loc-toggle" data-gearloc="' + g.id + '" data-loc="' + loc + '">' + locEmoji + '</button></div>';
       });
     });
   }
@@ -1997,7 +2032,14 @@ function openSetEditor(setId){
   function updateStats(){
     const gearIds = getCheckedNumbers('setGearIds');
     const supplyIds = getCheckedNumbers('setSupplyIds');
-    const baseWeight = sumByIds(state.items, gearIds, 'weight');
+    let wornW=0, packW=0;
+    state.items.forEach(item=>{
+      if(!gearIds.includes(item.id)) return;
+      const btn=box.querySelector('[data-gearloc="'+item.id+'"]');
+      const loc=btn?btn.dataset.loc:'pack';
+      const w=Number(item.weight)||0;
+      if(loc==='worn') wornW+=w; else packW+=w;
+    });
     const consumablesWeight = state.supplies.reduce((a,sp)=>{
       if(!supplyIds.includes(sp.id)) return a;
       const qtyEl=box.querySelector('[data-supplyqty="'+sp.id+'"]');
@@ -2006,14 +2048,21 @@ function openSetEditor(setId){
     },0);
     box.querySelector('#setStats').innerHTML =
       'ギア数 ' + gearIds.length + '点 ｜ 消耗品数 ' + supplyIds.length + '点' +
-      ' ｜ 装備重量 ' + formatWeightKg(baseWeight) +
-      ' ｜ 消耗品重量 ' + formatWeightKg(consumablesWeight) +
-      ' ｜ 総重量 ' + formatWeightKg(baseWeight + consumablesWeight);
+      ' ｜ 👕 着用: ' + formatWeightKg(wornW) +
+      ' ｜ 🎒 パック: ' + formatWeightKg(packW) +
+      ' ｜ 🍙 消耗品: ' + formatWeightKg(consumablesWeight) +
+      ' ｜ 🏔️ 総重量: ' + formatWeightKg(wornW + packW + consumablesWeight);
   }
 
   updateStats();
   box.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',updateStats));
   box.querySelectorAll('[data-supplyqty]').forEach(el=>el.addEventListener('input',updateStats));
+  box.querySelectorAll('.loc-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+    const newLoc=btn.dataset.loc==='pack'?'worn':'pack';
+    btn.dataset.loc=newLoc;
+    btn.textContent=newLoc==='worn'?'👕':'🎒';
+    updateStats();
+  }));
 
   const save=()=>{
     s.gearIds = getCheckedNumbers('setGearIds');
@@ -2022,6 +2071,10 @@ function openSetEditor(setId){
     s.supplyQuantities = {};
     box.querySelectorAll('[data-supplyqty]').forEach(el=>{
       s.supplyQuantities[el.dataset.supplyqty]=Number(el.value||1);
+    });
+    s.gearLocations = {};
+    box.querySelectorAll('.loc-toggle').forEach(btn=>{
+      s.gearLocations[btn.dataset.gearloc]=btn.dataset.loc;
     });
     saveEquipmentSets();
     document.body.removeChild(overlay);
@@ -2111,11 +2164,16 @@ function openPackingMode(setId){
       const totalGearWeight=gears.reduce((a,g)=>a+(Number(g.weight)||0),0);
       const totalSupplyWeight=supplies.reduce((a,sp)=>a+(Number(sp.weight)||0),0);
 
+      const locs=s.gearLocations||{};
+      let wornW=0,packW2=0;
+      gears.forEach(g=>{const w=Number(g.weight)||0;if(locs[g.id]==='worn')wornW+=w;else packW2+=w;});
       summaryEl.innerHTML=
         '準備完了 '+done+' / '+gears.length+' 点 ('+rate+'%)' +
-        '<br>⚙️ 装備重量: ' + (totalGearWeight/1000).toFixed(1) + 'kg' +
+        '<br>👕 着用重量: ' + (wornW/1000).toFixed(1) + 'kg' +
+        '<br>🎒 パック重量: ' + (packW2/1000).toFixed(1) + 'kg' +
         '<br>🍙 消耗品重量: ' + (totalSupplyWeight/1000).toFixed(1) + 'kg' +
-        '<br>🎒 総重量: ' + ((totalGearWeight + totalSupplyWeight)/1000).toFixed(1) + 'kg' +
+        '<br>🏔️ 総重量: ' + ((totalGearWeight + totalSupplyWeight)/1000).toFixed(1) + 'kg' +
+        '<br>Base Weight: ' + (packW2/1000).toFixed(1) + 'kg' +
         '<br>パッキング済ギア重量: ' + packedWeight.toLocaleString() + 'g' +
         ' / 未収納ギア重量: ' + (totalGearWeight - packedWeight).toLocaleString() + 'g';
     };
