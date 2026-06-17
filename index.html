@@ -267,14 +267,36 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 }
 
 
+
+/* Ver8.6.4 mobile fixes */
 @media (max-width:768px){
-.modal,.modal-content,.modal-body,.modal-form,.modal-form *{box-sizing:border-box!important;}
-.modal-content{width:95vw!important;max-width:95vw!important;overflow-x:hidden!important;}
-.modal-body{overflow-x:hidden!important;}
-input,select,textarea{max-width:100%!important;width:100%!important;}
-img{max-width:100%!important;height:auto!important;}
+  #gearModal .modal-content{
+    width:calc(100vw - 20px)!important;
+    max-width:calc(100vw - 20px)!important;
+    margin:10px auto!important;
+    box-sizing:border-box!important;
+  }
+  #gearForm{
+    width:100%!important;
+    min-width:0!important;
+    overflow-x:hidden!important;
+    padding:10px!important;
+    box-sizing:border-box!important;
+  }
+  #gearForm *{
+    box-sizing:border-box!important;
+    max-width:100%!important;
+  }
+  .two-col{
+    grid-template-columns:1fr!important;
+  }
+  .photo-preview img{
+    width:100px!important;
+    height:auto!important;
+  }
 }
-.header-icon-secondary,.app-icon-secondary{display:none!important;}
+.brand-icon{display:none!important;}
+
 </style>
 </head>
 <body>
