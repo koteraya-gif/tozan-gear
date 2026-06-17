@@ -317,6 +317,35 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   }
 }
 
+
+/* Ver8.6.6 mobile modal final */
+@media (max-width:768px){
+  .photo-preview{max-width:120px!important;max-height:120px!important;}
+  .photo-preview img{max-width:80px!important;max-height:80px!important;}
+  #gearModal input,#gearModal select,#gearModal textarea{
+    height:44px!important;
+    min-height:44px!important;
+    font-size:16px!important;
+    padding:8px 10px!important;
+  }
+  #gearModal textarea{
+    height:100px!important;
+  }
+  #gearModal .form-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+  #gearModal .form-actions .spacer{
+    display:none!important;
+  }
+  #gearModal .form-actions button{
+    width:100%!important;
+    margin:0!important;
+  }
+}
+.brand-icon,.photo-preview .brand-icon{display:none!important;}
+
 </style>
 </head>
 <body>
