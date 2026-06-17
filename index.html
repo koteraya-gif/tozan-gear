@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>登山ギア管理アプリ Ver8.2.2</title>
+<meta name="theme-color" content="#2a5c3d" />
+<link rel="icon" href="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='192' height='192' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232a5c3d'/><path d='M96 36 L156 156 H36 Z' fill='%23ffffff' opacity='0.95'/><path d='M96 36 L116 156 H76 Z' fill='%232a5c3d'/></svg>" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='192' height='192' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232a5c3d'/><path d='M96 36 L156 156 H36 Z' fill='%23ffffff' opacity='0.95'/><path d='M96 36 L116 156 H76 Z' fill='%232a5c3d'/></svg>" />
+<link rel="manifest" id="inline-manifest" />
+<style>
+:root {
+  --green: #1f3b73;
+  --green-2: #274b8f;
+  --bg: #f5f7f5;
+  --card: #ffffff;
+  --text: #1b1b1b;
+  --muted: #667a6b;
+  --border: #e2e8e4;
+  --danger: #b23838;
+  --focus: #1e7a55;
+  --table-head: #f3f7f4;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Meiryo", "Noto Sans JP", Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+.app-header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: linear-gradient(0deg, var(--green), var(--green-2));
+  color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { width: 28px; height: 28px; border-radius: 4px; }
+.app-header h1 { font-size: 18px; margin: 0; }
+button, input, select, textarea { font-size: 16px; }
+.primary-btn { background: #fff; color: var(--green); border: none; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor:pointer; }
+.primary-btn:active { transform: translateY(1px); }
+.ghost-btn { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.7); border-radius: 8px; padding: 6px 10px; cursor:pointer; }
+.icon-btn { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 8px; background: #fff; cursor: pointer; }
+.icon-inline { padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor:pointer; }
+.danger-btn { background: var(--danger); color: #fff; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor:pointer; }
+.container { max-width: 1140px; margin: 0 auto; padding: 12px; }
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+.summary-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.summary-item .label { color: var(--muted); font-size: 12px; }
+.summary-item .value { font-size: 20px; font-weight: 800; margin-top: 6px; }
+.controls { display: grid; gap: 10px; grid-template-columns: 1fr; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.controls-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.search-group { display: grid; gap: 8px; grid-template-columns: 1fr 1fr 1fr auto; }
+.sort-group { display: flex; gap: 8px; align-items: center; }
+.view-toggle { display: flex; gap: 8px; align-items: center; }
+.view-toggle select, .controls .icon-btn { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+#sortDirBtn { color: var(--green); border-color: var(--green); }
+input[type="text"], input[type="number"], input[type="date"], select, textarea {
+  width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff;
+}
+input:focus, select:focus, textarea:focus { outline: 3px solid rgba(30,122,85,0.2); border-color: var(--focus); }
+.gear-list { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin: 14px 0 40px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.card .thumb { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eef2ee; }
+.card .content { padding: 10px 12px; display: grid; gap: 6px; }
+.card .title-row { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+.card .title { font-weight: 800; font-size: 16px; margin: 0; }
+.card .meta { color: var(--muted); font-size: 12px; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.badge { background: #eef6f0; color: var(--green); font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid #d8e9de; }
+.card .actions { display: flex; gap: 8px; margin-top: 8px; }
+.card .actions button { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor:pointer; }
+.card .actions .edit { color: var(--green); border-color: #cfe3d7; }
+.card .actions .delete { color: var(--danger); border-color: #f1d1d1; }
+.table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin: 14px 0 40px; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 760px; }
+.table thead th {
+  position: sticky; top: 0; background: var(--table-head); color: var(--text);
+  text-align: left; font-weight: 700; padding: 10px; border-bottom: 1px solid var(--border);
+  white-space: nowrap; user-select: none; cursor: pointer;
+}
+.table thead th.is-static { cursor: default; }
+.table tbody td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tbody tr:hover { background: #fafcfb; }
+.table .thumb-td img { width: 50px; height: 38px; object-fit: cover; border-radius: 6px; background: #eef2ee; border: 1px solid var(--border); }
+.table .actions-td button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; margin-right: 6px; cursor:pointer; }
+.sort-indicator { margin-left: 6px; color: var(--muted); }
+.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); padding: 14px; }
+.modal.show { display: flex; }
+.modal-content { width: 100%; max-width: 640px; background: #fff; border-radius: 14px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); max-height:90vh; display:flex; flex-direction:column; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); background: #f3f7f4; position:sticky; top:0; z-index:2; }
+#gearForm { padding: 12px; display: grid; gap: 12px; overflow-y:auto; flex:1; min-height:0; }
+.form-row { display: grid; gap: 6px; }
+.two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.photo-preview img { width: 140px; height: 105px; object-fit: cover; border: 1px solid var(--border); border-radius: 8px; background: #eef2ee; }
+.form-actions { display: flex; align-items: center; gap: 8px; }
+.form-actions .spacer { flex: 1; }
+.mdl-wide .modal-content { max-width: 760px; max-height:90vh; display:flex; flex-direction:column; }
+.cat-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.cat-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: #fff; }
+.small { font-size: 12px; color: var(--muted); }
+.app-footer { text-align: center; padding: 24px 12px; color: var(--muted); }
+@media (max-width: 720px) {
+  .search-group { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+}
+.tabbar{display:flex;gap:8px;margin:12px 0}
+.tabbtn{padding:8px 12px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer}
+.tabbtn.active{font-weight:bold;background:#eef6f0;color:var(--green);border-color:#cfe3d7}
+.panel{display:none;background:#fff;border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}
+.panel.active{display:block}
+.set-card{border:1px solid var(--border);border-radius:12px;padding:12px;margin:12px 0;background:#fff}
+.set-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.set-stats{margin-top:10px;color:#234}
+.supply-row{display:grid;grid-template-columns:140px 1fr 120px auto;gap:8px;margin-bottom:8px}
+.checkbox-group{display:grid;gap:6px}
+.checkbox-item{display:block;padding:4px 0}
+.section-block{border:1px solid var(--border);border-radius:10px;padding:10px;margin:10px 0;background:#fbfdfb}
+.section-block h3,.section-block h4{margin:0 0 8px}
+.empty-note{color:var(--muted)}
+.selected-row{ background:#eef6f0; }
+.supply-layout{display:grid;gap:12px}
+.supply-search-box,.supply-stats-box,.supply-edit-box,.supply-add-box{
+  background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;
+}
+.supply-search-row{display:grid;grid-template-columns:1fr 180px;gap:8px}
+.supply-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.supply-stat-item{background:#f8fbf8;border:1px solid var(--border);border-radius:10px;padding:10px}
+.supply-stat-item .label{font-size:12px;color:var(--muted)}
+.supply-stat-item .value{font-size:20px;font-weight:800;margin-top:6px}
+.supply-cat-summary{display:flex;flex-wrap:wrap;gap:8px}
+.supply-cat-chip{background:#eef6f0;color:var(--green);font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid #d8e9de}
+.supply-edit-grid{display:grid;grid-template-columns:140px 1fr 140px auto auto;gap:8px}
+.supply-edit-note{font-size:12px;color:var(--muted);margin-top:8px}
+.supply-table-row{cursor:pointer}
+@media (max-width: 720px) {
+  .supply-row{grid-template-columns:1fr}
+  .supply-search-row{grid-template-columns:1fr}
+  .supply-stats-grid{grid-template-columns:1fr}
+  .supply-edit-grid{grid-template-columns:1fr}
+}
+
+body.dark{
+  --bg:#121212;
+  --card:#1e1e1e;
+  --text:#f0f0f0;
+  --border:#333;
+  --table-head:#252525;
+  --muted:#b0b0b0;
+}
+.category-badge{font-weight:bold;padding:3px 8px;border-radius:999px;color:#fff}
+.cat-テント{background:#1976d2}.cat-シュラフ{background:#7b1fa2}
+.cat-ウェア{background:#388e3c}.cat-クッカー{background:#f57c00}
+.weight-bar{height:10px;border-radius:999px;background:#dfe7df;overflow:hidden;margin-top:6px}
+.weight-fill{height:100%;background:linear-gradient(90deg,#2a5c3d,#4caf50)}
+.cat-テント{background:#1976d2}.cat-シュラフ{background:#7b1fa2}
+.cat-ウェア,.cat-レインウェア{background:#388e3c}.cat-クッカー{background:#f57c00}
+.cat-ストーブ{background:#d32f2f}.cat-ザック{background:#795548}
+.cat-小物{background:#607d8b}.cat-その他{background:#2a5c3d}
+body.dark .card,body.dark .set-card,body.dark .modal-content,body.dark input,body.dark select,body.dark textarea,body.dark .table-wrap{background:var(--card);color:var(--text)}
+
+
+
+:root{
+ --accent-orange:#f28c28;
+ --accent-purple:#7c4dff;
+}
+.app-header{
+ background:linear-gradient(90deg,#1f3b73,#274b8f)!important;
+}
+body.dark .app-header{
+ background:linear-gradient(90deg,#0f172a,#1f3b73)!important;
+}
+.primary-btn{
+ background:var(--accent-purple)!important;
+ color:#fff!important;
+ border:none!important;
+}
+body.dark .toolbar button,
+body.dark .icon-btn{
+ background:#1a2233!important;
+ color:#eef2ff!important;
+ border:1px solid #35507f!important;
+}
+.brand::before{
+ content:"🏔️";
+ margin-right:8px;
+ font-size:24px;
+}
+
+
+/* Ver8.4.1 Patagonia Plus */
+:root{
+ --patagonia-navy:#1f3b73;
+ --patagonia-navy2:#274b8f;
+ --patagonia-purple:#7c4dff;
+ --patagonia-orange:#f28c28;
+}
+.header,.app-header,.topbar{
+ background:linear-gradient(90deg,var(--patagonia-navy),var(--patagonia-navy2))!important;
+}
+.primary-btn{
+ background:var(--patagonia-purple)!important;
+ color:#fff!important;border:none!important;
+}
+.stats-card,.card,.gear-card,.set-card{
+ border-radius:16px!important;
+ box-shadow:0 8px 20px rgba(0,0,0,.12)!important;
+}
+body.dark .toolbar button,
+body.dark .icon-btn,
+body.dark .secondary-btn{
+ background:#182235!important;
+ color:#eef2ff!important;
+ border:1px solid #35507f!important;
+}
+.category-chip,.category-badge{
+ border-radius:999px!important;
+ font-weight:700;
+}
+.weight-bar{height:10px;border-radius:999px;background:#dbe3f5;overflow:hidden}
+.weight-fill{height:100%;background:linear-gradient(90deg,var(--patagonia-orange),var(--patagonia-purple))}
+
+
+@media (max-width: 768px){
+  body{overflow-x:hidden!important;}
+  .app-header,.header,.topbar{flex-direction:column!important;align-items:center!important;padding:12px!important;}
+  .brand,.app-title{font-size:32px!important;writing-mode:horizontal-tb!important;}
+  .toolbar,.header-actions{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;width:100%;}
+  .toolbar button,.header-actions button,.primary-btn,.icon-btn{min-height:44px!important;}
+  .modal,.modal-content,[role="dialog"]{
+    width:min(95vw,900px)!important;
+    max-width:95vw!important;
+    margin:10px auto!important;
+    left:auto!important;
+    right:auto!important;
+  }
+  table{display:block;overflow-x:auto;}
+  img{max-width:100%;height:auto;}
+  .stats-grid,.card-grid{grid-template-columns:1fr!important;}
+}
+
+
+@media (max-width:768px){
+.tab-btn,.nav-btn,.tab{white-space:nowrap!important;font-size:14px!important;}
+.header-actions,.toolbar{justify-content:center!important;}
+.theme-toggle,.dark-toggle{font-size:0!important;}
+.theme-toggle::before,.dark-toggle::before{content:"🌙";font-size:20px;}
+.modal,.modal-content,[class*="modal"]{
+ max-width:95vw!important;width:95vw!important;
+ box-sizing:border-box!important;overflow-x:hidden!important;
+}
+input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
+body{overflow-x:hidden!important;}
+}
+
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <img alt="テントアイコン" class="brand-icon" aria-hidden="true"
+      src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='28' height='28' viewBox='0 0 192 192'><rect width='192' height='192' rx='12' ry='12' fill='%232a5c3d'/><path d='M96 36 L156 156 H36 Z' fill='%23ffffff' opacity='0.95'/><path d='M96 36 L116 156 H76 Z' fill='%232a5c3d'/></svg>" />
+    <h1>登山ギア管理アプリ</h1>
+  </div>
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <button id="importJsonBtn" class="icon-btn">JSON読込</button>
+    <button id="exportJsonBtn" class="icon-btn">JSON出力</button>
+    <button id="manageCategoriesBtn" class="icon-btn">カテゴリ管理</button>
+    <button id="themeToggleBtn" class="icon-btn">🌙 ダーク</button><button id="addGearBtn" class="primary-btn">+ 新規登録</button>
+  </div>
+  <input type="file" id="importJsonFile" accept=".json,application/json" style="display:none;">
+</header>
+
+<main class="container">
+  <div class="tabbar">
+    <button id="gearTabBtn" class="tabbtn active">🎒 ギア管理</button>
+    <button id="setTabBtn" class="tabbtn">🏔️ 装備セット</button>
+    <button id="supplyTabBtn" class="tabbtn">🍙 消耗品</button>
+  </div>
+
+  <section id="gearSection" class="active">
+    <section class="summary" aria-label="サマリー">
+      <div class="summary-item">
+        <div class="label">登録ギア数</div>
+        <div class="value" id="summaryCount">0</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">所有総額</div>
+        <div class="value" id="summaryTotalPrice">¥0</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">総重量</div>
+        <div class="value" id="summaryTotalWeight">0 g</div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="検索と並び替え">
+      <div class="search-group">
+        <input type="text" id="searchName" placeholder="名称で検索" aria-label="名称で検索" />
+        <input type="text" id="searchMaker" placeholder="メーカーで検索" aria-label="メーカーで検索" />
+        <select id="filterCategory" aria-label="カテゴリ絞り込み">
+          <option value="">全てのカテゴリ</option>
+        </select>
+        <button id="clearFilters" class="ghost-btn">条件クリア</button>
+      </div>
+      <div class="controls-bar">
+        <div class="sort-group">
+          <label for="sortBy">並び替え:</label>
+          <select id="sortBy" aria-label="並び替え">
+            <option value="name">名称順</option>
+            <option value="weight">重量順</option>
+            <option value="purchasePrice">購入価格順</option>
+            <option value="purchaseDate">購入日順</option>
+          </select>
+          <button id="sortDirBtn" class="ghost-btn" title="昇順/降順">▲</button>
+        </div>
+        <div class="view-toggle" aria-label="表示切替">
+          <label for="viewMode">表示切替:</label>
+          <select id="viewMode">
+            <option value="card">カード表示</option>
+            <option value="list">一覧表示</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section id="gearList" class="gear-list" aria-label="ギア一覧（カード表示）"></section>
+
+    <section id="gearTableWrap" class="table-wrap" aria-label="ギア一覧（表）" style="display:none;">
+      <table class="table" id="gearTable">
+        <thead>
+          <tr>
+            <th class="is-static">写真</th>
+            <th data-key="name">名称 <span class="sort-indicator"></span></th>
+            <th data-key="maker">メーカー <span class="sort-indicator"></span></th>
+            <th data-key="category">カテゴリ <span class="sort-indicator"></span></th>
+            <th data-key="weight">重量(g) <span class="sort-indicator"></span></th>
+            <th data-key="msrp">定価 <span class="sort-indicator"></span></th>
+            <th data-key="purchasePrice">購入価格 <span class="sort-indicator"></span></th>
+            <th data-key="purchaseDate">購入日 <span class="sort-indicator"></span></th>
+            <th class="is-static">操作</th>
+          </tr>
+        </thead>
+        <tbody id="gearTableBody"></tbody>
+      </table>
+    </section>
+  </section>
+
+  <section id="setSection" class="panel">
+    <h2>🏔️ 装備セット</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <input id="newSetName" type="text" placeholder="例：雪山テント泊">
+      <button id="addSetBtn" class="icon-btn">セット作成</button>
+    </div>
+    <div id="setList"></div>
+  </section>
+
+  <section id="supplySection" class="panel">
+    <h2>🍙 消耗品管理</h2>
+
+    <div class="supply-layout">
+      <div class="supply-add-box">
+        <h3 style="margin-top:0;">新規追加</h3>
+        <div class="supply-row">
+          <select id="newSupplyCategory">
+            <option>燃料</option>
+            <option>食料</option>
+            <option>飲料</option>
+            <option>医療</option>
+            <option>電子機器</option>
+            <option>その他</option>
+          </select>
+          <input id="newSupplyName" type="text" placeholder="例：ガス缶">
+          <input id="newSupplyWeight" type="number" min="0" step="1" placeholder="重量(g)">
+          <button id="addSupplyBtn" class="icon-btn">追加</button>
+        </div>
+      </div>
+
+      <div class="supply-search-box">
+        <h3 style="margin-top:0;">検索</h3>
+        <div class="supply-search-row">
+          <input id="supplySearchInput" type="text" placeholder="名称・カテゴリで検索">
+          <select id="supplySort">
+            <option value="category">カテゴリ順</option>
+            <option value="name">名称順</option>
+            <option value="weightAsc">重量順（軽→重）</option>
+            <option value="weightDesc">重量順（重→軽）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="supply-stats-box">
+        <h3 style="margin-top:0;">統計</h3>
+        <div class="supply-stats-grid">
+          <div class="supply-stat-item">
+            <div class="label">件数</div>
+            <div class="value" id="supplyCountValue">0件</div>
+          </div>
+          <div class="supply-stat-item">
+            <div class="label">総重量</div>
+            <div class="value" id="supplyTotalWeightValue">0 g</div>
+          </div>
+          <div class="supply-stat-item">
+            <div class="label">平均重量</div>
+            <div class="value" id="supplyAvgWeightValue">0 g</div>
+          </div>
+        </div>
+        <div id="supplySummary" style="font-weight:bold;margin-bottom:10px"></div>
+        <div id="supplyStats" style="margin-bottom:10px"></div>
+        <div id="supplyCategorySummary" class="supply-cat-summary"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>カテゴリ</th>
+              <th>名称</th>
+              <th>重量(g)</th>
+              <th class="is-static">操作</th>
+            </tr>
+          </thead>
+          <tbody id="supplyTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="supply-edit-box">
+        <h3 style="margin-top:0;">消耗品編集</h3>
+        <div class="supply-edit-grid">
+          <select id="editSupplyCategory"></select>
+          <input id="editSupplyName" type="text" placeholder="名称">
+          <input id="editSupplyWeight" type="number" min="0" step="1" placeholder="重量(g)">
+          <button id="saveSupplyEditBtn" class="icon-btn">保存</button>
+          <button id="clearSupplyEditBtn" class="icon-btn">クリア</button>
+        </div>
+        <div id="supplyEditStatus" class="supply-edit-note">一覧の行をクリックするとここに反映されます。</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="gearModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">ギア登録</h2>
+      <button id="closeModal" class="icon-btn" aria-label="閉じる">✕</button>
+    </div>
+    <form id="gearForm">
+      <input type="hidden" id="gearId" />
+      <div class="form-row">
+        <label for="gearPhoto">写真</label>
+        <input type="file" id="gearPhoto" accept="image/*" />
+        <div class="photo-preview">
+          <img id="photoPreview" alt="プレビュー"
+            src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='140' height='105' viewBox='0 0 640 480'><rect width='640' height='480' fill='%23eef2ee'/><path d='M80 360 L200 240 L280 320 L360 200 L560 360 Z' fill='%23cfe3d7'/><circle cx='520' cy='120' r='36' fill='%23d8e9de'/><path d='M300 320 L340 380 L260 380 Z' fill='%2399c5ae'/></svg>" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="gearName">名称</label>
+        <input type="text" id="gearName" required />
+      </div>
+      <div class="form-row">
+        <label for="gearMaker">メーカー</label>
+        <input type="text" id="gearMaker" />
+      </div>
+      <div class="form-row">
+        <label for="gearCategory">カテゴリ</label>
+        <select id="gearCategory" required></select>
+      </div>
+      <div class="form-row two-col">
+        <div>
+          <label for="gearWeight">重量(g)</label>
+          <input type="number" id="gearWeight" min="0" step="1" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="gearPriceMsrp">定価(円)</label>
+          <input type="number" id="gearPriceMsrp" min="0" step="1" inputmode="numeric" />
+        </div>
+      </div>
+      <div class="form-row two-col">
+        <div>
+          <label for="gearPricePaid">購入価格(円)</label>
+          <input type="number" id="gearPricePaid" min="0" step="1" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="gearPurchaseDate">購入日</label>
+          <input type="date" id="gearPurchaseDate" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="gearNote">メモ</label>
+        <textarea id="gearNote" rows="3"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="deleteGearBtn" class="danger-btn" hidden>削除</button>
+        <div class="spacer"></div>
+        <button type="button" id="cancelBtn" class="ghost-btn" style="color:#1b1b1b;border-color:#ccc;">キャンセル</button>
+        <button type="submit" class="primary-btn" style="border:1px solid #cfe3d7;">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="catModal" class="modal mdl-wide" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>カテゴリ管理</h2>
+      <button id="closeCatModal" class="icon-btn" aria-label="閉じる">✕</button>
+    </div>
+    <div style="padding:12px; display:grid; gap:12px; overflow-y:auto; flex:1; min-height:0;">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input id="newCatInput" type="text" placeholder="新しいカテゴリ名" />
+        <button id="addCatBtn" class="icon-inline">追加</button>
+        <span class="small">既存ギアのカテゴリは変更しません（名称変更・一括置換は下のリストで可能）</span>
+      </div>
+      <ul id="catList" class="cat-list"></ul>
+    </div>
+  </div>
+</div>
+
+<footer class="app-footer">
+  <small>© 登山ギア管理アプリ</small>
+</footer>
+
+<script>
+(function registerInlineManifest(){
+  const manifest = {
+    name: "登山ギア管理アプリ",
+    short_name: "ギア管理",
+    description: "登山用品・登山ギアをローカルに保存して管理できるPWAアプリ。",
+    start_url: location.pathname + location.search,
+    scope: "./",
+    display: "standalone",
+    background_color: "#f5f7f5",
+    theme_color: "#2a5c3d",
+    icons: [
+      { src: makeTentIconSVGDataURL(192), sizes: "192x192", type: "image/svg+xml" },
+      { src: makeTentIconSVGDataURL(512), sizes: "512x512", type: "image/svg+xml" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  document.querySelector('link[rel="manifest"]#inline-manifest')?.setAttribute('href', url);
+})();
+(function registerInlineSW(){
+  if (!('serviceWorker' in navigator)) return;
+  const swCode = `
+    const CACHE_NAME = 'mount-gear-cache-v822';
+    const ASSETS = ['./'];
+    self.addEventListener('install', (event) => {
+      event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', (event) => {
+      event.waitUntil(
+        caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+        )
+      );
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', (event) => {
+      const req = event.request;
+      event.respondWith(
+        caches.match(req).then(cached => {
+          if (cached) return cached;
+          return fetch(req).then(res => {
+            if (req.method === 'GET' && new URL(req.url).origin === location.origin) {
+              const resClone = res.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
+            }
+            return res;
+          }).catch(() => {
+            if (req.destination === 'image') {
+              return new Response(\`
+                <svg xmlns="[w3.org](http://www.w3.org/2000/svg)" width="640" height="480" viewBox="0 0 640 480">
+                  <rect width="640" height="480" fill="#eef2ee"/>
+                  <path d="M80 360 L200 240 L280 320 L360 200 L560 360 Z" fill="#cfe3d7"/>
+                  <circle cx="520" cy="120" r="36" fill="#d8e9de"/>
+                  <path d="M300 320 L340 380 L260 380 Z" fill="#99c5ae"/>
+                </svg>
+              \`, { headers: { 'Content-Type': 'image/svg+xml' }});
+            }
+          })
+        })
+      );
+    });
+  `;
+  const blob = new Blob([swCode], {type: 'text/javascript'});
+  const url = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(console.warn);
+})();
+function makeTentIconSVGDataURL(size=192){
+  const svg = `
+  <svg xmlns="[w3.org](http://www.w3.org/2000/svg)" width="${size}" height="${size}" viewBox="0 0 192 192">
+    <rect width="192" height="192" fill="#2a5c3d"/>
+    <path d="M96 36 L156 156 H36 Z" fill="#ffffff" opacity="0.95"/>
+    <path d="M96 36 L116 156 H76 Z" fill="#2a5c3d"/>
+  </svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+const STORAGE_KEY = 'mountGear.items.v1';
+const CAT_STORAGE_KEY = 'mountGear.categories.v1';
+const SET_STORAGE_KEY = 'mountGear.sets.v1';
+const SUPPLY_STORAGE_KEY = 'mountGear.supplies.v1';
+
+const DEFAULT_CATEGORY_LIST = [
+  'ザック','テント','シュラフ','マット','レインウェア',
+  'ウェア','クッカー','ストーブ','ヘッドランプ','小物','その他'
+];
+
+let state = {
+  items: [],
+  categories: [],
+  equipmentSets: [],
+  supplies: [],
+  filters: { name: '', maker: '', category: '' },
+  sortBy: 'name',
+  sortDir: 'asc',
+  viewMode: 'list',
+  supplyFilters: {
+    search: '',
+    sort: 'category'
+  },
+  selectedSupplyId: null
+};
+
+const els = {
+  gearSection: document.getElementById('gearSection'),
+  setSection: document.getElementById('setSection'),
+  supplySection: document.getElementById('supplySection'),
+  gearTabBtn: document.getElementById('gearTabBtn'),
+  setTabBtn: document.getElementById('setTabBtn'),
+  supplyTabBtn: document.getElementById('supplyTabBtn'),
+
+  list: document.getElementById('gearList'),
+  tableWrap: document.getElementById('gearTableWrap'),
+  tableBody: document.getElementById('gearTableBody'),
+  table: document.getElementById('gearTable'),
+  viewMode: document.getElementById('viewMode'),
+  summary: {
+    count: document.getElementById('summaryCount'),
+    totalPrice: document.getElementById('summaryTotalPrice'),
+    totalWeight: document.getElementById('summaryTotalWeight'),
+  },
+
+  searchName: document.getElementById('searchName'),
+  searchMaker: document.getElementById('searchMaker'),
+  filterCategory: document.getElementById('filterCategory'),
+  clearFilters: document.getElementById('clearFilters'),
+  sortBy: document.getElementById('sortBy'),
+  sortDirBtn: document.getElementById('sortDirBtn'),
+
+  addBtn: document.getElementById('addGearBtn'),
+  importJsonBtn: document.getElementById('importJsonBtn'),
+  importJsonFile: document.getElementById('importJsonFile'),
+  exportJsonBtn: document.getElementById('exportJsonBtn'),
+  manageCatsBtn: document.getElementById('manageCategoriesBtn'),
+
+  modal: document.getElementById('gearModal'),
+  modalTitle: document.getElementById('modalTitle'),
+  closeModal: document.getElementById('closeModal'),
+  form: document.getElementById('gearForm'),
+  fields: {
+    id: document.getElementById('gearId'),
+    photo: document.getElementById('gearPhoto'),
+    photoPreview: document.getElementById('photoPreview'),
+    name: document.getElementById('gearName'),
+    maker: document.getElementById('gearMaker'),
+    category: document.getElementById('gearCategory'),
+    weight: document.getElementById('gearWeight'),
+    msrp: document.getElementById('gearPriceMsrp'),
+    paid: document.getElementById('gearPricePaid'),
+    date: document.getElementById('gearPurchaseDate'),
+    note: document.getElementById('gearNote'),
+  },
+  deleteBtn: document.getElementById('deleteGearBtn'),
+  cancelBtn: document.getElementById('cancelBtn'),
+
+  catModal: document.getElementById('catModal'),
+  closeCatModal: document.getElementById('closeCatModal'),
+  catList: document.getElementById('catList'),
+  newCatInput: document.getElementById('newCatInput'),
+  addCatBtn: document.getElementById('addCatBtn'),
+
+  newSetName: document.getElementById('newSetName'),
+  addSetBtn: document.getElementById('addSetBtn'),
+  setList: document.getElementById('setList'),
+
+  newSupplyCategory: document.getElementById('newSupplyCategory'),
+  newSupplyName: document.getElementById('newSupplyName'),
+  newSupplyWeight: document.getElementById('newSupplyWeight'),
+  addSupplyBtn: document.getElementById('addSupplyBtn'),
+  supplySummary: document.getElementById('supplySummary'),
+  supplyTableBody: document.getElementById('supplyTableBody'),
+  supplyStats: document.getElementById('supplyStats'),
+  supplySort: document.getElementById('supplySort'),
+  editSupplyCategory: document.getElementById('editSupplyCategory'),
+  editSupplyName: document.getElementById('editSupplyName'),
+  editSupplyWeight: document.getElementById('editSupplyWeight'),
+  saveSupplyEditBtn: document.getElementById('saveSupplyEditBtn'),
+  clearSupplyEditBtn: document.getElementById('clearSupplyEditBtn'),
+  supplySearchInput: document.getElementById('supplySearchInput'),
+  supplyCountValue: document.getElementById('supplyCountValue'),
+  supplyTotalWeightValue: document.getElementById('supplyTotalWeightValue'),
+  supplyAvgWeightValue: document.getElementById('supplyAvgWeightValue'),
+  supplyCategorySummary: document.getElementById('supplyCategorySummary'),
+  supplyEditStatus: document.getElementById('supplyEditStatus')
+};
+
+function normalizeItem(item){
+  return {
+    id: Number(item?.id) || Date.now(),
+    photo: item?.photo || '',
+    name: item?.name || '',
+    maker: item?.maker || '',
+    category: item?.category || '',
+    weight: numOrNull(item?.weight),
+    msrp: numOrNull(item?.msrp),
+    paid: numOrNull(item?.paid),
+    date: item?.date || '',
+    note: item?.note || ''
+  };
+}
+
+function normalizeSupply(s){
+  return {
+    id: Number(s?.id) || Date.now(),
+    name: s?.name || '',
+    category: s?.category || 'その他',
+    weight: Number.isFinite(Number(s?.weight)) ? Number(s.weight) : 0,
+    checked: !!s?.checked
+  };
+}
+
+function normalizeEquipmentSet(set){
+  return {
+    id: Number(set?.id) || Date.now(),
+    name: set?.name || '無名セット',
+    gearIds: Array.isArray(set?.gearIds) ? set.gearIds.map(Number).filter(Number.isFinite) : [],
+    supplyIds: Array.isArray(set?.supplyIds) ? set.supplyIds.map(Number).filter(Number.isFinite) : [],
+    supplyQuantities: set?.supplyQuantities || {},
+    memo: set?.memo || ''
+  };
+}
+
+function normalizeState(raw){
+  const safe = raw || {};
+  return {
+    ...state,
+    ...safe,
+    items: Array.isArray(safe.items) ? safe.items.map(normalizeItem) : [],
+    categories: Array.isArray(safe.categories) && safe.categories.length ? [...new Set(safe.categories.filter(Boolean))] : [...DEFAULT_CATEGORY_LIST],
+    equipmentSets: Array.isArray(safe.equipmentSets) ? safe.equipmentSets.map(normalizeEquipmentSet) : [],
+    supplies: Array.isArray(safe.supplies) ? safe.supplies.map(normalizeSupply) : []
+  };
+}
+
+const DB_NAME = 'MountGearDB';
+const DB_VERSION = 1;
+const STORE_ITEMS = 'items';
+const STORE_META = 'meta';
+
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE_ITEMS)) db.createObjectStore(STORE_ITEMS,{keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_META)) db.createObjectStore(STORE_META,{keyPath:'key'});
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+
+async function saveItems(){
+  const db = await openDB();
+  const tx = db.transaction(STORE_ITEMS,'readwrite');
+  const store = tx.objectStore(STORE_ITEMS);
+  await promisifyRequest(store.clear());
+  for(const item of state.items){ store.put(item); }
+}
+
+async function loadItems(){
+  try{
+    const db = await openDB();
+    const tx = db.transaction(STORE_ITEMS,'readonly');
+    const store = tx.objectStore(STORE_ITEMS);
+    const req = store.getAll();
+    state.items = await new Promise((res,rej)=>{
+      req.onsuccess=()=>res((req.result||[]).map(normalizeItem));
+      req.onerror=()=>rej(req.error);
+    });
+
+    if(state.items.length===0){
+      const legacy = localStorage.getItem(STORAGE_KEY);
+      if(legacy){
+        state.items = JSON.parse(legacy).map(normalizeItem);
+        saveItems();
+      }
+    }
+  }catch(e){ console.error(e); state.items=[]; }
+}
+
+async function saveCategories(){
+  const db = await openDB();
+  const tx = db.transaction(STORE_META,'readwrite');
+  tx.objectStore(STORE_META).put({key:'categories', value:state.categories});
+  localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(state.categories));
+}
+
+async function loadCategories(){
+  try{
+    const db = await openDB();
+    const tx = db.transaction(STORE_META,'readonly');
+    const req = tx.objectStore(STORE_META).get('categories');
+    const row = await new Promise((res,rej)=>{
+      req.onsuccess=()=>res(req.result);
+      req.onerror=()=>rej(req.error);
+    });
+
+    if(row?.value && Array.isArray(row.value) && row.value.length){
+      state.categories=row.value;
+    }else{
+      const legacy = localStorage.getItem(CAT_STORAGE_KEY);
+      state.categories = legacy ? JSON.parse(legacy) : [...DEFAULT_CATEGORY_LIST];
+      saveCategories();
+    }
+  }catch(e){
+    state.categories=[...DEFAULT_CATEGORY_LIST];
+  }
+}
+
+function loadEquipmentSets(){
+  try{
+    state.equipmentSets = (JSON.parse(localStorage.getItem(SET_STORAGE_KEY) || '[]') || []).map(normalizeEquipmentSet);
+  }catch(e){
+    state.equipmentSets = [];
+  }
+}
+function saveEquipmentSets(){
+  state.equipmentSets = (state.equipmentSets || []).map(normalizeEquipmentSet);
+  localStorage.setItem(SET_STORAGE_KEY, JSON.stringify(state.equipmentSets));
+  renderEquipmentSets();
+}
+
+function loadSupplies(){
+  try{
+    state.supplies = (JSON.parse(localStorage.getItem(SUPPLY_STORAGE_KEY) || '[]') || []).map(normalizeSupply);
+  }catch(e){
+    state.supplies = [];
+  }
+}
+function saveSupplies(){
+  state.supplies = (state.supplies || []).map(normalizeSupply);
+  localStorage.setItem(SUPPLY_STORAGE_KEY, JSON.stringify(state.supplies));
+  renderSupplies();
+  renderEquipmentSets();
+  renderSummary();
+}
+
+function promisifyRequest(req){
+  return new Promise((resolve,reject)=>{
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+
+async function compressImage(file, maxSize = 1000, quality = 0.7){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width;
+        let h = img.height;
+        const ratio = Math.min(1, maxSize / Math.max(w, h));
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+if (els.fields.photo) {
+  els.fields.photo.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      window.__compressedImageData = await compressImage(file, 1000, 0.7);
+    } catch(err) {
+      console.error(err);
+    }
+  });
+}
+
+init();
+
+async function init() {
+  await loadItems();
+  await loadCategories();
+  loadEquipmentSets();
+  loadSupplies();
+
+  state = normalizeState(state);
+  syncCategorySelects();
+
+  els.addBtn.addEventListener('click', () => openModal());
+  els.closeModal.addEventListener('click', closeModal);
+  els.cancelBtn.addEventListener('click', closeModal);
+  els.fields.photo.addEventListener('change', handlePhotoChange);
+
+  els.searchName.addEventListener('input', () => { state.filters.name = els.searchName.value.trim(); render(); });
+  els.searchMaker.addEventListener('input', () => { state.filters.maker = els.searchMaker.value.trim(); render(); });
+  els.filterCategory.addEventListener('change', () => { state.filters.category = els.filterCategory.value; render(); });
+  els.clearFilters.addEventListener('click', () => {
+    els.searchName.value = '';
+    els.searchMaker.value = '';
+    els.filterCategory.value = '';
+    state.filters = { name: '', maker: '', category: '' };
+    render();
+  });
+
+  els.sortBy.addEventListener('change', () => { state.sortBy = els.sortBy.value; render(); });
+  els.sortDirBtn.addEventListener('click', () => {
+    state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+    els.sortDirBtn.textContent = state.sortDir === 'asc' ? '▲' : '▼';
+    render();
+  });
+
+  els.viewMode.addEventListener('change', () => {
+    state.viewMode = els.viewMode.value;
+    renderViewToggle();
+    render();
+  });
+
+  els.table.querySelectorAll('thead th').forEach(th => {
+    const key = th.getAttribute('data-key');
+    if (!key) return;
+    th.addEventListener('click', () => {
+      const logicalKey = tableKeyToSortKey(key);
+      if (state.sortBy === logicalKey) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortBy = logicalKey;
+        state.sortDir = 'asc';
+      }
+      updateTableSortIndicators();
+      render();
+    });
+  });
+
+  els.importJsonBtn.addEventListener('click', () => els.importJsonFile.click());
+  els.importJsonFile.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if(f) importJsonBackup(f);
+    e.target.value='';
+  });
+  els.exportJsonBtn.addEventListener('click', exportJsonBackup);
+
+  els.manageCatsBtn.addEventListener('click', openCatModal);
+  els.closeCatModal.addEventListener('click', closeCatModal);
+  els.addCatBtn.addEventListener('click', addCategory);
+  els.newCatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addCategory(); }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target === els.modal) closeModal();
+    if (e.target === els.catModal) closeCatModal();
+  });
+
+  els.form.addEventListener('submit', onSubmit);
+  els.deleteBtn.addEventListener('click', onDelete);
+
+  els.gearTabBtn.addEventListener('click', () => switchTab('gear'));
+  els.setTabBtn.addEventListener('click', () => switchTab('set'));
+  els.supplyTabBtn.addEventListener('click', () => switchTab('supply'));
+
+  els.addSetBtn.addEventListener('click', addEquipmentSet);
+  els.addSupplyBtn.addEventListener('click', addSupply);
+
+  if(els.supplySort) {
+    els.supplySort.addEventListener('change', () => {
+      state.supplyFilters.sort = els.supplySort.value;
+      renderSupplies();
+    });
+  }
+
+  if(els.supplySearchInput) {
+    els.supplySearchInput.addEventListener('input', () => {
+      state.supplyFilters.search = els.supplySearchInput.value.trim();
+      renderSupplies();
+    });
+  }
+
+  window.currentSupplyEditId = null;
+  if(els.saveSupplyEditBtn) els.saveSupplyEditBtn.addEventListener('click', saveSupplyEdit);
+  if(els.clearSupplyEditBtn) els.clearSupplyEditBtn.addEventListener('click', clearSupplyEdit);
+
+  renderViewToggle();
+  render();
+  renderSupplies();
+  renderEquipmentSets();
+  switchTab('gear');
+}
+
+function switchTab(tab){
+  els.gearSection.style.display = tab === 'gear' ? '' : 'none';
+  els.setSection.classList.toggle('active', tab === 'set');
+  els.supplySection.classList.toggle('active', tab === 'supply');
+
+  els.gearTabBtn.classList.toggle('active', tab === 'gear');
+  els.setTabBtn.classList.toggle('active', tab === 'set');
+  els.supplyTabBtn.classList.toggle('active', tab === 'supply');
+}
+
+function importJsonBackup(file){
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try{
+      const data = JSON.parse(reader.result);
+      const normalized = normalizeState({
+        items: Array.isArray(data.items) ? data.items : [],
+        categories: Array.isArray(data.categories) ? data.categories : [...DEFAULT_CATEGORY_LIST],
+        equipmentSets: Array.isArray(data.equipmentSets) ? data.equipmentSets : [],
+        supplies: Array.isArray(data.supplies) ? data.supplies : []
+      });
+
+      const mode = confirm(
+        'OK: 現在のデータを削除して復元\n\nキャンセル: 現在のデータに追加して復元'
+      ) ? 'replace' : 'merge';
+
+      if(mode === 'replace'){
+        state.items = normalized.items;
+        state.categories = normalized.categories;
+        state.equipmentSets = normalized.equipmentSets;
+        state.supplies = normalized.supplies;
+      } else {
+        state.items = [...state.items, ...normalized.items].map(normalizeItem);
+
+        const catSet = new Set([...(state.categories || []), ...(normalized.categories || [])]);
+        state.categories = [...catSet];
+
+        state.equipmentSets = [...(state.equipmentSets || []), ...(normalized.equipmentSets || [])].map(normalizeEquipmentSet);
+        state.supplies = [...(state.supplies || []), ...(normalized.supplies || [])].map(normalizeSupply);
+      }
+
+      await saveItems();
+      await saveCategories();
+      saveEquipmentSets();
+      saveSupplies();
+      syncCategorySelects();
+      render();
+      renderSupplies();
+      renderEquipmentSets();
+
+      alert('JSON読込が完了しました');
+    }catch(err){
+      alert('JSONファイルの読込に失敗しました');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportJsonBackup(){
+  const backup = {
+    exportDate: new Date().toISOString(),
+    items: state.items.map(normalizeItem),
+    categories: state.categories,
+    equipmentSets: (state.equipmentSets || []).map(normalizeEquipmentSet),
+    supplies: (state.supplies || []).map(normalizeSupply)
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'gear_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function syncCategorySelects() {
+  fillCategorySelect(els.filterCategory, true);
+  fillCategorySelect(els.fields.category, false);
+}
+
+function fillCategorySelect(selectEl, includeAllOption) {
+  const current = selectEl.value;
+  selectEl.innerHTML = '';
+  if (includeAllOption) {
+    const optAll = document.createElement('option');
+    optAll.value = '';
+    optAll.textContent = '全てのカテゴリ';
+    selectEl.appendChild(optAll);
+  }
+  state.categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    selectEl.appendChild(opt);
+  });
+  if ([...selectEl.options].some(o => o.value === current)) {
+    selectEl.value = current;
+  }
+}
+
+function render() {
+  const filtered = applyFilters(state.items);
+  const sorted = applySorting(filtered);
+  renderSummary();
+  if (state.viewMode === 'list') {
+    renderTable(sorted);
+  } else {
+    renderCards(sorted);
+  }
+}
+
+function renderSummary() {
+  els.summary.count.textContent = String(state.items.length);
+  els.summary.totalPrice.textContent = '¥' + formatNumber(sum(state.items, 'paid'));
+  const gearWeight = sum(state.items, 'weight');
+  const supplyWeight = (state.supplies || []).reduce((a, s) => a + (Number(s.weight) || 0), 0);
+  els.summary.totalWeight.textContent = formatNumber(gearWeight + supplyWeight) + ' g';
+}
+
+function renderViewToggle() {
+  if (state.viewMode === 'list') {
+    els.list.style.display = 'none';
+    els.tableWrap.style.display = '';
+    els.viewMode.value = 'list';
+    updateTableSortIndicators();
+  } else {
+    els.list.style.display = '';
+    els.tableWrap.style.display = 'none';
+    els.viewMode.value = 'card';
+  }
+}
+
+function updateTableSortIndicators() {
+  els.table.querySelectorAll('thead th').forEach(th => {
+    const span = th.querySelector('.sort-indicator');
+    if (!span) return;
+    const key = th.getAttribute('data-key');
+    const logicalKey = tableKeyToSortKey(key);
+    if (state.sortBy === logicalKey) {
+      span.textContent = state.sortDir === 'asc' ? '▲' : '▼';
+    } else {
+      span.textContent = '';
+    }
+  });
+}
+
+function tableKeyToSortKey(k) {
+  switch (k) {
+    case 'name': return 'name';
+    case 'maker': return 'maker';
+    case 'category': return 'category';
+    case 'weight': return 'weight';
+    case 'msrp': return 'msrp';
+    case 'purchasePrice': return 'purchasePrice';
+    case 'purchaseDate': return 'purchaseDate';
+    default: return 'name';
+  }
+}
+
+function renderCards(items) {
+  const root = els.list;
+  root.innerHTML = '';
+  if (items.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'card';
+    empty.innerHTML = `<div class="content"><p class="meta">該当するギアがありません。右上「+ 新規登録」から追加してください。</p></div>`;
+    root.appendChild(empty);
+    return;
+  }
+  for (const it of items) {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const img = document.createElement('img');
+    img.className = 'thumb';
+    img.src = it.photo || placeholderDataURL();
+    img.alt = it.name || 'ギア写真';
+    card.appendChild(img);
+
+    const content = document.createElement('div');
+    content.className = 'content';
+
+    const titleRow = document.createElement('div');
+    titleRow.className = 'title-row';
+    const h = document.createElement('h3');
+    h.className = 'title';
+    h.textContent = it.name || '(名称未設定)';
+    const maker = document.createElement('div');
+    maker.className = 'meta';
+    maker.textContent = it.maker || '';
+    titleRow.appendChild(h);
+    titleRow.appendChild(maker);
+    content.appendChild(titleRow);
+
+    const badges = document.createElement('div');
+    badges.className = 'badges';
+    badges.appendChild(badge(`${it.category || '未分類'}`));
+    badges.appendChild(badge(it.weight ? `重量 ${formatNumber(it.weight)} g` : '重量 -'));
+    badges.appendChild(badge(it.paid != null && it.paid !== '' ? `購入 ¥${formatNumber(it.paid)}` : '購入 -'));
+    content.appendChild(badges);
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit';
+    editBtn.textContent = '編集';
+    editBtn.addEventListener('click', () => openModal(it.id));
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete';
+    delBtn.textContent = '削除';
+    delBtn.addEventListener('click', () => confirmDelete(it.id));
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    content.appendChild(actions);
+
+    card.appendChild(content);
+    root.appendChild(card);
+  }
+}
+
+function renderTable(items) {
+  const tbody = els.tableBody;
+  tbody.innerHTML = '';
+  if (items.length === 0) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 9;
+    td.innerHTML = `<span class="meta">該当するギアがありません。右上「+ 新規登録」から追加してください。</span>`;
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+  for (const it of items) {
+    const tr = document.createElement('tr');
+
+    const tdPhoto = document.createElement('td');
+    tdPhoto.className = 'thumb-td';
+    const img = document.createElement('img');
+    img.src = it.photo || placeholderDataURL();
+    img.alt = it.name || 'ギア写真';
+    tdPhoto.appendChild(img);
+    tr.appendChild(tdPhoto);
+
+    tr.appendChild(tdText(it.name || ''));
+    tr.appendChild(tdText(it.maker || ''));
+    tr.appendChild(tdText(it.category || ''));
+    tr.appendChild(tdText(it.weight != null ? formatNumber(it.weight) : ''));
+    tr.appendChild(tdText(it.msrp != null ? '¥' + formatNumber(it.msrp) : ''));
+    tr.appendChild(tdText(it.paid != null ? '¥' + formatNumber(it.paid) : ''));
+    tr.appendChild(tdText(it.date || ''));
+
+    const tdAct = document.createElement('td');
+    tdAct.className = 'actions-td';
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '編集';
+    editBtn.addEventListener('click', () => openModal(it.id));
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '削除';
+    delBtn.addEventListener('click', () => confirmDelete(it.id));
+    tdAct.appendChild(editBtn);
+    tdAct.appendChild(delBtn);
+    tr.appendChild(tdAct);
+
+    tbody.appendChild(tr);
+  }
+}
+
+function tdText(text) { const td = document.createElement('td'); td.textContent = text; return td; }
+function badge(text) { const span = document.createElement('span'); span.className = 'badge'; span.textContent = text; return span; }
+
+function applyFilters(items) {
+  const name = state.filters.name.toLowerCase();
+  const maker = state.filters.maker.toLowerCase();
+  const cat = state.filters.category;
+  return items.filter(it => {
+    const okName = !name || (it.name || '').toLowerCase().includes(name);
+    const okMaker = !maker || (it.maker || '').toLowerCase().includes(maker);
+    const okCat = !cat || it.category === cat;
+    return okName && okMaker && okCat;
+  });
+}
+
+function applySorting(items) {
+  const { sortBy, sortDir } = state;
+  const arr = [...items];
+  arr.sort((a, b) => {
+    const va = getSortValue(a, sortBy);
+    const vb = getSortValue(b, sortBy);
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return arr;
+}
+
+function getSortValue(item, key) {
+  switch (key) {
+    case 'name': return (item.name || '').toLowerCase();
+    case 'maker': return (item.maker || '').toLowerCase();
+    case 'category': return (item.category || '').toLowerCase();
+    case 'weight': return toNumber(item.weight);
+    case 'msrp': return toNumber(item.msrp);
+    case 'purchasePrice': return toNumber(item.paid);
+    case 'purchaseDate': return item.date || '';
+    default: return '';
+  }
+}
+
+function toNumber(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+function sum(items, field) {
+  return items.reduce((acc, it) => {
+    const n = Number(it[field]);
+    return acc + (Number.isFinite(n) ? n : 0);
+  }, 0);
+}
+function formatNumber(n) { const x = Number(n) || 0; return x.toLocaleString('ja-JP'); }
+function formatWeight(n) { return formatNumber(Number(n) || 0) + ' g'; }
+
+function openModal(id) {
+  resetForm();
+  if (id != null) {
+    const it = state.items.find(x => x.id === id);
+    if (!it) return;
+    els.modalTitle.textContent = 'ギア編集';
+    els.fields.id.value = it.id;
+    els.fields.photoPreview.src = it.photo || placeholderDataURL();
+    els.fields.name.value = it.name || '';
+    els.fields.maker.value = it.maker || '';
+    els.fields.category.value = it.category || (state.categories[0] || '');
+    els.fields.weight.value = it.weight ?? '';
+    els.fields.msrp.value = it.msrp ?? '';
+    els.fields.paid.value = it.paid ?? '';
+    els.fields.date.value = it.date || '';
+    els.fields.note.value = it.note || '';
+    els.deleteBtn.hidden = false;
+  } else {
+    els.modalTitle.textContent = 'ギア登録';
+    els.fields.category.value = state.filters.category || (state.categories[0] || '');
+    els.deleteBtn.hidden = true;
+  }
+  els.modal.classList.add('show');
+  els.modal.setAttribute('aria-hidden', 'false');
+}
+function closeModal() { els.modal.classList.remove('show'); els.modal.setAttribute('aria-hidden', 'true'); }
+function resetForm() {
+  els.form.reset();
+  els.fields.id.value = '';
+  els.fields.photo.value = '';
+  els.fields.photoPreview.src = placeholderDataURL();
+  window.__compressedImageData = null;
+}
+function handlePhotoChange(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { els.fields.photoPreview.src = reader.result; };
+  reader.readAsDataURL(file);
+}
+function onSubmit(e) {
+  e.preventDefault();
+  const id = els.fields.id.value ? Number(els.fields.id.value) : null;
+  const item = normalizeItem({
+    id: id ?? Date.now(),
+    photo: window.__compressedImageData || (isPlaceholder(els.fields.photoPreview.src) ? '' : els.fields.photoPreview.src),
+    name: els.fields.name.value.trim(),
+    maker: els.fields.maker.value.trim(),
+    category: els.fields.category.value,
+    weight: numOrNull(els.fields.weight.value),
+    msrp: numOrNull(els.fields.msrp.value),
+    paid: numOrNull(els.fields.paid.value),
+    date: els.fields.date.value,
+    note: els.fields.note.value.trim(),
+  });
+
+  if (!item.name) { alert('名称を入力してください。'); return; }
+  if (!item.category) { alert('カテゴリを選択してください。'); return; }
+
+  if (id == null) {
+    state.items.push(item);
+  } else {
+    const idx = state.items.findIndex(x => x.id === id);
+    if (idx !== -1) state.items[idx] = item;
+  }
+  saveItems();
+  closeModal();
+  render();
+  renderEquipmentSets();
+}
+function numOrNull(v) { if (v === '' || v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; }
+
+function confirmDelete(id) {
+  if (confirm('このギアを削除しますか？')) {
+    state.items = state.items.filter(x => x.id !== id);
+    state.equipmentSets = state.equipmentSets.map(set => ({
+      ...set,
+      gearIds: (set.gearIds || []).filter(gid => gid !== id)
+    }));
+    saveItems();
+    saveEquipmentSets();
+    render();
+  }
+}
+function onDelete() {
+  const id = Number(els.fields.id.value);
+  if (!id) return;
+  confirmDelete(id);
+  closeModal();
+}
+function placeholderDataURL(){
+  const svg = `
+  <svg xmlns="[w3.org](http://www.w3.org/2000/svg)" width="640" height="480" viewBox="0 0 640 480">
+    <rect width="640" height="480" fill="#eef2ee"/>
+    <path d="M80 360 L200 240 L280 320 L360 200 L560 360 Z" fill="#cfe3d7"/>
+    <circle cx="520" cy="120" r="36" fill="#d8e9de"/>
+    <path d="M300 320 L340 380 L260 380 Z" fill="#99c5ae"/>
+  </svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+function isPlaceholder(src){ return src && src.startsWith('data:image/svg+xml') && src.includes('%23eef2ee'); }
+
+function openCatModal() {
+  renderCatList();
+  els.catModal.classList.add('show');
+  els.catModal.setAttribute('aria-hidden', 'false');
+  els.newCatInput.focus();
+}
+function closeCatModal() {
+  els.catModal.classList.remove('show');
+  els.catModal.setAttribute('aria-hidden', 'true');
+}
+function renderCatList() {
+  els.catList.innerHTML = '';
+  state.categories.forEach((cat, idx) => {
+    const li = document.createElement('li');
+    li.className = 'cat-item';
+
+    const wrap = document.createElement('div');
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = cat;
+    nameInput.setAttribute('aria-label', 'カテゴリ名');
+    nameInput.addEventListener('change', () => renameCategory(idx, nameInput.value.trim()));
+    wrap.appendChild(nameInput);
+
+    const replaceWrap = document.createElement('div');
+    replaceWrap.className = 'small';
+    replaceWrap.style.marginTop = '8px';
+    const replaceBtn = document.createElement('button');
+    replaceBtn.textContent = '名称一括置換（既存ギアも更新）';
+    replaceBtn.className = 'icon-inline';
+    replaceBtn.addEventListener('click', () => bulkReplaceCategory(cat, nameInput.value.trim()));
+    replaceWrap.appendChild(replaceBtn);
+    const note = document.createElement('span');
+    note.textContent = ' 現在の名前を変更してから押すと、登録済みギアのカテゴリ文字列もまとめて更新します。';
+    replaceWrap.appendChild(note);
+    wrap.appendChild(replaceWrap);
+
+    const actions = document.createElement('div');
+
+    const moveUp = document.createElement('button');
+    moveUp.textContent = '上へ';
+    moveUp.className = 'icon-inline';
+    moveUp.disabled = idx === 0;
+    moveUp.addEventListener('click', () => { moveCategory(idx, -1); });
+
+    const moveDown = document.createElement('button');
+    moveDown.textContent = '下へ';
+    moveDown.className = 'icon-inline';
+    moveDown.disabled = idx === state.categories.length - 1;
+    moveDown.addEventListener('click', () => { moveCategory(idx, +1); });
+
+    const del = document.createElement('button');
+    del.textContent = '削除';
+    del.className = 'icon-inline';
+    del.addEventListener('click', () => requestDeleteCategory(idx));
+
+    actions.appendChild(moveUp);
+    actions.appendChild(moveDown);
+    actions.appendChild(del);
+
+    li.appendChild(wrap);
+    li.appendChild(actions);
+    els.catList.appendChild(li);
+  });
+}
+
+function addCategory() {
+  const name = els.newCatInput.value.trim();
+  if (!name) return;
+  if (state.categories.includes(name)) { alert('同名のカテゴリが既にあります。'); return; }
+  state.categories.push(name);
+  saveCategories();
+  els.newCatInput.value = '';
+  syncCategorySelects();
+  renderCatList();
+}
+function renameCategory(index, newName) {
+  if (!newName) { alert('カテゴリ名を入力してください。'); renderCatList(); return; }
+  if (state.categories.some((c, i) => i !== index && c === newName)) {
+    alert('同名のカテゴリが既にあります。');
+    renderCatList();
+    return;
+  }
+  state.categories[index] = newName;
+  saveCategories();
+  syncCategorySelects();
+}
+function moveCategory(index, delta) {
+  const j = index + delta;
+  if (j < 0 || j >= state.categories.length) return;
+  const arr = state.categories;
+  [arr[index], arr[j]] = [arr[j], arr[index]];
+  saveCategories();
+  syncCategorySelects();
+  renderCatList();
+}
+function requestDeleteCategory(index) {
+  const cat = state.categories[index];
+  const usedCount = state.items.filter(it => it.category === cat).length;
+  if (usedCount > 0) {
+    const ok = confirm(`「${cat}」は ${usedCount} 件のギアで使用中です。\n置換してから削除しますか？`);
+    if (!ok) return;
+    const replacement = prompt('置換先カテゴリ名を入力（既存カテゴリ名を正確に入力）:');
+    if (!replacement) return;
+    if (!state.categories.includes(replacement)) { alert('置換先カテゴリが存在しません。先に作成してください。'); return; }
+    state.items = state.items.map(it => it.category === cat ? { ...it, category: replacement } : it);
+    saveItems();
+  }
+  state.categories.splice(index, 1);
+  saveCategories();
+  syncCategorySelects();
+  renderCatList();
+  render();
+}
+function bulkReplaceCategory(oldName, newName) {
+  if (!newName) { alert('新しい名前を入力してください。'); return; }
+  if (oldName === newName) { alert('名前が変わっていません。'); return; }
+  if (state.categories.some(c => c === newName)) {
+    const doMerge = confirm(`「${newName}」は既に存在します。ギアのカテゴリを「${oldName}」→「${newName}」へ移行し、旧カテゴリを削除しますか？`);
+    if (!doMerge) return;
+    state.items = state.items.map(it => it.category === oldName ? { ...it, category: newName } : it);
+    state.categories = state.categories.filter(c => c !== oldName);
+  } else {
+    state.categories = state.categories.map(c => c === oldName ? newName : c);
+    state.items = state.items.map(it => it.category === oldName ? { ...it, category: newName } : it);
+  }
+  saveItems();
+  saveCategories();
+  syncCategorySelects();
+  renderCatList();
+  render();
+}
+
+function addEquipmentSet(){
+  const n = els.newSetName.value.trim();
+  if(!n) return;
+  state.equipmentSets.push(normalizeEquipmentSet({
+    id: Date.now(),
+    name: n,
+    gearIds: [],
+    supplyIds: []
+  }));
+  saveEquipmentSets();
+  els.newSetName.value = '';
+}
+
+function sumByIds(items, ids, key='weight'){
+  const idSet = new Set(ids || []);
+  return items.reduce((a, item) => {
+    if (!idSet.has(item.id)) return a;
+    return a + (Number(item[key]) || 0);
+  }, 0);
+}
+
+function getEquipmentSetWeights(set){
+  const baseWeight = sumByIds(state.items, set.gearIds || [], 'weight');
+  const consumablesWeight = state.supplies.reduce((a,sp)=>{
+    if(!(set.supplyIds||[]).includes(sp.id)) return a;
+    const qty = Number((set.supplyQuantities||{})[sp.id] || 1);
+    return a + ((Number(sp.weight)||0) * qty);
+  },0);
+  return {
+    baseWeight,
+    consumablesWeight,
+    packWeight: baseWeight + consumablesWeight
+  };
+}
+
+function renderEquipmentSets(){
+  const root = els.setList;
+  if(!root) return;
+  root.innerHTML = '';
+
+  if(!state.equipmentSets.length){
+    root.innerHTML = '<p class="empty-note">装備セットがありません。</p>';
+    return;
+  }
+
+  state.equipmentSets.forEach((s)=>{
+    const card = document.createElement('div');
+    card.className = 'set-card';
+
+    const title = document.createElement('div');
+    title.innerHTML = '<strong>' + escapeHtml(s.name) + '</strong>';
+    card.appendChild(title);
+
+    const gears = state.items.filter(g => (s.gearIds || []).includes(g.id));
+    const supplies = state.supplies.filter(x => (s.supplyIds || []).includes(x.id));
+    const paid = gears.reduce((a,g)=>a+(Number(g.paid)||0),0);
+    const msrp = gears.reduce((a,g)=>a+(Number(g.msrp)||0),0);
+
+    const packingKey='mountGear.packing.' + s.id;
+    const packingState=JSON.parse(localStorage.getItem(packingKey)||'{}');
+    const packedCount=gears.filter(g=>packingState[g.id]).length;
+    const rate=gears.length ? Math.round((packedCount/gears.length)*100) : 0;
+
+    let mark='🔴';
+    if(rate>=100){ mark='✅'; }
+    else if(rate>=50){ mark='🟡'; }
+
+    const wt = getEquipmentSetWeights(s);
+    const stats = document.createElement('div');
+    stats.className = 'set-stats';
+    stats.innerHTML =
+      mark + ' 準備状況: ' + packedCount + ' / ' + gears.length + ' (' + rate + '%)' +
+      '<br>⚙️ 装備重量: ' + formatWeight(wt.baseWeight) +
+      '<br>🍙 消耗品重量: ' + formatWeight(wt.consumablesWeight) +
+      '<br>🎒 総重量: ' + formatWeight(wt.packWeight) +
+      '<br>ギア数: ' + (s.gearIds?.length || 0) + '点 / 消耗品数: ' + (s.supplyIds?.length || 0) + '点' +
+      '<br>購入額: ¥' + formatNumber(paid) + ' / 定価: ¥' + formatNumber(msrp);
+    card.appendChild(stats);
+
+    const actions = document.createElement('div');
+    actions.className = 'set-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'icon-inline';
+    editBtn.textContent = '編集';
+    editBtn.onclick = () => openSetEditor(s.id);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'icon-inline';
+    copyBtn.textContent = '複製';
+    copyBtn.onclick = () => duplicateEquipmentSet(s.id);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'icon-inline';
+    delBtn.textContent = '削除';
+    delBtn.onclick = () => deleteEquipmentSet(s.id);
+
+    const packBtn = document.createElement('button');
+    packBtn.className = 'icon-inline';
+    packBtn.textContent = 'パッキング';
+    packBtn.onclick = () => openPackingMode(s.id);
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'icon-inline';
+    resetBtn.textContent = 'リセット';
+    resetBtn.onclick = () => resetPackingState(s.id, s.name);
+
+    actions.appendChild(editBtn);
+    actions.appendChild(copyBtn);
+    actions.appendChild(delBtn);
+    actions.appendChild(packBtn);
+    actions.appendChild(resetBtn);
+    if(s.memo){ const m=document.createElement('div'); m.style.marginTop='8px'; m.textContent='📝 メモあり'; card.appendChild(m);} 
+    card.appendChild(actions);
+
+    root.appendChild(card);
+  });
+}
+
+function groupByCategory(items){
+  return items.reduce((acc, item) => {
+    const key = item.category || '未分類';
+    (acc[key] ||= []).push(item);
+    return acc;
+  }, {});
+}
+
+function openSetEditor(setId){
+  const s=state.equipmentSets.find(x=>x.id===setId);
+  if(!s) return;
+
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  const box=document.createElement('div');
+  box.style.cssText='background:#fff;width:100%;max-width:760px;max-height:85vh;overflow:auto;border-radius:12px;padding:16px;';
+
+  const gearGroups = groupByCategory(state.items);
+  const supplyGroups = groupByCategory(state.supplies);
+
+  let h = '';
+  h += '<h2>' + escapeHtml(s.name) + '</h2>';
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><button id="saveSetBtnTop">保存</button><button id="closeSetBtnTop">閉じる</button></div>';
+  h += '<div id="setStats" style="position:sticky;top:0;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;margin:12px 0;font-weight:bold;z-index:20"></div>';
+  h += '<div class="section-block"><h3>📝 備考</h3><textarea id="setMemo" style="width:100%;min-height:120px;resize:vertical;" placeholder="山行メモ・反省点・持ち物メモなど">' + escapeHtml(s.memo||'') + '</textarea></div>';
+
+  h += '<div class="section-block"><h3>ギア</h3>';
+  const gearCats = Object.keys(gearGroups).sort((a,b)=>a.localeCompare(b,'ja'));
+  if(!gearCats.length){
+    h += '<p class="empty-note">登録ギアがありません。</p>';
+  }else{
+    gearCats.forEach(cat=>{
+      h += '<h4>▼ ' + escapeHtml(cat) + '（' + gearGroups[cat].length + '）</h4>';
+      gearGroups[cat].forEach(g=>{
+        const checked=(s.gearIds||[]).includes(g.id)?'checked':'';
+        h += '<label class="checkbox-item"><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '> ' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</label>';
+      });
+    });
+  }
+  h += '</div>';
+
+  h += '<div class="section-block"><h3>🍙 消耗品</h3>';
+  const supplyCats = Object.keys(supplyGroups).sort((a,b)=>a.localeCompare(b,'ja'));
+  if(!supplyCats.length){
+    h += '<p class="empty-note">登録されている消耗品がありません。</p>';
+  }else{
+    supplyCats.forEach(cat=>{
+      h += '<h4>▼ ' + escapeHtml(cat) + '（' + supplyGroups[cat].length + '）</h4>';
+      supplyGroups[cat].forEach(sp=>{
+        const checked=(s.supplyIds||[]).includes(sp.id)?'checked':'';
+        const qty=((s.supplyQuantities||{})[sp.id]||1);
+        h += '<label class="checkbox-item"><input type="checkbox" name="setSupplyIds" value="' + sp.id + '" ' + checked + '> ' + escapeHtml(sp.name) + ' (' + formatWeight(sp.weight || 0) + ') 数量:<input type="number" min="1" value="' + qty + '" data-supplyqty="' + sp.id + '" style="width:70px"></label>';
+      });
+    });
+  }
+  h += '</div>';
+
+  h += '<div style="margin-top:12px"><button id="saveSetBtn">保存</button> <button id="closeSetBtn">閉じる</button></div>';
+
+  box.innerHTML = h;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  function getCheckedNumbers(name){
+    return [...box.querySelectorAll('input[name="' + name + '"]:checked')].map(x=>Number(x.value));
+  }
+
+  function updateStats(){
+    const gearIds = getCheckedNumbers('setGearIds');
+    const supplyIds = getCheckedNumbers('setSupplyIds');
+    const baseWeight = sumByIds(state.items, gearIds, 'weight');
+    const consumablesWeight = state.supplies.reduce((a,sp)=>{
+      if(!supplyIds.includes(sp.id)) return a;
+      const qtyEl=box.querySelector('[data-supplyqty="'+sp.id+'"]');
+      const qty=Number(qtyEl?.value||1);
+      return a + ((Number(sp.weight)||0) * qty);
+    },0);
+    box.querySelector('#setStats').innerHTML =
+      'ギア数 ' + gearIds.length + '点 ｜ 消耗品数 ' + supplyIds.length + '点' +
+      ' ｜ 装備重量 ' + formatWeight(baseWeight) +
+      ' ｜ 消耗品重量 ' + formatWeight(consumablesWeight) +
+      ' ｜ 総重量 ' + formatWeight(baseWeight + consumablesWeight);
+  }
+
+  updateStats();
+  box.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',updateStats));
+  box.querySelectorAll('[data-supplyqty]').forEach(el=>el.addEventListener('input',updateStats));
+
+  const save=()=>{
+    s.gearIds = getCheckedNumbers('setGearIds');
+    s.supplyIds = getCheckedNumbers('setSupplyIds');
+    s.memo=(box.querySelector('#setMemo')?.value||'').trim();
+    s.supplyQuantities = {};
+    box.querySelectorAll('[data-supplyqty]').forEach(el=>{
+      s.supplyQuantities[el.dataset.supplyqty]=Number(el.value||1);
+    });
+    saveEquipmentSets();
+    document.body.removeChild(overlay);
+  };
+  const close=()=>document.body.removeChild(overlay);
+
+  box.querySelector('#saveSetBtn').onclick=save;
+  box.querySelector('#saveSetBtnTop').onclick=save;
+  box.querySelector('#closeSetBtn').onclick=close;
+  box.querySelector('#closeSetBtnTop').onclick=close;
+}
+
+function openPackingMode(setId){
+  const s=state.equipmentSets.find(x=>x.id===setId);
+  if(!s) return;
+
+  const packingKey='mountGear.packing.'+setId;
+  let packingState=JSON.parse(localStorage.getItem(packingKey)||'{}');
+  const gears=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
+  const supplies=state.supplies.filter(sp=>(s.supplyIds||[]).includes(sp.id));
+
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  const box=document.createElement('div');
+  box.style.cssText='background:#fff;width:100%;max-width:700px;max-height:85vh;overflow:auto;border-radius:12px;padding:16px;';
+
+  function renderPacking(){
+    box.innerHTML='<h2>パッキングモード：'+escapeHtml(s.name)+'</h2><div><button id="topCloseBtn">閉じる</button></div><div id="packSummary" style="font-weight:bold;margin:12px 0"></div>';
+
+    const gearGroups={};
+    gears.forEach(g=>{
+      const c=g.category||'未分類';
+      (gearGroups[c] ||= []).push(g);
+    });
+
+    Object.keys(gearGroups).sort().forEach(cat=>{
+      const h=document.createElement('h3');
+      h.textContent='▼ '+cat+'（'+gearGroups[cat].length+'）';
+      box.appendChild(h);
+
+      gearGroups[cat].forEach(g=>{
+        const row=document.createElement('label');
+        row.style.display='block';
+        row.style.margin='6px 0';
+        const checked=packingState[g.id]?'checked':'';
+        row.innerHTML='<input type="checkbox" data-id="'+g.id+'" '+checked+'> '+escapeHtml(g.name);
+        box.appendChild(row);
+      });
+    });
+
+    if(supplies.length){
+      const sh = document.createElement('h3');
+      sh.textContent = '▼ 消耗品（' + supplies.length + '）';
+      box.appendChild(sh);
+
+      supplies.forEach(sp=>{
+        const row=document.createElement('div');
+        row.style.margin='6px 0';
+        row.textContent = sp.name + ' / ' + (sp.category || '未分類') + ' / ' + formatWeight(sp.weight || 0);
+        box.appendChild(row);
+      });
+    }
+
+    const close=document.createElement('button');
+    close.textContent='閉じる';
+    close.onclick=()=>{document.body.removeChild(overlay);renderEquipmentSets();};
+    box.appendChild(close);
+
+    box.querySelector('#topCloseBtn').onclick=()=>{
+      document.body.removeChild(overlay);
+      renderEquipmentSets();
+    };
+
+    const checks=box.querySelectorAll('input[type=checkbox]');
+    const summaryEl=box.querySelector('#packSummary');
+
+    const update=()=>{
+      checks.forEach(c=>packingState[c.dataset.id]=c.checked);
+      localStorage.setItem(packingKey,JSON.stringify(packingState));
+      renderEquipmentSets();
+
+      const done=[...checks].filter(c=>c.checked).length;
+      const rate=gears.length?Math.round(done/gears.length*100):0;
+
+      const packedWeight=gears.filter(g=>packingState[g.id]).reduce((a,g)=>a+(Number(g.weight)||0),0);
+      const totalGearWeight=gears.reduce((a,g)=>a+(Number(g.weight)||0),0);
+      const totalSupplyWeight=supplies.reduce((a,sp)=>a+(Number(sp.weight)||0),0);
+
+      summaryEl.innerHTML=
+        '準備完了 '+done+' / '+gears.length+' 点 ('+rate+'%)' +
+        '<br>Base Weight: ' + totalGearWeight.toLocaleString() + 'g' +
+        '<br>Consumables: ' + totalSupplyWeight.toLocaleString() + 'g' +
+        '<br>Pack Weight: ' + (totalGearWeight + totalSupplyWeight).toLocaleString() + 'g' +
+        '<br>パッキング済ギア重量: ' + packedWeight.toLocaleString() + 'g' +
+        ' / 未収納ギア重量: ' + (totalGearWeight - packedWeight).toLocaleString() + 'g';
+    };
+
+    checks.forEach(c=>c.addEventListener('change',update));
+    update();
+  }
+
+  renderPacking();
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function resetPackingState(setId,setName){
+  const ok = confirm('装備セット「'+setName+'」のパッキング状態を全て解除しますか？');
+  if(!ok) return;
+
+  localStorage.removeItem('mountGear.packing.'+setId);
+  renderEquipmentSets();
+  alert('パッキング状態をリセットしました');
+}
+
+function deleteEquipmentSet(setId){
+  const s = state.equipmentSets.find(x=>x.id===setId);
+  if(!s) return;
+
+  if(!confirm('装備セット「' + s.name + '」を削除しますか？')) return;
+
+  state.equipmentSets = state.equipmentSets.filter(x=>x.id!==setId);
+  saveEquipmentSets();
+}
+
+function duplicateEquipmentSet(setId){
+  const srcSet = state.equipmentSets.find(x=>x.id===setId);
+  if(!srcSet) return;
+
+  const newName = prompt('複製後のセット名を入力してください', srcSet.name + ' コピー');
+  if(!newName) return;
+
+  state.equipmentSets.push(normalizeEquipmentSet({
+    id: Date.now(),
+    name: newName,
+    gearIds: [...(srcSet.gearIds || [])],
+    supplyIds: [...(srcSet.supplyIds || [])]
+  }));
+
+  saveEquipmentSets();
+  alert('装備セットを複製しました');
+}
+
+function addSupply(){
+  const n = els.newSupplyName.value.trim();
+  if(!n) return;
+  const cat = els.newSupplyCategory.value || 'その他';
+  const wt = Number(els.newSupplyWeight.value || 0);
+
+  state.supplies.push(normalizeSupply({
+    id: Date.now(),
+    category: cat,
+    name: n,
+    weight: wt,
+    checked: false
+  }));
+
+  saveSupplies();
+  els.newSupplyName.value = '';
+  els.newSupplyWeight.value = '';
+}
+
+function getFilteredSupplies(){
+  let supplies = [...(state.supplies || [])];
+  const keyword = (state.supplyFilters.search || '').toLowerCase();
+
+  if(keyword){
+    supplies = supplies.filter(s => {
+      const name = (s.name || '').toLowerCase();
+      const category = (s.category || '').toLowerCase();
+      return name.includes(keyword) || category.includes(keyword);
+    });
+  }
+
+  const sort = state.supplyFilters.sort || 'category';
+  supplies.sort((a,b)=>{
+    if(sort === 'name') {
+      return (a.name || '').localeCompare((b.name || ''), 'ja');
+    }
+    if(sort === 'weightAsc') {
+      return (Number(a.weight) || 0) - (Number(b.weight) || 0);
+    }
+    if(sort === 'weightDesc') {
+      return (Number(b.weight) || 0) - (Number(a.weight) || 0);
+    }
+    return (a.category || '').localeCompare((b.category || ''), 'ja') || (a.name || '').localeCompare((b.name || ''), 'ja');
+  });
+
+  return supplies;
+}
+
+function renderSupplies(){
+  const body = els.supplyTableBody;
+  const sumEl = els.supplySummary;
+  const statsEl = els.supplyStats;
+  if(!body || !sumEl) return;
+
+  const supplies = getFilteredSupplies();
+  body.innerHTML='';
+
+  const total = supplies.reduce((a,s)=>a+(Number(s.weight)||0),0);
+  const count = supplies.length;
+  const avg = count ? Math.round(total / count) : 0;
+
+  const cats={};
+  supplies.forEach(s=>{
+    const key = s.category || 'その他';
+    cats[key] = (cats[key] || 0) + 1;
+  });
+
+  els.supplyCountValue.textContent = count + '件';
+  els.supplyTotalWeightValue.textContent = formatNumber(total) + ' g';
+  els.supplyAvgWeightValue.textContent = formatNumber(avg) + ' g';
+
+  sumEl.textContent='検索結果: ' + count + '件';
+  statsEl.textContent='総重量 ' + formatNumber(total) + 'g / 平均重量 ' + formatNumber(avg) + 'g';
+
+  if(els.supplyCategorySummary){
+    els.supplyCategorySummary.innerHTML = '';
+    Object.keys(cats).sort((a,b)=>a.localeCompare(b,'ja')).forEach(cat=>{
+      const chip = document.createElement('span');
+      chip.className = 'supply-cat-chip';
+      chip.textContent = cat + ' ' + cats[cat] + '件';
+      els.supplyCategorySummary.appendChild(chip);
+    });
+  }
+
+  const catSelect=els.editSupplyCategory;
+  if(catSelect && !catSelect.options.length){
+    ['燃料','食料','飲料','医療','電子機器','その他'].forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c;
+      o.textContent=c;
+      catSelect.appendChild(o);
+    });
+  }
+
+  if(supplies.length === 0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4"><span class="empty-note">該当する消耗品がありません。</span></td>';
+    body.appendChild(tr);
+    return;
+  }
+
+  supplies.forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.className = 'supply-table-row';
+    if(state.selectedSupplyId === s.id) {
+      tr.classList.add('selected-row');
+    }
+
+    const td1 = document.createElement('td');
+    td1.textContent = s.category || 'その他';
+    const td2 = document.createElement('td');
+    td2.textContent = s.name;
+    const td3 = document.createElement('td');
+    td3.textContent = Number(s.weight) || 0;
+    const td4 = document.createElement('td');
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'icon-inline';
+    delBtn.textContent = '削除';
+    delBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      deleteSupply(s.id);
+    });
+
+    td4.appendChild(delBtn);
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+    tr.appendChild(td4);
+
+    tr.addEventListener('click', ()=>editSupply(s.id));
+    body.appendChild(tr);
+  });
+}
+
+function editSupply(supplyId){
+  const s = state.supplies.find(x => x.id === supplyId);
+  if(!s) return;
+  window.currentSupplyEditId = s.id;
+  state.selectedSupplyId = s.id;
+
+  if(els.editSupplyCategory) els.editSupplyCategory.value = s.category || 'その他';
+  if(els.editSupplyName) els.editSupplyName.value = s.name || '';
+  if(els.editSupplyWeight) els.editSupplyWeight.value = s.weight || 0;
+  if(els.supplyEditStatus) {
+    els.supplyEditStatus.textContent = '選択中: ' + s.name + ' / ' + (s.category || 'その他');
+  }
+  renderSupplies();
+}
+
+function saveSupplyEdit(){
+  const id = window.currentSupplyEditId;
+  if(!id) {
+    alert('先に一覧から編集する消耗品を選択してください。');
+    return;
+  }
+  const s = state.supplies.find(x=>x.id===id);
+  if(!s) return;
+
+  const name = els.editSupplyName.value.trim();
+  if(!name){
+    alert('名称を入力してください。');
+    return;
+  }
+
+  s.category = els.editSupplyCategory.value;
+  s.name = name;
+  s.weight = Number(els.editSupplyWeight.value) || 0;
+  saveSupplies();
+
+  if(els.supplyEditStatus) {
+    els.supplyEditStatus.textContent = '保存しました: ' + s.name;
+  }
+}
+
+function clearSupplyEdit(){
+  window.currentSupplyEditId = null;
+  state.selectedSupplyId = null;
+  if(els.editSupplyCategory) els.editSupplyCategory.value = '燃料';
+  if(els.editSupplyName) els.editSupplyName.value = '';
+  if(els.editSupplyWeight) els.editSupplyWeight.value = '';
+  if(els.supplyEditStatus) {
+    els.supplyEditStatus.textContent = '一覧の行をクリックするとここに反映されます。';
+  }
+  renderSupplies();
+}
+
+function deleteSupply(supplyId){
+  if(!confirm('この消耗品を削除しますか？')) return;
+
+  state.supplies = state.supplies.filter(x => x.id !== supplyId);
+  state.equipmentSets = state.equipmentSets.map(set => ({
+    ...set,
+    supplyIds: (set.supplyIds || []).filter(id => id !== supplyId)
+  }));
+
+  if(window.currentSupplyEditId === supplyId){
+    clearSupplyEdit();
+  }
+
+  saveSupplies();
+  saveEquipmentSets();
+}
+
+function escapeHtml(str){
+  return String(str ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const btn=document.getElementById('themeToggleBtn');
+ if(!btn) return;
+ const dark=localStorage.getItem('mountGear.darkMode')==='1';
+ if(dark) document.body.classList.add('dark');
+ btn.textContent=document.body.classList.contains('dark')?'☀️ ライト':'🌙 ダーク';
+ btn.addEventListener('click',()=>{
+   document.body.classList.toggle('dark');
+   localStorage.setItem('mountGear.darkMode',document.body.classList.contains('dark')?'1':'0');
+   btn.textContent=document.body.classList.contains('dark')?'☀️ ライト':'🌙 ダーク';
+ });
+});
+</script></body>
+</html>
