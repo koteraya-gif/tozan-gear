@@ -255,6 +255,17 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 body{overflow-x:hidden!important;}
 }
 
+
+@media (max-width:768px){
+.tabbar{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important;}
+.tabbtn{font-size:16px!important;white-space:nowrap!important;padding:10px 4px!important;line-height:1.2!important;}
+.header-actions{justify-content:center!important;}
+#themeToggleBtn{font-size:0!important;min-width:60px!important;}
+#themeToggleBtn::before{content:"🌙";font-size:24px;}
+.summary-item .value{font-size:2rem!important;}
+input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
+}
+
 </style>
 </head>
 <body>
@@ -268,7 +279,7 @@ body{overflow-x:hidden!important;}
     <button id="importJsonBtn" class="icon-btn">JSON読込</button>
     <button id="exportJsonBtn" class="icon-btn">JSON出力</button>
     <button id="manageCategoriesBtn" class="icon-btn">カテゴリ管理</button>
-    <button id="themeToggleBtn" class="icon-btn">🌙 ダーク</button><button id="addGearBtn" class="primary-btn">+ 新規登録</button>
+    <button id="themeToggleBtn" class="icon-btn">🌙</button><button id="addGearBtn" class="primary-btn">+ 新規登録</button>
   </div>
   <input type="file" id="importJsonFile" accept=".json,application/json" style="display:none;">
 </header>
@@ -1885,9 +1896,9 @@ function openPackingMode(setId){
 
       summaryEl.innerHTML=
         '準備完了 '+done+' / '+gears.length+' 点 ('+rate+'%)' +
-        '<br>Base Weight: ' + totalGearWeight.toLocaleString() + 'g' +
-        '<br>Consumables: ' + totalSupplyWeight.toLocaleString() + 'g' +
-        '<br>Pack Weight: ' + (totalGearWeight + totalSupplyWeight).toLocaleString() + 'g' +
+        '<br>⚙️ 装備重量: ' + (totalGearWeight/1000).toFixed(1) + 'kg' +
+        '<br>🍙 消耗品重量: ' + (totalSupplyWeight/1000).toFixed(1) + 'kg' +
+        '<br>🎒 総重量: ' + ((totalGearWeight + totalSupplyWeight)/1000).toFixed(1) + 'kg' +
         '<br>パッキング済ギア重量: ' + packedWeight.toLocaleString() + 'g' +
         ' / 未収納ギア重量: ' + (totalGearWeight - packedWeight).toLocaleString() + 'g';
     };
