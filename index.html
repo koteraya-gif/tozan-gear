@@ -771,7 +771,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v911';
+    const CACHE_NAME = 'mount-gear-cache-v912';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -2081,11 +2081,12 @@ function openPackingMode(setId){
       box.appendChild(h);
 
       gearGroups[cat].forEach(g=>{
-        const row=document.createElement('label');
-        row.style.display='block';
-        row.style.margin='6px 0';
+        const loc=(s.gearLocations||{})[g.id]||'pack';
+        const locEmoji=loc==='worn'?'👕':'🎒';
         const checked=packingState[g.id]?'checked':'';
-        row.innerHTML='<input type="checkbox" data-id="'+g.id+'" '+checked+'> '+escapeHtml(g.name);
+        const row=document.createElement('div');
+        row.className='gear-check-row';
+        row.innerHTML='<label><input type="checkbox" data-id="'+g.id+'" '+checked+'><span>'+escapeHtml(g.name)+'</span></label><button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'">'+locEmoji+'</button>';
         box.appendChild(row);
       });
     });
@@ -2142,6 +2143,15 @@ function openPackingMode(setId){
     };
 
     checks.forEach(c=>c.addEventListener('change',update));
+    box.querySelectorAll('.loc-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+      const newLoc=btn.dataset.loc==='pack'?'worn':'pack';
+      btn.dataset.loc=newLoc;
+      btn.textContent=newLoc==='worn'?'👕':'🎒';
+      if(!s.gearLocations) s.gearLocations={};
+      s.gearLocations[btn.dataset.gearloc]=newLoc;
+      saveEquipmentSets();
+      update();
+    }));
     update();
   }
 
