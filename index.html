@@ -479,6 +479,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .loc-toggle[data-loc="worn"]{background:#fff3e8;}
 .loc-toggle:active{opacity:0.7;}
 @media(max-width:768px){.loc-toggle{min-width:44px;min-height:44px;font-size:20px;}}
+@media(max-width:768px){#importCsvBtn,#exportCsvBtn{display:none!important;}}
 
 /* Ver9.1.3 モバイル: カード3列 / 一覧写真非表示・カード写真表示 */
 @media (max-width:768px){
@@ -505,12 +506,15 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
     <h1>登山ギア管理アプリ</h1>
   </div>
   <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <button id="importCsvBtn" class="icon-btn">CSV一括登録</button>
+    <button id="exportCsvBtn" class="icon-btn">CSV出力</button>
     <button id="importJsonBtn" class="icon-btn">JSON読込</button>
     <button id="exportJsonBtn" class="icon-btn">JSON出力</button>
     <button id="manageCategoriesBtn" class="icon-btn">カテゴリ管理</button>
     <button id="themeToggleBtn" class="icon-btn">🌙</button><button id="addGearBtn" class="primary-btn">+ 新規登録</button>
   </div>
   <input type="file" id="importJsonFile" accept=".json,application/json" style="display:none;">
+  <input type="file" id="importCsvFile" accept=".csv,text/csv" style="display:none;">
 </header>
 
 <main class="container">
@@ -787,7 +791,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v913';
+    const CACHE_NAME = 'mount-gear-cache-v916';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -899,6 +903,9 @@ const els = {
   addBtn: document.getElementById('addGearBtn'),
   importJsonBtn: document.getElementById('importJsonBtn'),
   importJsonFile: document.getElementById('importJsonFile'),
+  importCsvBtn: document.getElementById('importCsvBtn'),
+  importCsvFile: document.getElementById('importCsvFile'),
+  exportCsvBtn: document.getElementById('exportCsvBtn'),
   exportJsonBtn: document.getElementById('exportJsonBtn'),
   manageCatsBtn: document.getElementById('manageCategoriesBtn'),
 
@@ -1209,6 +1216,13 @@ async function init() {
   });
 
   els.importJsonBtn.addEventListener('click', () => els.importJsonFile.click());
+  els.importCsvBtn.addEventListener('click', () => els.importCsvFile.click());
+  els.importCsvFile.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if(f) importCsv(f);
+    e.target.value='';
+  });
+  els.exportCsvBtn.addEventListener('click', exportCsv);
   els.importJsonFile.addEventListener('change', (e) => {
     const f = e.target.files?.[0];
     if(f) importJsonBackup(f);
@@ -1320,6 +1334,127 @@ function importJsonBackup(file){
     }
   };
   reader.readAsText(file);
+}
+
+function importCsv(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var text = reader.result;
+      var lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(function(l){return l.trim();});
+      if(lines.length < 2){ alert('CSVにデータ行がありません。'); return; }
+
+      var headers = parseCsvRow(lines[0]).map(function(h){return h.trim();});
+      var colMap = {
+        name:     ['名前','ギア名','アイテム名','name','item'],
+        maker:    ['メーカー','ブランド','maker','brand'],
+        category: ['カテゴリ','category'],
+        weight:   ['重量','重量(g)','weight','weight(g)'],
+        msrp:     ['定価','定価(円)','msrp','retail'],
+        paid:     ['購入価格','購入価格(円)','purchased','paid'],
+        date:     ['購入日','date'],
+        note:     ['メモ','備考','note','memo']
+      };
+      var colIndex = {};
+      Object.keys(colMap).forEach(function(field){
+        var aliases = colMap[field];
+        colIndex[field] = -1;
+        for(var a=0;a<headers.length;a++){
+          for(var b=0;b<aliases.length;b++){
+            if(headers[a].toLowerCase()===aliases[b].toLowerCase()){colIndex[field]=a;break;}
+          }
+          if(colIndex[field]>=0) break;
+        }
+      });
+
+      if(colIndex['name'] < 0){
+        alert('CSVに「名前」列が見つかりません。\n1行目にヘッダー行（名前,メーカー,カテゴリ,重量(g),定価(円),購入価格(円),購入日,メモ）を含めてください。');
+        return;
+      }
+
+      var newItems = [];
+      for(var row=1;row<lines.length;row++){
+        var cols = parseCsvRow(lines[row]);
+        function getCol(field){ var ci=colIndex[field]; return ci>=0?(cols[ci]||'').trim():''; }
+        var name = getCol('name');
+        if(!name) continue;
+        var weightRaw = getCol('weight').replace(/,/g,'');
+        var msrpRaw   = getCol('msrp').replace(/,/g,'').replace(/[¥￥]/g,'');
+        var paidRaw   = getCol('paid').replace(/,/g,'').replace(/[¥￥]/g,'');
+        newItems.push(normalizeItem({
+          id: Date.now() + row,
+          name:name, maker:getCol('maker'), category:getCol('category'),
+          weight: weightRaw!=='' ? Number(weightRaw) : null,
+          msrp:   msrpRaw!==''   ? Number(msrpRaw)   : null,
+          paid:   paidRaw!==''   ? Number(paidRaw)    : null,
+          date:getCol('date'), note:getCol('note'), photo:''
+        }));
+      }
+
+      if(newItems.length===0){ alert('登録できるデータがありませんでした。'); return; }
+      if(!confirm(newItems.length+'件のギアを追加登録しますか？')) return;
+
+      newItems.forEach(function(it){
+        if(it.category && !state.categories.includes(it.category)) state.categories.push(it.category);
+      });
+      state.items = state.items.concat(newItems);
+      saveItems(); saveCategories(); render();
+      alert(newItems.length+'件のギアを登録しました！');
+    } catch(e){ alert('CSVの読み込みに失敗しました。\n'+e.message); }
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function parseCsvRow(line){
+  var result=[],cur='',inQuote=false;
+  for(var i=0;i<line.length;i++){
+    var ch=line[i];
+    if(inQuote){ if(ch==='"'){ if(line[i+1]==='"'){cur+='"';i++;}else inQuote=false; }else cur+=ch; }
+    else{ if(ch==='"')inQuote=true; else if(ch===','){result.push(cur);cur='';}else cur+=ch; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function exportCsv(){
+  if(!state.items || state.items.length === 0){
+    alert('出力するギアがありません。');
+    return;
+  }
+  var headers = ['名前','メーカー','カテゴリ','重量(g)','定価(円)','購入価格(円)','購入日','メモ'];
+  var rows = [headers.join(',')];
+  state.items.forEach(function(it){
+    var cols = [
+      it.name    || '',
+      it.maker   || '',
+      it.category|| '',
+      it.weight  != null ? String(it.weight)  : '',
+      it.msrp    != null ? String(it.msrp)    : '',
+      it.paid    != null ? String(it.paid)     : '',
+      it.date    || '',
+      it.note    || ''
+    ].map(function(v){
+      // カンマ・ダブルクォート・改行を含む場合はクォートで囲む
+      if(v.indexOf(',')>=0 || v.indexOf('"')>=0 || v.indexOf('\n')>=0){
+        return '"' + v.replace(/"/g,'""') + '"';
+      }
+      return v;
+    });
+    rows.push(cols.join(','));
+  });
+  // BOM付きUTF-8でExcelでも文字化けしない
+  var bom = '﻿';
+  var blob = new Blob([bom + rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  var d = new Date();
+  var ds = d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
+  a.download = 'gear_' + ds + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function exportJsonBackup(){
