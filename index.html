@@ -771,7 +771,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v822';
+    const CACHE_NAME = 'mount-gear-cache-v911';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -2413,5 +2413,36 @@ document.addEventListener('DOMContentLoaded',()=>{
    btn.textContent=document.body.classList.contains('dark')?'☀️ ライト':'🌙 ダーク';
  });
 });
-</script></body>
+</script>
+<script>
+/* Ver9.1.2 iOS apple-touch-icon: SVG→PNG変換 */
+(function(){
+  var MTN='M512,108 L730,452 793,408 940,755 Q940,775 920,775 L104,775 Q84,775 84,755 L225,435 261,378 Z',SM='M512,108 L415,293 490,258 512,250 535,258 612,293 Z',SL='M261,378 L303,463 261,436 219,463 Z',SR='M793,408 L840,494 793,465 746,494 Z';
+  var svgStr='<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 1024 1024">'
+    +'<rect width="1024" height="1024" fill="white"/>'
+    +'<path d="'+MTN+'" fill="#3a5175"/>'
+    +'<path d="'+SM+'" fill="white"/>'
+    +'<path d="'+SL+'" fill="white"/>'
+    +'<path d="'+SR+'" fill="white"/>'
+    +'</svg>';
+  var blob=new Blob([svgStr],{type:'image/svg+xml'});
+  var url=URL.createObjectURL(blob);
+  var img=new Image();
+  img.onload=function(){
+    var c=document.createElement('canvas');
+    c.width=c.height=180;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,180,180);
+    ctx.drawImage(img,0,0,180,180);
+    URL.revokeObjectURL(url);
+    var png=c.toDataURL('image/png');
+    var el=document.querySelector('link[rel="apple-touch-icon"]');
+    if(!el){ el=document.createElement('link'); el.rel='apple-touch-icon'; document.head.appendChild(el); }
+    el.href=png;
+  };
+  img.src=url;
+})();
+</script>
+</body>
 </html>
