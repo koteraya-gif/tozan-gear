@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>登山ギア管理アプリ Ver8.2.2</title>
+<title>登山ギア管理アプリ Ver9.1.3</title>
 <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
@@ -479,6 +479,19 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .loc-toggle[data-loc="worn"]{background:#fff3e8;}
 .loc-toggle:active{opacity:0.7;}
 @media(max-width:768px){.loc-toggle{min-width:44px;min-height:44px;font-size:20px;}}
+
+/* Ver9.1.3 モバイル: カード3列 & 写真非表示 */
+@media (max-width:768px){
+  .gear-list{grid-template-columns:repeat(3,1fr)!important;gap:6px!important;}
+  .card .thumb{display:none!important;}
+  .card .content{padding:6px 8px!important;gap:4px!important;}
+  .card .title{font-size:11px!important;line-height:1.3!important;}
+  .card .meta{font-size:10px!important;}
+  .badges{gap:3px!important;margin-top:2px!important;}
+  .badge{font-size:9px!important;padding:2px 5px!important;}
+  .card .actions{padding:4px 6px!important;gap:4px!important;}
+  .card .actions button{font-size:11px!important;padding:4px 6px!important;}
+}
 </style>
 </head>
 <body>
@@ -771,7 +784,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v912';
+    const CACHE_NAME = 'mount-gear-cache-v913';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
