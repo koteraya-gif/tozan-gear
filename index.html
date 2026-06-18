@@ -480,10 +480,11 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .loc-toggle:active{opacity:0.7;}
 @media(max-width:768px){.loc-toggle{min-width:44px;min-height:44px;font-size:20px;}}
 
-/* Ver9.1.3 モバイル: カード3列 & 写真非表示 */
+/* Ver9.1.3 モバイル: カード3列 / 一覧写真非表示・カード写真表示 */
 @media (max-width:768px){
+  /* カード3列レイアウト */
   .gear-list{grid-template-columns:repeat(3,1fr)!important;gap:6px!important;}
-  .card .thumb{display:none!important;}
+  /* カード表示: 写真はそのまま表示、コンテンツ縮小 */
   .card .content{padding:6px 8px!important;gap:4px!important;}
   .card .title{font-size:11px!important;line-height:1.3!important;}
   .card .meta{font-size:10px!important;}
@@ -491,6 +492,8 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .badge{font-size:9px!important;padding:2px 5px!important;}
   .card .actions{padding:4px 6px!important;gap:4px!important;}
   .card .actions button{font-size:11px!important;padding:4px 6px!important;}
+  /* 一覧表示: 写真列を非表示 */
+  .thumb-td{display:none!important;}
 }
 </style>
 </head>
