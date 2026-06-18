@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>登山ギア管理アプリ Ver8.2.2</title>
 <meta name="theme-color" content="#2a5c3d" />
-<link rel="icon" href="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='192' height='192' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232a5c3d'/><path d='M96 36 L156 156 H36 Z' fill='%23ffffff' opacity='0.95'/><path d='M96 36 L116 156 H76 Z' fill='%232a5c3d'/></svg>" />
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='192' height='192' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232a5c3d'/><path d='M96 36 L156 156 H36 Z' fill='%23ffffff' opacity='0.95'/><path d='M96 36 L116 156 H76 Z' fill='%232a5c3d'/></svg>" />
+<link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="manifest" id="inline-manifest" />
 <style>
 :root {
@@ -464,51 +464,21 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 
 /* Ver8.6.9 統計カード モバイル修正 */
 @media (max-width:768px){
-  /* ②③ フォント縮小・3カード均等幅 */
-  .summary{
-    grid-template-columns:repeat(3,1fr)!important;
-    gap:6px!important;
-  }
-  .summary-item{
-    min-width:0!important;
-    padding:10px 6px!important;
-    overflow:hidden!important;
-  }
-  .summary-item .label{
-    font-size:10px!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .summary-item .value{
-    font-size:1.3rem!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    margin-top:4px!important;
-  }
+  .summary{grid-template-columns:repeat(3,1fr)!important;gap:6px!important;}
+  .summary-item{min-width:0!important;padding:10px 6px!important;overflow:hidden!important;}
+  .summary-item .label{font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  .summary-item .value{font-size:1.3rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin-top:4px!important;}
 }
 
+
 /* Ver9.1 着用/パック重量管理 */
-.gear-check-row{
-  display:flex;align-items:center;gap:8px;margin:4px 0;
-}
-.gear-check-row label{
-  flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;
-}
-.gear-check-row label span{
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.loc-toggle{
-  border:1px solid #ccc;border-radius:8px;padding:4px 10px;
-  font-size:18px;cursor:pointer;background:#f0f4ff;
-  min-width:44px;min-height:36px;flex-shrink:0;line-height:1;
-}
+.gear-check-row{display:flex;align-items:center;gap:8px;margin:4px 0;}
+.gear-check-row label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
+.gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.loc-toggle{border:1px solid #ccc;border-radius:8px;padding:4px 10px;font-size:18px;cursor:pointer;background:#f0f4ff;min-width:44px;min-height:36px;flex-shrink:0;line-height:1;}
 .loc-toggle[data-loc="worn"]{background:#fff3e8;}
 .loc-toggle:active{opacity:0.7;}
-@media(max-width:768px){
-  .loc-toggle{min-width:44px;min-height:44px;font-size:20px;}
-}
+@media(max-width:768px){.loc-toggle{min-width:44px;min-height:44px;font-size:20px;}}
 </style>
 </head>
 <body>
@@ -847,12 +817,14 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   navigator.serviceWorker.register(url).catch(console.warn);
 })();
 function makeTentIconSVGDataURL(size=192){
-  const svg = `
-  <svg xmlns="[w3.org](http://www.w3.org/2000/svg)" width="${size}" height="${size}" viewBox="0 0 192 192">
-    <rect width="192" height="192" fill="#2a5c3d"/>
-    <path d="M96 36 L156 156 H36 Z" fill="#ffffff" opacity="0.95"/>
-    <path d="M96 36 L116 156 H76 Z" fill="#2a5c3d"/>
-  </svg>`;
+  const paths = ['M512,108 L730,452 793,408 940,755 Q940,775 920,775 L104,775 Q84,775 84,755 L225,435 261,378 Z','M512,108 L415,293 490,258 512,250 535,258 612,293 Z','M261,378 L303,463 261,436 219,463 Z','M793,408 L840,494 793,465 746,494 Z'];
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '" viewBox="0 0 1024 1024">'
+    + '<rect width="1024" height="1024" fill="white"/>'
+    + '<path d="' + paths[0] + '" fill="#3a5175"/>'
+    + '<path d="' + paths[1] + '" fill="white"/>'
+    + '<path d="' + paths[2] + '" fill="white"/>'
+    + '<path d="' + paths[3] + '" fill="white"/>'
+    + '</svg>';
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 
@@ -1866,12 +1838,7 @@ function getEquipmentSetWeights(set){
     const qty = Number((set.supplyQuantities||{})[sp.id] || 1);
     return a + ((Number(sp.weight)||0) * qty);
   },0);
-  return {
-    wornWeight,
-    packWeight,
-    consumablesWeight,
-    totalWeight: wornWeight + packWeight + consumablesWeight
-  };
+  return { wornWeight, packWeight, consumablesWeight, totalWeight: wornWeight + packWeight + consumablesWeight };
 }
 
 function renderEquipmentSets(){
@@ -1994,9 +1961,7 @@ function openSetEditor(setId){
       h += '<h4>▼ ' + escapeHtml(cat) + '（' + gearGroups[cat].length + '）</h4>';
       gearGroups[cat].forEach(g=>{
         const checked=(s.gearIds||[]).includes(g.id)?'checked':'';
-        const loc=(s.gearLocations||{})[g.id]||'pack';
-        const locEmoji=loc==='worn'?'👕':'🎒';
-        h += '<div class="gear-check-row"><label><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '><span>' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</span></label><button type="button" class="loc-toggle" data-gearloc="' + g.id + '" data-loc="' + loc + '">' + locEmoji + '</button></div>';
+        h += '<label class="checkbox-item"><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '> ' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</label>';
       });
     });
   }
