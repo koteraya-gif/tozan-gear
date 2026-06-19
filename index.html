@@ -792,7 +792,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v917';
+    const CACHE_NAME = 'mount-gear-cache-v918';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -1252,6 +1252,11 @@ if (els.fields.photo) {
 init();
 
 async function init() {
+  // 起動診断ログ（Safari vs PWA ストレージ分離の確認用）
+  console.info('[MountGear] origin:', location.origin);
+  console.info('[MountGear] isPWA:', window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true);
+  console.info('[MountGear] userAgent:', navigator.userAgent);
+
   await loadItems();
   await loadCategories();
   const setsResult     = await loadEquipmentSets();
@@ -1422,7 +1427,8 @@ function importJsonBackup(file){
       renderSupplies();
       renderEquipmentSets();
 
-      alert('JSON読込が完了しました');
+      const _isPwa = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+      alert('JSON読込が完了しました。' + (_isPwa ? '' : '\n\n※ PWA版(ホーム画面アイコン)とSafariはストレージが別です。\nPWA版でも同じデータを使うには、PWA版を開いてJSON読込を実行してください。'));
     }catch(err){
       alert('JSONファイルの読込に失敗しました');
       console.error(err);
