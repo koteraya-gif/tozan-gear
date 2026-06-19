@@ -2113,7 +2113,9 @@ function openSetEditor(setId){
       h += '<h4>▼ ' + escapeHtml(cat) + '（' + gearGroups[cat].length + '）</h4>';
       gearGroups[cat].forEach(g=>{
         const checked=(s.gearIds||[]).includes(g.id)?'checked':'';
-        h += '<label class="checkbox-item"><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '> ' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</label>';
+        const loc=(s.gearLocations||{})[g.id]||'pack';
+        const locEmoji=loc==='worn'?'👕':'🎒';
+        h += '<div class="gear-check-row"><label><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '><span>' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</span></label><button type="button" class="loc-toggle" data-gearloc="' + g.id + '" data-loc="' + loc + '">' + locEmoji + '</button></div>';
       });
     });
   }
