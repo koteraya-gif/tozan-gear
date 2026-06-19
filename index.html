@@ -792,7 +792,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v916';
+    const CACHE_NAME = 'mount-gear-cache-v917';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -1011,17 +1011,21 @@ function normalizeState(raw){
 }
 
 const DB_NAME = 'MountGearDB';
-const DB_VERSION = 1;
-const STORE_ITEMS = 'items';
-const STORE_META = 'meta';
+const DB_VERSION = 2;
+const STORE_ITEMS    = 'items';
+const STORE_META     = 'meta';
+const STORE_SETS     = 'sets';
+const STORE_SUPPLIES = 'supplies';
 
 function openDB(){
   return new Promise((resolve,reject)=>{
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e)=>{
       const db = e.target.result;
-      if(!db.objectStoreNames.contains(STORE_ITEMS)) db.createObjectStore(STORE_ITEMS,{keyPath:'id'});
-      if(!db.objectStoreNames.contains(STORE_META)) db.createObjectStore(STORE_META,{keyPath:'key'});
+      if(!db.objectStoreNames.contains(STORE_ITEMS))    db.createObjectStore(STORE_ITEMS,   {keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_META))     db.createObjectStore(STORE_META,    {keyPath:'key'});
+      if(!db.objectStoreNames.contains(STORE_SETS))     db.createObjectStore(STORE_SETS,    {keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_SUPPLIES)) db.createObjectStore(STORE_SUPPLIES,{keyPath:'id'});
     };
     req.onsuccess=()=>resolve(req.result);
     req.onerror=()=>reject(req.error);
@@ -1058,10 +1062,13 @@ async function loadItems(){
 }
 
 async function saveCategories(){
-  const db = await openDB();
-  const tx = db.transaction(STORE_META,'readwrite');
-  tx.objectStore(STORE_META).put({key:'categories', value:state.categories});
-  localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(state.categories));
+  try{
+    const db = await openDB();
+    const tx = db.transaction(STORE_META,'readwrite');
+    tx.objectStore(STORE_META).put({key:'categories', value:state.categories});
+  }catch(e){
+    console.error('[saveCategories] IndexedDB 書き込み失敗:', e);
+  }
 }
 
 async function loadCategories(){
@@ -1086,32 +1093,114 @@ async function loadCategories(){
   }
 }
 
-function loadEquipmentSets(){
+async function loadEquipmentSets(){
   try{
-    state.equipmentSets = (JSON.parse(localStorage.getItem(SET_STORAGE_KEY) || '[]') || []).map(normalizeEquipmentSet);
+    const db = await openDB();
+    const tx = db.transaction(STORE_SETS,'readonly');
+    const rows = await promisifyRequest(tx.objectStore(STORE_SETS).getAll());
+    if(rows && rows.length > 0){
+      state.equipmentSets = rows.map(normalizeEquipmentSet);
+      return;
+    }
+    // IndexedDB が空 → localStorage から移行を試みる
+    const legacy = localStorage.getItem(SET_STORAGE_KEY);
+    if(legacy){
+      const parsed = JSON.parse(legacy);
+      if(Array.isArray(parsed) && parsed.length > 0){
+        state.equipmentSets = parsed.map(normalizeEquipmentSet);
+        // 移行: IndexedDB へ書き込み成功後のみ localStorage を削除
+        try{
+          const db2 = await openDB();
+          const tx2 = db2.transaction(STORE_SETS,'readwrite');
+          const store2 = tx2.objectStore(STORE_SETS);
+          await promisifyRequest(store2.clear());
+          for(const s of state.equipmentSets){ store2.put(s); }
+          await new Promise((res,rej)=>{ tx2.oncomplete=res; tx2.onerror=()=>rej(tx2.error); });
+          localStorage.removeItem(SET_STORAGE_KEY);
+          console.info('[loadEquipmentSets] localStorage → IndexedDB 移行完了');
+          return 'migrated'; // 移行フラグ
+        }catch(me){
+          console.error('[loadEquipmentSets] 移行中に IndexedDB 書き込み失敗（localStorage は保持）:', me);
+        }
+      }
+    } else {
+      state.equipmentSets = [];
+    }
   }catch(e){
-    state.equipmentSets = [];
+    console.error('[loadEquipmentSets] IndexedDB 読み込み失敗:', e);
+    // フォールバック: localStorage から読む
+    try{
+      state.equipmentSets = (JSON.parse(localStorage.getItem(SET_STORAGE_KEY)||'[]')||[]).map(normalizeEquipmentSet);
+    }catch(fe){ state.equipmentSets = []; }
   }
 }
-function saveEquipmentSets(){
+async function saveEquipmentSets(){
   state.equipmentSets = (state.equipmentSets || []).map(normalizeEquipmentSet);
-  localStorage.setItem(SET_STORAGE_KEY, JSON.stringify(state.equipmentSets));
-  renderEquipmentSets();
+  renderEquipmentSets(); // 即時 UI 更新（IndexedDB 完了を待たない）
+  try{
+    const db = await openDB();
+    const tx = db.transaction(STORE_SETS,'readwrite');
+    const store = tx.objectStore(STORE_SETS);
+    await promisifyRequest(store.clear());
+    for(const s of state.equipmentSets){ store.put(s); }
+  }catch(e){
+    console.error('[saveEquipmentSets] IndexedDB 書き込み失敗:', e);
+  }
 }
 
-function loadSupplies(){
+async function loadSupplies(){
   try{
-    state.supplies = (JSON.parse(localStorage.getItem(SUPPLY_STORAGE_KEY) || '[]') || []).map(normalizeSupply);
+    const db = await openDB();
+    const tx = db.transaction(STORE_SUPPLIES,'readonly');
+    const rows = await promisifyRequest(tx.objectStore(STORE_SUPPLIES).getAll());
+    if(rows && rows.length > 0){
+      state.supplies = rows.map(normalizeSupply);
+      return;
+    }
+    // IndexedDB が空 → localStorage から移行を試みる
+    const legacy = localStorage.getItem(SUPPLY_STORAGE_KEY);
+    if(legacy){
+      const parsed = JSON.parse(legacy);
+      if(Array.isArray(parsed) && parsed.length > 0){
+        state.supplies = parsed.map(normalizeSupply);
+        try{
+          const db2 = await openDB();
+          const tx2 = db2.transaction(STORE_SUPPLIES,'readwrite');
+          const store2 = tx2.objectStore(STORE_SUPPLIES);
+          await promisifyRequest(store2.clear());
+          for(const s of state.supplies){ store2.put(s); }
+          await new Promise((res,rej)=>{ tx2.oncomplete=res; tx2.onerror=()=>rej(tx2.error); });
+          localStorage.removeItem(SUPPLY_STORAGE_KEY);
+          console.info('[loadSupplies] localStorage → IndexedDB 移行完了');
+          return 'migrated';
+        }catch(me){
+          console.error('[loadSupplies] 移行中に IndexedDB 書き込み失敗（localStorage は保持）:', me);
+        }
+      }
+    } else {
+      state.supplies = [];
+    }
   }catch(e){
-    state.supplies = [];
+    console.error('[loadSupplies] IndexedDB 読み込み失敗:', e);
+    try{
+      state.supplies = (JSON.parse(localStorage.getItem(SUPPLY_STORAGE_KEY)||'[]')||[]).map(normalizeSupply);
+    }catch(fe){ state.supplies = []; }
   }
 }
-function saveSupplies(){
+async function saveSupplies(){
   state.supplies = (state.supplies || []).map(normalizeSupply);
-  localStorage.setItem(SUPPLY_STORAGE_KEY, JSON.stringify(state.supplies));
-  renderSupplies();
+  renderSupplies();       // 即時 UI 更新
   renderEquipmentSets();
   renderSummary();
+  try{
+    const db = await openDB();
+    const tx = db.transaction(STORE_SUPPLIES,'readwrite');
+    const store = tx.objectStore(STORE_SUPPLIES);
+    await promisifyRequest(store.clear());
+    for(const s of state.supplies){ store.put(s); }
+  }catch(e){
+    console.error('[saveSupplies] IndexedDB 書き込み失敗:', e);
+  }
 }
 
 function promisifyRequest(req){
@@ -1165,8 +1254,13 @@ init();
 async function init() {
   await loadItems();
   await loadCategories();
-  loadEquipmentSets();
-  loadSupplies();
+  const setsResult     = await loadEquipmentSets();
+  const suppliesResult = await loadSupplies();
+
+  // 初回移行完了時のみ通知
+  if(setsResult === 'migrated' || suppliesResult === 'migrated'){
+    setTimeout(()=>alert('データ移行が完了しました。\n既存のギア・装備セット・消耗品データをIndexedDBへ移動しました。'), 500);
+  }
 
   state = normalizeState(state);
   syncCategorySelects();
@@ -1321,8 +1415,8 @@ function importJsonBackup(file){
 
       await saveItems();
       await saveCategories();
-      saveEquipmentSets();
-      saveSupplies();
+      await saveEquipmentSets();
+      await saveSupplies();
       syncCategorySelects();
       render();
       renderSupplies();
