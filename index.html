@@ -493,8 +493,9 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .badge{font-size:9px!important;padding:2px 5px!important;}
   .card .actions{padding:4px 6px!important;gap:4px!important;}
   .card .actions button{font-size:11px!important;padding:4px 6px!important;}
-  /* 一覧表示: 写真列を非表示 */
+  /* 一覧表示: 写真列（データ行・ヘッダー行）を非表示 */
   .thumb-td{display:none!important;}
+  th.is-static:first-child{display:none!important;}
 }
 </style>
 </head>
