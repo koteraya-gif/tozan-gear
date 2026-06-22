@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>登山ギア管理アプリ Ver9.1.4</title>
+<title>登山ギア管理アプリ Ver9.1.5</title>
 <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
@@ -2060,17 +2060,22 @@ function bulkReplaceCategory(oldName, newName) {
   render();
 }
 
-function addEquipmentSet(){
+async function addEquipmentSet(){
   const n = els.newSetName.value.trim();
-  if(!n) return;
-  state.equipmentSets.push(normalizeEquipmentSet({
-    id: Date.now(),
-    name: n,
-    gearIds: [],
-    supplyIds: []
-  }));
-  saveEquipmentSets();
-  els.newSetName.value = '';
+  if(!n){ alert('セット名を入力してください'); els.newSetName.focus(); return; }
+  try{
+    state.equipmentSets.push(normalizeEquipmentSet({
+      id: Date.now(),
+      name: n,
+      gearIds: [],
+      supplyIds: []
+    }));
+    await saveEquipmentSets();
+    els.newSetName.value = '';
+  }catch(e){
+    console.error('[addEquipmentSet] 保存失敗:', e);
+    alert('装備セットの保存に失敗しました: ' + e.message);
+  }
 }
 
 function sumByIds(items, ids, key='weight'){
@@ -2136,10 +2141,10 @@ function renderEquipmentSets(){
     stats.className = 'set-stats';
     stats.innerHTML =
       mark + ' 準備状況: ' + packedCount + ' / ' + gears.length + ' (' + rate + '%)' +
-      '<br>👕 着用重量: ' + formatWeightKg(wt.wornWeight) +
-      '<br>🎒 パック重量: ' + formatWeightKg(wt.packWeight) +
-      '<br>🍙 消耗品重量: ' + formatWeightKg(wt.consumablesWeight) +
-      '<br>🏔️ 総重量: ' + formatWeightKg(wt.totalWeight) +
+      '<br>👕 着用重量：' + Math.round(wt.wornWeight).toLocaleString('ja-JP') + 'g' +
+      '<br>🎒 パック重量：' + Math.round(wt.packWeight).toLocaleString('ja-JP') + 'g' +
+      '<br>🍙 消耗品重量：' + Math.round(wt.consumablesWeight).toLocaleString('ja-JP') + 'g' +
+      '<br>🏔️ 総重量：' + Math.round(wt.totalWeight).toLocaleString('ja-JP') + 'g' +
       '<br>ギア数: ' + (s.gearIds?.length || 0) + '点 / 消耗品数: ' + (s.supplyIds?.length || 0) + '点' +
       '<br>購入額: ¥' + formatNumber(paid) + ' / 定価: ¥' + formatNumber(msrp);
     card.appendChild(stats);
@@ -2221,7 +2226,8 @@ function openSetEditor(setId){
         const checked=(s.gearIds||[]).includes(g.id)?'checked':'';
         const loc=(s.gearLocations||{})[g.id]||'pack';
         const locEmoji=loc==='worn'?'👕':'🎒';
-        h += '<div class="gear-check-row"><label><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '><span>' + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</span></label><button type="button" class="loc-toggle" data-gearloc="' + g.id + '" data-loc="' + loc + '">' + locEmoji + '</button></div>';
+        const makerLabel = g.maker ? escapeHtml(g.maker) + '｜' : '';
+        h += '<div class="gear-check-row"><label><input type="checkbox" name="setGearIds" value="' + g.id + '" ' + checked + '><span>' + makerLabel + escapeHtml(g.name) + ' (' + formatWeight(g.weight || 0) + ')</span></label><button type="button" class="loc-toggle" data-gearloc="' + g.id + '" data-loc="' + loc + '">' + locEmoji + '</button></div>';
       });
     });
   }
@@ -2272,10 +2278,10 @@ function openSetEditor(setId){
     },0);
     box.querySelector('#setStats').innerHTML =
       'ギア数 ' + gearIds.length + '点 ｜ 消耗品数 ' + supplyIds.length + '点' +
-      ' ｜ 👕 着用: ' + formatWeightKg(wornW) +
-      ' ｜ 🎒 パック: ' + formatWeightKg(packW) +
-      ' ｜ 🍙 消耗品: ' + formatWeightKg(consumablesWeight) +
-      ' ｜ 🏔️ 総重量: ' + formatWeightKg(wornW + packW + consumablesWeight);
+      ' ｜ 👕 着用：' + Math.round(wornW).toLocaleString('ja-JP') + 'g' +
+      ' ｜ 🎒 パック：' + Math.round(packW).toLocaleString('ja-JP') + 'g' +
+      ' ｜ 🍙 消耗品：' + Math.round(consumablesWeight).toLocaleString('ja-JP') + 'g' +
+      ' ｜ 🏔️ 総重量：' + Math.round(wornW + packW + consumablesWeight).toLocaleString('ja-JP') + 'g';
   }
 
   updateStats();
@@ -2429,14 +2435,14 @@ function resetPackingState(setId,setName){
   alert('パッキング状態をリセットしました');
 }
 
-function deleteEquipmentSet(setId){
+async function deleteEquipmentSet(setId){
   const s = state.equipmentSets.find(x=>x.id===setId);
   if(!s) return;
 
   if(!confirm('装備セット「' + s.name + '」を削除しますか？')) return;
 
   state.equipmentSets = state.equipmentSets.filter(x=>x.id!==setId);
-  saveEquipmentSets();
+  await saveEquipmentSets();
 }
 
 function duplicateEquipmentSet(setId){
