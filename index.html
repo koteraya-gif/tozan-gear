@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>登山ギア管理アプリ Ver9.1.5</title>
+<title>登山ギア管理アプリ Ver10.0</title>
 <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
@@ -470,6 +470,16 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .summary-item .value{font-size:1.3rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin-top:4px!important;}
 }
 
+/* Ver10.0 食料プラン レイアウト */
+.meal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.meal-col{background:#f5f7ff;border-radius:8px;padding:6px 5px;min-width:0;overflow:hidden;}
+.meal-col-title{font-size:11px;font-weight:700;color:#1f3b73;text-align:center;padding:2px 4px;background:#dde4ff;border-radius:4px;margin-bottom:5px;white-space:nowrap;}
+.meal-label{display:flex;align-items:flex-start;gap:3px;padding:2px 0;cursor:pointer;font-size:12px;line-height:1.3;}
+.meal-label input{flex-shrink:0;margin-top:2px;}
+.meal-name{word-break:break-all;overflow-wrap:anywhere;}
+.snack-stepper{display:flex;align-items:center;gap:4px;justify-content:center;margin-top:4px;}
+.snack-btn{width:26px;height:26px;border:1px solid #fcc;border-radius:5px;background:#fff;cursor:pointer;font-size:16px;line-height:1;padding:0;color:#c55;}
+.snack-qty-val{min-width:22px;text-align:center;font-weight:700;font-size:14px;}
 /* Ver9.1.4 統計カード幅調整・g表記・折り返し禁止 */
 @media (max-width:768px){
   .summary{grid-template-columns:0.8fr 1fr 1.2fr!important;}
@@ -618,6 +628,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
           <select id="newSupplyCategory">
             <option>燃料</option>
             <option>食料</option>
+            <option>行動食</option>
             <option>飲料</option>
             <option>医療</option>
             <option>電子機器</option>
@@ -798,7 +809,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v918';
+    const CACHE_NAME = 'mount-gear-cache-v1000';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -1000,7 +1011,10 @@ function normalizeEquipmentSet(set){
     supplyIds: Array.isArray(set?.supplyIds) ? set.supplyIds.map(Number).filter(Number.isFinite) : [],
     supplyQuantities: set?.supplyQuantities || {},
     gearLocations: (set?.gearLocations && typeof set.gearLocations === 'object') ? set.gearLocations : {},
-    memo: set?.memo || ''
+    memo: set?.memo || '',
+    days: (Number.isFinite(Number(set?.days)) && Number(set?.days) >= 1) ? Math.min(Math.round(Number(set.days)), 14) : 1,
+    mealPlan: (set?.mealPlan && typeof set.mealPlan === 'object') ? set.mealPlan : {},
+    snackPlan: (set?.snackPlan && typeof set.snackPlan === 'object') ? set.snackPlan : {}
   };
 }
 
@@ -2249,6 +2263,17 @@ function openSetEditor(setId){
   }
   h += '</div>';
 
+  h += '<div class="section-block"><h3>🍙 食料プラン</h3>';
+  h += '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">山行日数：';
+  h += '<select id="setDaysSelect" style="width:auto;padding:6px 10px;">';
+  [1,2,3,4,5,6,7].forEach(d=>{
+    const sel=(s.days||1)===d?' selected':'';
+    h += '<option value="'+d+'"'+sel+'>'+d+'日</option>';
+  });
+  h += '</select></div>';
+  h += '<div id="mealPlanDays"></div>';
+  h += '<div id="mealPlanTotal" style="margin-top:10px;padding-top:8px;border-top:1px solid #e2e8e4;font-size:15px;"></div>';
+  h += '</div>';
   h += '<div style="margin-top:12px"><button id="saveSetBtn">保存</button> <button id="closeSetBtn">閉じる</button></div>';
 
   box.innerHTML = h;
@@ -2294,6 +2319,130 @@ function openSetEditor(setId){
     updateStats();
   }));
 
+  /* ===== 🍙 食料プラン ===== */
+  let localMealPlan=JSON.parse(JSON.stringify(s.mealPlan||{}));
+  let localSnackPlan=(()=>{const sp=s.snackPlan||{};const r={};Object.keys(sp).forEach(k=>{if(Number(sp[k])>0)r[Number(k)]=Number(sp[k]);});return r;})();
+  let localDays=s.days||1;
+  const MEALS=['朝食','昼食','夕食'];
+
+  function calcMealCounts(){
+    const counts={};
+    Object.values(localMealPlan).forEach(dayObj=>{
+      if(!dayObj||typeof dayObj!=='object')return;
+      MEALS.forEach(mt=>{((dayObj[mt])||[]).forEach(id=>{counts[id]=(counts[id]||0)+1;});});
+    });
+    Object.keys(localSnackPlan).forEach(id=>{
+      if(localSnackPlan[id]>0)counts[Number(id)]=(counts[Number(id)]||0)+localSnackPlan[id];
+    });
+    return counts;
+  }
+
+  function updateMealSummary(){
+    const el=box.querySelector('#mealPlanTotal');
+    if(!el)return;
+    const counts=calcMealCounts();
+    const ids=Object.keys(counts);
+    if(!ids.length){el.innerHTML='';return;}
+    let totalW=0,rows='';
+    ids.forEach(id=>{
+      const sp=state.supplies.find(x=>x.id===Number(id));
+      if(!sp)return;
+      const w=(Number(sp.weight)||0)*counts[id];
+      totalW+=w;
+      rows+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 4px;">'+
+        '<span>'+escapeHtml(sp.name)+' <strong style="color:#1f3b73;">×'+counts[id]+'</strong></span>'+
+        '<span style="color:#667a6b;">'+Math.round(w).toLocaleString('ja-JP')+'g</span></div>';
+    });
+    el.innerHTML='<div style="font-weight:700;margin-bottom:6px;font-size:13px;">📊 食料集計</div>'+
+      '<div style="background:#f5f7f5;border-radius:6px;padding:6px 2px;">'+rows+'</div>'+
+      '<div style="border-top:1px solid #e2e8e4;margin-top:8px;padding-top:8px;font-weight:700;font-size:15px;">🍙 食料総重量：'+Math.round(totalW).toLocaleString('ja-JP')+'g</div>';
+  }
+
+  function renderMealPlanSection(){
+    const daysEl=box.querySelector('#setDaysSelect');
+    if(daysEl) localDays=Number(daysEl.value)||1;
+    const container=box.querySelector('#mealPlanDays');
+    if(!container)return;
+    const mealSups=state.supplies.filter(sp=>sp.category!=='行動食');
+    const snackSups=state.supplies.filter(sp=>sp.category==='行動食');
+    let html='';
+    for(let d=1;d<=localDays;d++){
+      const dk=String(d);
+      if(!localMealPlan[dk]||typeof localMealPlan[dk]!=='object')localMealPlan[dk]={};
+      html+='<div style="margin-bottom:10px;">';
+      html+='<div style="font-weight:700;font-size:13px;color:#1f3b73;padding:4px 8px;background:#eef2ff;border-radius:6px;margin-bottom:5px;">📅 '+d+'日目</div>';
+      html+='<div class="meal-grid">';
+      MEALS.forEach(mt=>{
+        const mealIds=new Set(((localMealPlan[dk][mt])||[]).map(Number));
+        html+='<div class="meal-col"><div class="meal-col-title">'+mt+'</div>';
+        if(!mealSups.length){
+          html+='<p style="color:#999;font-size:11px;margin:2px 0;text-align:center;">なし</p>';
+        }else{
+          mealSups.forEach(sp=>{
+            const ck=mealIds.has(sp.id)?'checked':'';
+            html+='<label class="meal-label"><input type="checkbox" class="mcb" data-day="'+dk+'" data-mt="'+mt+'" data-sid="'+sp.id+'" '+ck+'><span class="meal-name">'+escapeHtml(sp.name)+'</span></label>';
+          });
+        }
+        html+='</div>';
+      });
+      html+='</div></div>';
+    }
+    /* 行動食セクション */
+    html+='<div style="margin-top:10px;padding:10px;background:#fff8f0;border:1px solid #fde2b8;border-radius:10px;">';
+    html+='<div style="font-weight:700;font-size:14px;margin-bottom:8px;">🍫 行動食</div>';
+    if(!snackSups.length){
+      html+='<p style="color:#999;font-size:13px;margin:0;">消耗品タブでカテゴリ「行動食」の消耗品を登録してください。</p>';
+    }else{
+      html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+      snackSups.forEach(sp=>{
+        const qty=localSnackPlan[sp.id]||0;
+        html+='<div style="background:#fff;border:1px solid #fde2b8;border-radius:8px;padding:6px 8px;min-width:72px;text-align:center;">';
+        html+='<div style="font-size:12px;margin-bottom:2px;word-break:break-all;">'+escapeHtml(sp.name)+'</div>';
+        html+='<div style="font-size:11px;color:#aaa;margin-bottom:4px;">'+(Math.round(Number(sp.weight)||0))+'g</div>';
+        html+='<div class="snack-stepper">';
+        html+='<button class="snack-btn snack-dec" data-sid="'+sp.id+'">−</button>';
+        html+='<span class="snack-qty-val" data-sid="'+sp.id+'">'+qty+'</span>';
+        html+='<button class="snack-btn snack-inc" data-sid="'+sp.id+'">+</button>';
+        html+='</div></div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+    container.innerHTML=html;
+    updateMealSummary();
+    container.querySelectorAll('.mcb').forEach(cb=>{
+      cb.addEventListener('change',()=>{
+        const day=cb.dataset.day,mt=cb.dataset.mt,sid=Number(cb.dataset.sid);
+        if(!localMealPlan[day])localMealPlan[day]={};
+        if(!localMealPlan[day][mt])localMealPlan[day][mt]=[];
+        if(cb.checked){if(!localMealPlan[day][mt].includes(sid))localMealPlan[day][mt].push(sid);}
+        else{localMealPlan[day][mt]=localMealPlan[day][mt].filter(x=>x!==sid);}
+        updateMealSummary();
+      });
+    });
+    container.querySelectorAll('.snack-inc').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const sid=Number(btn.dataset.sid);
+        localSnackPlan[sid]=(localSnackPlan[sid]||0)+1;
+        const qEl=container.querySelector('.snack-qty-val[data-sid="'+sid+'"]');
+        if(qEl)qEl.textContent=localSnackPlan[sid];
+        updateMealSummary();
+      });
+    });
+    container.querySelectorAll('.snack-dec').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const sid=Number(btn.dataset.sid);
+        localSnackPlan[sid]=Math.max(0,(localSnackPlan[sid]||0)-1);
+        const qEl=container.querySelector('.snack-qty-val[data-sid="'+sid+'"]');
+        if(qEl)qEl.textContent=localSnackPlan[sid];
+        updateMealSummary();
+      });
+    });
+  }
+  renderMealPlanSection();
+  const daysSelEl=box.querySelector('#setDaysSelect');
+  if(daysSelEl)daysSelEl.addEventListener('change',renderMealPlanSection);
+
   const save=()=>{
     s.gearIds = getCheckedNumbers('setGearIds');
     s.supplyIds = getCheckedNumbers('setSupplyIds');
@@ -2305,6 +2454,16 @@ function openSetEditor(setId){
     s.gearLocations = {};
     box.querySelectorAll('.loc-toggle').forEach(btn=>{
       s.gearLocations[btn.dataset.gearloc]=btn.dataset.loc;
+    });
+    s.days=localDays;
+    s.mealPlan=localMealPlan;
+    s.snackPlan=localSnackPlan;
+    // 食料プランから数量を自動集計
+    const mealCounts=calcMealCounts();
+    Object.keys(mealCounts).forEach(id=>{
+      const numId=Number(id);
+      if(!s.supplyIds.includes(numId))s.supplyIds.push(numId);
+      s.supplyQuantities[String(numId)]=mealCounts[id];
     });
     saveEquipmentSets();
     document.body.removeChild(overlay);
@@ -2456,7 +2615,10 @@ function duplicateEquipmentSet(setId){
     id: Date.now(),
     name: newName,
     gearIds: [...(srcSet.gearIds || [])],
-    supplyIds: [...(srcSet.supplyIds || [])]
+    supplyIds: [...(srcSet.supplyIds || [])],
+    days: srcSet.days || 1,
+    mealPlan: JSON.parse(JSON.stringify(srcSet.mealPlan || {})),
+    snackPlan: JSON.parse(JSON.stringify(srcSet.snackPlan || {}))
   }));
 
   saveEquipmentSets();
@@ -2549,7 +2711,7 @@ function renderSupplies(){
 
   const catSelect=els.editSupplyCategory;
   if(catSelect && !catSelect.options.length){
-    ['燃料','食料','飲料','医療','電子機器','その他'].forEach(c=>{
+    ['燃料','食料','行動食','飲料','医療','電子機器','その他'].forEach(c=>{
       const o=document.createElement('option');
       o.value=c;
       o.textContent=c;
