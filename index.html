@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>登山ギア管理アプリ Ver9.1.3</title>
+<title>登山ギア管理アプリ Ver9.1.4</title>
 <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
@@ -468,6 +468,12 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .summary-item{min-width:0!important;padding:10px 6px!important;overflow:hidden!important;}
   .summary-item .label{font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
   .summary-item .value{font-size:1.3rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin-top:4px!important;}
+}
+
+/* Ver9.1.4 統計カード幅調整・g表記・折り返し禁止 */
+@media (max-width:768px){
+  .summary{grid-template-columns:0.8fr 1fr 1.2fr!important;}
+  .summary-item .value{overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;}
 }
 
 
@@ -1618,7 +1624,7 @@ function renderSummary() {
   els.summary.totalPrice.textContent = '¥' + formatNumber(sum(state.items, 'paid'));
   const gearWeight = sum(state.items, 'weight');
   const supplyWeight = (state.supplies || []).reduce((a, s) => a + (Number(s.weight) || 0), 0);
-  els.summary.totalWeight.textContent = formatWeightKg(gearWeight + supplyWeight);
+  els.summary.totalWeight.textContent = Math.round(gearWeight + supplyWeight).toLocaleString('ja-JP') + 'g';
 }
 
 function renderViewToggle() {
