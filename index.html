@@ -117,7 +117,8 @@ input:focus, select:focus, textarea:focus { outline: 3px solid rgba(30,122,85,0.
 .checkbox-group{display:grid;gap:6px}
 .checkbox-item{display:block;padding:4px 0}
 .section-block{border:1px solid var(--border);border-radius:10px;padding:10px;margin:10px 0;background:#fbfdfb}
-.section-block h3,.section-block h4{margin:0 0 8px}
+.section-block h3{margin:0 0 8px;font-size:14px;}
+.section-block h4{margin:4px 0 3px;font-size:12px;color:#1f3b73;background:#eef2ff;padding:2px 6px;border-radius:4px;font-weight:700;}
 .empty-note{color:var(--muted)}
 .selected-row{ background:#eef6f0; }
 .supply-layout{display:grid;gap:12px}
@@ -488,9 +489,9 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 
 
 /* Ver9.1 着用/パック重量管理 */
-.gear-check-row{display:flex;align-items:center;gap:8px;margin:4px 0;}
+.gear-check-row{display:flex;align-items:center;gap:6px;margin:2px 0;}
 .gear-check-row label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
-.gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;}
 .loc-toggle{border:1px solid #ccc;border-radius:8px;padding:4px 10px;font-size:18px;cursor:pointer;background:#f0f4ff;min-width:44px;min-height:36px;flex-shrink:0;line-height:1;}
 .loc-toggle[data-loc="worn"]{background:#fff3e8;}
 .loc-toggle:active{opacity:0.7;}
@@ -2247,22 +2248,6 @@ function openSetEditor(setId){
   }
   h += '</div>';
 
-  h += '<div class="section-block"><h3>🍙 消耗品</h3>';
-  const supplyCats = Object.keys(supplyGroups).sort((a,b)=>a.localeCompare(b,'ja'));
-  if(!supplyCats.length){
-    h += '<p class="empty-note">登録されている消耗品がありません。</p>';
-  }else{
-    supplyCats.forEach(cat=>{
-      h += '<h4>▼ ' + escapeHtml(cat) + '（' + supplyGroups[cat].length + '）</h4>';
-      supplyGroups[cat].forEach(sp=>{
-        const checked=(s.supplyIds||[]).includes(sp.id)?'checked':'';
-        const qty=((s.supplyQuantities||{})[sp.id]||1);
-        h += '<label class="checkbox-item"><input type="checkbox" name="setSupplyIds" value="' + sp.id + '" ' + checked + '> ' + escapeHtml(sp.name) + ' (' + formatWeight(sp.weight || 0) + ') 数量:<input type="number" min="1" value="' + qty + '" data-supplyqty="' + sp.id + '" style="width:70px"></label>';
-      });
-    });
-  }
-  h += '</div>';
-
   h += '<div class="section-block"><h3>🍙 食料プラン</h3>';
   h += '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">山行日数：';
   h += '<select id="setDaysSelect" style="width:auto;padding:6px 10px;">';
@@ -2284,34 +2269,36 @@ function openSetEditor(setId){
     return [...box.querySelectorAll('input[name="' + name + '"]:checked')].map(x=>Number(x.value));
   }
 
+  /* ===== 🍙 食料プラン (state — declared early so updateStats can use calcMealCounts) ===== */
+  let localMealPlan=JSON.parse(JSON.stringify(s.mealPlan||{}));
+  let localSnackPlan=(()=>{const sp=s.snackPlan||{};const r={};Object.keys(sp).forEach(k=>{if(Number(sp[k])>0)r[Number(k)]=Number(sp[k]);});return r;})();
+  let localDays=s.days||1;
+
   function updateStats(){
-    const gearIds = getCheckedNumbers('setGearIds');
-    const supplyIds = getCheckedNumbers('setSupplyIds');
-    let wornW=0, packW=0;
+    const gearIds=getCheckedNumbers('setGearIds');
+    let wornW=0,packW=0;
     state.items.forEach(item=>{
-      if(!gearIds.includes(item.id)) return;
+      if(!gearIds.includes(item.id))return;
       const btn=box.querySelector('[data-gearloc="'+item.id+'"]');
       const loc=btn?btn.dataset.loc:'pack';
       const w=Number(item.weight)||0;
-      if(loc==='worn') wornW+=w; else packW+=w;
+      if(loc==='worn')wornW+=w;else packW+=w;
     });
-    const consumablesWeight = state.supplies.reduce((a,sp)=>{
-      if(!supplyIds.includes(sp.id)) return a;
-      const qtyEl=box.querySelector('[data-supplyqty="'+sp.id+'"]');
-      const qty=Number(qtyEl?.value||1);
-      return a + ((Number(sp.weight)||0) * qty);
+    const mealCounts=calcMealCounts();
+    const consumablesWeight=Object.keys(mealCounts).reduce((a,id)=>{
+      const sp=state.supplies.find(x=>x.id===Number(id));
+      return sp?a+((Number(sp.weight)||0)*mealCounts[id]):a;
     },0);
-    box.querySelector('#setStats').innerHTML =
-      'ギア数 ' + gearIds.length + '点 ｜ 消耗品数 ' + supplyIds.length + '点' +
-      ' ｜ 👕 着用：' + Math.round(wornW).toLocaleString('ja-JP') + 'g' +
-      ' ｜ 🎒 パック：' + Math.round(packW).toLocaleString('ja-JP') + 'g' +
-      ' ｜ 🍙 消耗品：' + Math.round(consumablesWeight).toLocaleString('ja-JP') + 'g' +
-      ' ｜ 🏔️ 総重量：' + Math.round(wornW + packW + consumablesWeight).toLocaleString('ja-JP') + 'g';
+    box.querySelector('#setStats').innerHTML=
+      'ギア数 '+gearIds.length+'点'+
+      ' ｜ 👕 着用：'+Math.round(wornW).toLocaleString('ja-JP')+'g'+
+      ' ｜ 🎒 パック：'+Math.round(packW).toLocaleString('ja-JP')+'g'+
+      ' ｜ 🍙 食料：'+Math.round(consumablesWeight).toLocaleString('ja-JP')+'g'+
+      ' ｜ 🏔️ 総重量：'+Math.round(wornW+packW+consumablesWeight).toLocaleString('ja-JP')+'g';
   }
 
   updateStats();
-  box.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',updateStats));
-  box.querySelectorAll('[data-supplyqty]').forEach(el=>el.addEventListener('input',updateStats));
+  box.querySelectorAll('input[type=checkbox]').forEach(ch=>ch.addEventListener('change',updateStats));
   box.querySelectorAll('.loc-toggle').forEach(btn=>btn.addEventListener('click',()=>{
     const newLoc=btn.dataset.loc==='pack'?'worn':'pack';
     btn.dataset.loc=newLoc;
@@ -2319,13 +2306,10 @@ function openSetEditor(setId){
     updateStats();
   }));
 
-  /* ===== 🍙 食料プラン ===== */
-  let localMealPlan=JSON.parse(JSON.stringify(s.mealPlan||{}));
-  let localSnackPlan=(()=>{const sp=s.snackPlan||{};const r={};Object.keys(sp).forEach(k=>{if(Number(sp[k])>0)r[Number(k)]=Number(sp[k]);});return r;})();
-  let localDays=s.days||1;
-  const MEALS=['朝食','昼食','夕食'];
+  /* ===== 🍙 食料プラン (functions) ===== */
 
   function calcMealCounts(){
+    const MEALS=['朝食','昼食','夕食']; // inlined — avoids TDZ of outer const
     const counts={};
     Object.values(localMealPlan).forEach(dayObj=>{
       if(!dayObj||typeof dayObj!=='object')return;
@@ -2356,9 +2340,11 @@ function openSetEditor(setId){
     el.innerHTML='<div style="font-weight:700;margin-bottom:6px;font-size:13px;">📊 食料集計</div>'+
       '<div style="background:#f5f7f5;border-radius:6px;padding:6px 2px;">'+rows+'</div>'+
       '<div style="border-top:1px solid #e2e8e4;margin-top:8px;padding-top:8px;font-weight:700;font-size:15px;">🍙 食料総重量：'+Math.round(totalW).toLocaleString('ja-JP')+'g</div>';
+    updateStats();
   }
 
   function renderMealPlanSection(){
+    const MEALS=['朝食','昼食','夕食'];
     const daysEl=box.querySelector('#setDaysSelect');
     if(daysEl) localDays=Number(daysEl.value)||1;
     const container=box.querySelector('#mealPlanDays');
@@ -2445,12 +2431,9 @@ function openSetEditor(setId){
 
   const save=()=>{
     s.gearIds = getCheckedNumbers('setGearIds');
-    s.supplyIds = getCheckedNumbers('setSupplyIds');
-    s.memo=(box.querySelector('#setMemo')?.value||'').trim();
+    s.supplyIds = [];
     s.supplyQuantities = {};
-    box.querySelectorAll('[data-supplyqty]').forEach(el=>{
-      s.supplyQuantities[el.dataset.supplyqty]=Number(el.value||1);
-    });
+    s.memo=(box.querySelector('#setMemo')?.value||'').trim();
     s.gearLocations = {};
     box.querySelectorAll('.loc-toggle').forEach(btn=>{
       s.gearLocations[btn.dataset.gearloc]=btn.dataset.loc;
@@ -2492,87 +2475,111 @@ function openPackingMode(setId){
   box.style.cssText='background:#fff;width:100%;max-width:700px;max-height:85vh;overflow:auto;border-radius:12px;padding:16px;';
 
   function renderPacking(){
-    box.innerHTML='<h2>パッキングモード：'+escapeHtml(s.name)+'</h2><div><button id="topCloseBtn">閉じる</button></div><div id="packSummary" style="font-weight:bold;margin:12px 0"></div>';
+    const mealSups=supplies.filter(sp=>sp.category!=='行動食');
+    const snackSups=supplies.filter(sp=>sp.category==='行動食');
+    const sqty=s.supplyQuantities||{};
 
+    box.innerHTML='<h2 style="font-size:16px;margin-bottom:4px;">📦 パッキング：'+escapeHtml(s.name)+'</h2>'+
+      '<div><button id="topCloseBtn">閉じる</button></div>'+
+      '<div id="packSummary" style="font-size:13px;background:#f5f7f5;border-radius:8px;padding:8px 10px;margin:10px 0;"></div>';
+
+    /* ---- ギア ---- */
     const gearGroups={};
-    gears.forEach(g=>{
-      const c=g.category||'未分類';
-      (gearGroups[c] ||= []).push(g);
-    });
-
+    gears.forEach(g=>{const gc=g.category||'未分類';if(!gearGroups[gc])gearGroups[gc]=[];gearGroups[gc].push(g);});
     Object.keys(gearGroups).sort().forEach(cat=>{
-      const h=document.createElement('h3');
-      h.textContent='▼ '+cat+'（'+gearGroups[cat].length+'）';
-      box.appendChild(h);
-
+      const hEl=document.createElement('div');
+      hEl.style.cssText='font-size:12px;font-weight:700;color:#1f3b73;background:#eef2ff;padding:2px 8px;border-radius:4px;margin:8px 0 3px;';
+      hEl.textContent='▼ '+cat+'（'+gearGroups[cat].length+'）';
+      box.appendChild(hEl);
       gearGroups[cat].forEach(g=>{
         const loc=(s.gearLocations||{})[g.id]||'pack';
         const locEmoji=loc==='worn'?'👕':'🎒';
-        const checked=packingState[g.id]?'checked':'';
+        const ck=packingState['g_'+g.id]?'checked':'';
         const row=document.createElement('div');
         row.className='gear-check-row';
-        row.innerHTML='<label><input type="checkbox" data-id="'+g.id+'" '+checked+'><span>'+escapeHtml(g.name)+'</span></label><button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'">'+locEmoji+'</button>';
+        row.innerHTML='<label style="font-size:12px;"><input type="checkbox" data-id="g_'+g.id+'" '+ck+'><span>'+escapeHtml(g.name)+'<span style="color:#aaa;font-size:11px;margin-left:4px;">('+Math.round(Number(g.weight)||0).toLocaleString('ja-JP')+'g)</span></span></label><button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'" style="font-size:13px;">'+locEmoji+'</button>';
         box.appendChild(row);
       });
     });
 
-    if(supplies.length){
-      const sh = document.createElement('h3');
-      sh.textContent = '▼ 消耗品（' + supplies.length + '）';
-      box.appendChild(sh);
-
-      supplies.forEach(sp=>{
+    /* ---- 食料 ---- */
+    if(mealSups.length){
+      const hEl=document.createElement('div');
+      hEl.style.cssText='font-size:13px;font-weight:700;margin:12px 0 4px;padding:4px 8px;background:#e8f5e9;border-radius:6px;';
+      hEl.textContent='🍙 食料';
+      box.appendChild(hEl);
+      mealSups.forEach(sp=>{
+        const qty=sqty[String(sp.id)]||sqty[sp.id]||1;
+        const ck=packingState['s_'+sp.id]?'checked':'';
         const row=document.createElement('div');
-        row.style.margin='6px 0';
-        row.textContent = sp.name + ' / ' + (sp.category || '未分類') + ' / ' + formatWeight(sp.weight || 0);
+        row.className='gear-check-row';
+        row.innerHTML='<label style="font-size:12px;"><input type="checkbox" data-id="s_'+sp.id+'" '+ck+'><span>'+escapeHtml(sp.name)+' <strong style="color:#1f3b73;">×'+qty+'</strong></span></label>';
         box.appendChild(row);
       });
     }
 
-    const close=document.createElement('button');
-    close.textContent='閉じる';
-    close.onclick=()=>{document.body.removeChild(overlay);renderEquipmentSets();};
-    box.appendChild(close);
+    /* ---- 行動食 ---- */
+    if(snackSups.length){
+      const hEl=document.createElement('div');
+      hEl.style.cssText='font-size:13px;font-weight:700;margin:12px 0 4px;padding:4px 8px;background:#fff3e0;border-radius:6px;';
+      hEl.textContent='🍫 行動食';
+      box.appendChild(hEl);
+      snackSups.forEach(sp=>{
+        const qty=sqty[String(sp.id)]||sqty[sp.id]||1;
+        const ck=packingState['s_'+sp.id]?'checked':'';
+        const row=document.createElement('div');
+        row.className='gear-check-row';
+        row.innerHTML='<label style="font-size:12px;"><input type="checkbox" data-id="s_'+sp.id+'" '+ck+'><span>'+escapeHtml(sp.name)+' <strong style="color:#c55;">×'+qty+'</strong></span></label>';
+        box.appendChild(row);
+      });
+    }
 
-    box.querySelector('#topCloseBtn').onclick=()=>{
-      document.body.removeChild(overlay);
-      renderEquipmentSets();
-    };
+    const closeBtn=document.createElement('button');
+    closeBtn.textContent='閉じる';
+    closeBtn.style.marginTop='12px';
+    closeBtn.onclick=()=>{document.body.removeChild(overlay);renderEquipmentSets();};
+    box.appendChild(closeBtn);
+
+    box.querySelector('#topCloseBtn').onclick=()=>{document.body.removeChild(overlay);renderEquipmentSets();};
 
     const checks=box.querySelectorAll('input[type=checkbox]');
     const summaryEl=box.querySelector('#packSummary');
+    const totalFood=mealSups.length+snackSups.length;
 
     const update=()=>{
-      checks.forEach(c=>packingState[c.dataset.id]=c.checked);
+      checks.forEach(ch=>packingState[ch.dataset.id]=ch.checked);
       localStorage.setItem(packingKey,JSON.stringify(packingState));
       renderEquipmentSets();
 
-      const done=[...checks].filter(c=>c.checked).length;
-      const rate=gears.length?Math.round(done/gears.length*100):0;
+      const doneGear=gears.filter(g=>packingState['g_'+g.id]).length;
+      const doneFood=[...mealSups,...snackSups].filter(sp=>packingState['s_'+sp.id]).length;
+      const gearRate=gears.length?Math.round(doneGear/gears.length*100):0;
+      const foodRate=totalFood?Math.round(doneFood/totalFood*100):0;
 
-      const packedWeight=gears.filter(g=>packingState[g.id]).reduce((a,g)=>a+(Number(g.weight)||0),0);
-      const totalGearWeight=gears.reduce((a,g)=>a+(Number(g.weight)||0),0);
-      const totalSupplyWeight=supplies.reduce((a,sp)=>a+(Number(sp.weight)||0),0);
-
+      const totalGearW=gears.reduce((a,g)=>a+(Number(g.weight)||0),0);
+      const totalSupW=supplies.reduce((a,sp)=>{
+        const qty=sqty[String(sp.id)]||sqty[sp.id]||1;
+        return a+(Number(sp.weight)||0)*qty;
+      },0);
       const locs=s.gearLocations||{};
-      let wornW=0,packW2=0;
-      gears.forEach(g=>{const w=Number(g.weight)||0;if(locs[g.id]==='worn')wornW+=w;else packW2+=w;});
+      let wornW=0,packW=0;
+      gears.forEach(g=>{const w=Number(g.weight)||0;if(locs[g.id]==='worn')wornW+=w;else packW+=w;});
+
       summaryEl.innerHTML=
-        '準備完了 '+done+' / '+gears.length+' 点 ('+rate+'%)' +
-        '<br>👕 着用重量: ' + (wornW/1000).toFixed(1) + 'kg' +
-        '<br>🎒 パック重量: ' + (packW2/1000).toFixed(1) + 'kg' +
-        '<br>🍙 消耗品重量: ' + (totalSupplyWeight/1000).toFixed(1) + 'kg' +
-        '<br>🏔️ 総重量: ' + ((totalGearWeight + totalSupplyWeight)/1000).toFixed(1) + 'kg' +
-        '<br>パッキング済ギア重量: ' + packedWeight.toLocaleString() + 'g' +
-        ' / 未収納ギア重量: ' + (totalGearWeight - packedWeight).toLocaleString() + 'g';
+        '🎒 ギア '+doneGear+'/'+gears.length+'点 ('+gearRate+'%)'+
+        (totalFood?' ｜ 🍙 食料 '+doneFood+'/'+totalFood+'品 ('+foodRate+'%)':'')+
+        '<br>👕 着用：'+Math.round(wornW).toLocaleString('ja-JP')+'g'+
+        ' ｜ 🎒 パック：'+Math.round(packW).toLocaleString('ja-JP')+'g'+
+        ' ｜ 🍙 食料：'+Math.round(totalSupW).toLocaleString('ja-JP')+'g'+
+        ' ｜ 🏔️ 総重量：'+Math.round(totalGearW+totalSupW).toLocaleString('ja-JP')+'g';
     };
 
-    checks.forEach(c=>c.addEventListener('change',update));
+    checks.forEach(ch=>ch.addEventListener('change',update));
     box.querySelectorAll('.loc-toggle').forEach(btn=>btn.addEventListener('click',()=>{
       const newLoc=btn.dataset.loc==='pack'?'worn':'pack';
       btn.dataset.loc=newLoc;
       btn.textContent=newLoc==='worn'?'👕':'🎒';
-      if(!s.gearLocations) s.gearLocations={};
+      if(!s.gearLocations)s.gearLocations={};
       s.gearLocations[btn.dataset.gearloc]=newLoc;
       saveEquipmentSets();
       update();
