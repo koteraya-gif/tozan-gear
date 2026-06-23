@@ -118,7 +118,7 @@ input:focus, select:focus, textarea:focus { outline: 3px solid rgba(30,122,85,0.
 .checkbox-item{display:block;padding:4px 0}
 .section-block{border:1px solid var(--border);border-radius:10px;padding:10px;margin:10px 0;background:#fbfdfb}
 .section-block h3{margin:0 0 8px;font-size:14px;}
-.section-block h4{margin:4px 0 3px;font-size:12px;color:#1f3b73;background:#eef2ff;padding:2px 6px;border-radius:4px;font-weight:700;}
+.section-block h4{margin:3px 0 2px;font-size:12px;color:#1f3b73;background:#eef2ff;padding:1px 6px;border-radius:4px;font-weight:700;}
 .empty-note{color:var(--muted)}
 .selected-row{ background:#eef6f0; }
 .supply-layout{display:grid;gap:12px}
@@ -489,13 +489,13 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 
 
 /* Ver9.1 着用/パック重量管理 */
-.gear-check-row{display:flex;align-items:center;gap:6px;margin:2px 0;}
+.gear-check-row{display:flex;align-items:center;gap:5px;margin:1px 0;padding:1px 0;}
 .gear-check-row label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
-.gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;}
-.loc-toggle{border:1px solid #ccc;border-radius:8px;padding:4px 10px;font-size:18px;cursor:pointer;background:#f0f4ff;min-width:44px;min-height:36px;flex-shrink:0;line-height:1;}
+.gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;}
+.loc-toggle{border:1px solid #ccc;border-radius:6px;padding:2px 7px;font-size:15px;cursor:pointer;background:#f0f4ff;min-width:34px;min-height:28px;flex-shrink:0;line-height:1;}
 .loc-toggle[data-loc="worn"]{background:#fff3e8;}
 .loc-toggle:active{opacity:0.7;}
-@media(max-width:768px){.loc-toggle{min-width:44px;min-height:44px;font-size:20px;}}
+@media(max-width:768px){.loc-toggle{min-width:36px;min-height:36px;font-size:16px;}}
 @media(max-width:768px){#importCsvBtn,#exportCsvBtn{display:none!important;}}
 
 /* Ver9.1.3 モバイル: カード3列 / 一覧写真非表示・カード写真表示 */
@@ -516,6 +516,9 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 }
 
 /* ─── Ver10.5 新規スタイル ─── */
+/* ─── Ver10.6.2 追加スタイル ─── */
+#selectAllBtn { min-width: 76px; }
+
 .gear-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center;}
 .card{position:relative;}
 .card-cb-wrap{position:absolute;top:6px;left:6px;z-index:2;background:rgba(255,255,255,.85);border-radius:4px;padding:2px;}
@@ -589,6 +592,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
         <div class="sort-group">
           <label for="sortBy">並び替え:</label>
           <select id="sortBy" aria-label="並び替え">
+            <option value="gearNo">管理番号順</option>
             <option value="name">名称順</option>
             <option value="weight">重量順</option>
             <option value="purchasePrice">購入価格順</option>
@@ -609,6 +613,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
     <div class="gear-toolbar">
       <button id="gearExportCsvBtn" class="icon-btn">📥 CSV出力</button>
       <button id="gearImportCsvBtn" class="icon-btn">📤 CSV取込</button>
+      <button id="selectAllBtn" class="icon-btn">☐ 全選択</button>
       <button id="bulkDeleteBtn" class="danger-btn" style="display:none;">🗑 選択削除</button>
       <span id="selectedCountLabel" style="font-size:13px;color:var(--muted);display:none;"></span>
     </div>
@@ -1048,6 +1053,7 @@ const els = {
   gearImportCsvBtn: document.getElementById('gearImportCsvBtn'),
   gearCsvImportFile: document.getElementById('gearCsvImportFile'),
   bulkDeleteBtn: document.getElementById('bulkDeleteBtn'),
+  selectAllBtn: document.getElementById('selectAllBtn'),
   selectedCountLabel: document.getElementById('selectedCountLabel'),
 
   supplyExportCsvBtn: document.getElementById('supplyExportCsvBtn'),
@@ -1466,6 +1472,7 @@ async function init() {
 
   // 選択削除
   els.bulkDeleteBtn.addEventListener('click', confirmBulkDelete);
+  if(els.selectAllBtn) els.selectAllBtn.addEventListener('click', toggleSelectAll);
 
   // 消耗品モーダル
   els.spEditSaveBtn.addEventListener('click', saveSupplyEditModal);
@@ -1793,13 +1800,14 @@ function updateTableSortIndicators() {
 
 function tableKeyToSortKey(k) {
   switch (k) {
-    case 'name': return 'name';
-    case 'maker': return 'maker';
-    case 'category': return 'category';
-    case 'weight': return 'weight';
-    case 'msrp': return 'msrp';
+    case 'gearNo':        return 'gearNo';
+    case 'name':          return 'name';
+    case 'maker':         return 'maker';
+    case 'category':      return 'category';
+    case 'weight':        return 'weight';
+    case 'msrp':          return 'msrp';
     case 'purchasePrice': return 'purchasePrice';
-    case 'purchaseDate': return 'purchaseDate';
+    case 'purchaseDate':  return 'purchaseDate';
     default: return 'name';
   }
 }
@@ -2001,15 +2009,37 @@ function applySorting(items) {
 
 function getSortValue(item, key) {
   switch (key) {
-    case 'name': return (item.name || '').toLowerCase();
-    case 'maker': return (item.maker || '').toLowerCase();
+    case 'gearNo':   return naturalSortKey(item.gearNo);
+    case 'name':     return (item.name || '').toLowerCase();
+    case 'maker':    return (item.maker || '').toLowerCase();
     case 'category': return (item.category || '').toLowerCase();
-    case 'weight': return toNumber(item.weight);
-    case 'msrp': return toNumber(item.msrp);
+    case 'weight':   return toNumber(item.weight);
+    case 'msrp':     return toNumber(item.msrp);
     case 'purchasePrice': return toNumber(item.paid);
-    case 'purchaseDate': return item.date || '';
+    case 'purchaseDate':  return item.date || '';
     default: return '';
   }
+}
+
+/**
+ * 管理番号を文字列比較で正しく並べるためのキー生成。
+ * 純数値 (10001) も 英字接頭辞付き (G001) も正しくソートできる。
+ *   "10001" → "0000010001"
+ *   "10012" → "0000010012"
+ *   "G001"  → "g0000000001"
+ *   "G010"  → "g0000000010"
+ *   ""      → "\uFFFF"（未設定は末尾）
+ */
+function naturalSortKey(s) {
+  s = (s || '').trim();
+  if (!s) return '\uFFFF';
+  // 純数値
+  if (/^\d+$/.test(s)) return s.padStart(12, '0');
+  // 英字 + 数値 (G001, S001, ABC-0042 ...)
+  var m = s.match(/^([A-Za-z\-_]*)([0-9]+)(.*)$/);
+  if (m) return m[1].toLowerCase() + m[2].padStart(10, '0') + (m[3] || '');
+  // それ以外は小文字化して比較
+  return s.toLowerCase();
 }
 
 function toNumber(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
@@ -3138,6 +3168,26 @@ function updateBulkDeleteUI(){
     els.selectedCountLabel.style.display = count > 0 ? '' : 'none';
     els.selectedCountLabel.textContent = count + '件選択中';
   }
+  // 全選択ボタンのラベル切替
+  if(els.selectAllBtn){
+    const visibleItems = applyFilters(state.items);
+    const allSelected = visibleItems.length > 0 && visibleItems.every(it => state.selectedGearIds.has(it.id));
+    els.selectAllBtn.textContent = allSelected ? '☑ 全解除' : '☐ 全選択';
+  }
+}
+
+function toggleSelectAll(){
+  const visibleItems = applyFilters(state.items);
+  const allSelected = visibleItems.length > 0 && visibleItems.every(it => state.selectedGearIds.has(it.id));
+  if(allSelected){
+    // 全解除
+    visibleItems.forEach(it => state.selectedGearIds.delete(it.id));
+  } else {
+    // 全選択
+    visibleItems.forEach(it => state.selectedGearIds.add(it.id));
+  }
+  updateBulkDeleteUI();
+  render(); // チェックボックスの見た目を同期
 }
 
 function confirmBulkDelete(){
