@@ -492,6 +492,39 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .gear-check-row{display:flex;align-items:center;gap:5px;margin:1px 0;padding:1px 0;}
 .gear-check-row label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
 .gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;}
+/* ── スマホ版ギア一覧（Ver11.1） ── */
+.gear-mobile-list{display:none;}
+@media(max-width:768px){
+  /* テーブルを隠してモバイルリストを出す */
+  #gearTableWrap{display:none!important;}
+  .gear-mobile-list{display:block;padding:0 2px;}
+  .gear-mobile-row{
+    display:flex;align-items:center;gap:6px;
+    padding:3px 4px;border-bottom:1px solid var(--border);
+    min-height:28px;
+  }
+  .gear-mobile-row:last-child{border-bottom:none;}
+  .gear-mobile-row input[type=checkbox]{
+    flex-shrink:0;width:16px;height:16px;cursor:pointer;
+  }
+  .gear-mobile-info{
+    flex:1;display:flex;gap:0;min-width:0;
+    font-size:12px;line-height:1.3;overflow:hidden;
+  }
+  .gear-mobile-name{
+    flex:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    font-weight:500;color:var(--text);padding-right:4px;
+  }
+  .gear-mobile-maker{
+    flex:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    color:var(--muted);font-size:11px;padding-right:4px;
+  }
+  .gear-mobile-cat{
+    flex:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    color:var(--muted);font-size:11px;
+    background:var(--surface);border-radius:4px;padding:0 4px;
+  }
+}
 /* ── Ver11.0 Auth & Sync UI ── */
 .sync-badge{font-size:11px;padding:3px 7px;border-radius:10px;background:rgba(255,255,255,0.18);color:#fff;font-weight:600;white-space:nowrap;display:none;}
 .sync-badge.visible{display:inline-block;}
@@ -646,6 +679,8 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
       <span id="selectedCountLabel" style="font-size:13px;color:var(--muted);display:none;"></span>
     </div>
     <section id="gearList" class="gear-list" aria-label="ギア一覧（カード表示）"></section>
+
+    <div id="gearMobileList" class="gear-mobile-list" aria-label="ギア一覧（スマホ）"></div>
 
     <section id="gearTableWrap" class="table-wrap" aria-label="ギア一覧（表）" style="display:none;">
       <table class="table" id="gearTable">
@@ -1805,14 +1840,17 @@ function renderSummary() {
 }
 
 function renderViewToggle() {
+  const mobileList = document.getElementById('gearMobileList');
   if (state.viewMode === 'list') {
     els.list.style.display = 'none';
     els.tableWrap.style.display = '';
+    if (mobileList) mobileList.style.display = ''; // CSS media query handles actual visibility
     els.viewMode.value = 'list';
     updateTableSortIndicators();
   } else {
     els.list.style.display = '';
     els.tableWrap.style.display = 'none';
+    if (mobileList) mobileList.style.display = 'none';
     els.viewMode.value = 'card';
   }
 }
@@ -2006,6 +2044,58 @@ function renderTable(items) {
     tr.appendChild(tdAct);
 
     tbody.appendChild(tr);
+  }
+
+  // ── モバイルリスト（スマホ専用コンパクト表示） ──
+  const mobileList = document.getElementById('gearMobileList');
+  if (mobileList) {
+    mobileList.innerHTML = '';
+    if (items.length === 0) {
+      const msg = document.createElement('div');
+      msg.style.cssText = 'padding:12px 8px;font-size:12px;color:var(--muted);';
+      msg.textContent = '該当するギアがありません。右上「+ 新規登録」から追加してください。';
+      mobileList.appendChild(msg);
+    } else {
+      for (const it of items) {
+        const row = document.createElement('div');
+        row.className = 'gear-mobile-row';
+
+        // チェックボックス
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = state.selectedGearIds.has(it.id);
+        cb.addEventListener('change', () => {
+          if (cb.checked) state.selectedGearIds.add(it.id);
+          else state.selectedGearIds.delete(it.id);
+          updateBulkDeleteUI();
+        });
+        row.appendChild(cb);
+
+        // 名称・メーカー・カテゴリ
+        const info = document.createElement('div');
+        info.className = 'gear-mobile-info';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'gear-mobile-name';
+        nameEl.textContent = it.name || '';
+        nameEl.title = it.name || '';
+        nameEl.addEventListener('click', () => openModal(it.id));
+
+        const makerEl = document.createElement('div');
+        makerEl.className = 'gear-mobile-maker';
+        makerEl.textContent = it.maker || '';
+
+        const catEl = document.createElement('div');
+        catEl.className = 'gear-mobile-cat';
+        catEl.textContent = it.category || '';
+
+        info.appendChild(nameEl);
+        info.appendChild(makerEl);
+        info.appendChild(catEl);
+        row.appendChild(info);
+        mobileList.appendChild(row);
+      }
+    }
   }
 }
 
