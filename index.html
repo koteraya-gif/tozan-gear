@@ -620,6 +620,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
           <tr>
             <th class="is-static" style="width:36px;"></th>
             <th class="is-static">写真</th>
+            <th data-key="gearNo">管理番号 <span class="sort-indicator"></span></th>
             <th data-key="name">名称 <span class="sort-indicator"></span></th>
             <th data-key="maker">メーカー <span class="sort-indicator"></span></th>
             <th data-key="category">カテゴリ <span class="sort-indicator"></span></th>
@@ -705,6 +706,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
         <table class="table">
           <thead>
             <tr>
+              <th>管理番号</th>
               <th>カテゴリ</th>
               <th>名称</th>
               <th>重量(g)</th>
@@ -739,6 +741,10 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
           <img id="photoPreview" alt="画像なし"
             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'><rect width='110' height='110' rx='10' fill='%23eef2ee'/><text x='55' y='62' text-anchor='middle' font-size='40'>📷</text><text x='55' y='90' text-anchor='middle' font-size='12' fill='%23667a6b'>画像なし</text></svg>" />
         </div>
+      </div>
+      <div class="form-row">
+        <label for="gearNoInput">管理番号 <span style="font-size:11px;color:var(--muted);font-weight:400;">（空白で自動採番）</span></label>
+        <input type="text" id="gearNoInput" placeholder="例: G001" style="max-width:160px;" />
       </div>
       <div class="form-row">
         <label for="gearName">名称</label>
@@ -811,6 +817,10 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
 <div id="supplyEditModal" class="sp-modal" aria-hidden="true" role="dialog">
   <div class="sp-modal-box">
     <h3>消耗品編集</h3>
+    <div class="form-row">
+      <label>管理番号</label>
+      <input type="text" id="spEditSupplyNo" placeholder="例: S001" style="max-width:160px;" />
+    </div>
     <div class="form-row">
       <label>カテゴリ</label>
       <select id="spEditCategory">
@@ -1055,7 +1065,9 @@ const els = {
   spEditSaveBtn: document.getElementById('spEditSaveBtn'),
   spEditCancelBtn: document.getElementById('spEditCancelBtn'),
 
-  gearUrl: document.getElementById('gearUrl')
+  gearUrl: document.getElementById('gearUrl'),
+  gearNoInput: document.getElementById('gearNoInput'),
+  spEditSupplyNo: document.getElementById('spEditSupplyNo')
 };
 
 function normalizeItem(item){
@@ -1070,7 +1082,8 @@ function normalizeItem(item){
     paid: numOrNull(item?.paid),
     date: item?.date || '',
     note: item?.note || '',
-    url: item?.url || ''
+    url: item?.url || '',
+    gearNo: item?.gearNo || ''
   };
 }
 
@@ -1082,7 +1095,8 @@ function normalizeSupply(s){
     weight: Number.isFinite(Number(s?.weight)) ? Number(s.weight) : 0,
     price: numOrNull(s?.price),
     memo: s?.memo || '',
-    checked: !!s?.checked
+    checked: !!s?.checked,
+    supplyNo: s?.supplyNo || ''
   };
 }
 
@@ -1827,6 +1841,7 @@ function renderCards(items) {
 
     const badges = document.createElement('div');
     badges.className = 'badges';
+    if(it.gearNo){ badges.appendChild(badge(it.gearNo)); }
     badges.appendChild(badge(`${it.category || '未分類'}`));
     badges.appendChild(badge(it.weight ? `重量 ${formatNumber(it.weight)} g` : '重量 -'));
     badges.appendChild(badge(it.paid != null && it.paid !== '' ? `購入 ¥${formatNumber(it.paid)}` : '購入 -'));
@@ -1884,7 +1899,7 @@ function renderTable(items) {
   if (items.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 10;
+    td.colSpan = 11;
     td.innerHTML = `<span class="meta">該当するギアがありません。右上「+ 新規登録」から追加してください。</span>`;
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -1915,6 +1930,7 @@ function renderTable(items) {
     tdPhoto.appendChild(img);
     tr.appendChild(tdPhoto);
 
+    tr.appendChild(tdText(it.gearNo || ''));
     tr.appendChild(tdText(it.name || ''));
     tr.appendChild(tdText(it.maker || ''));
     tr.appendChild(tdText(it.category || ''));
@@ -2024,11 +2040,13 @@ function openModal(id) {
     els.fields.date.value = it.date || '';
     els.fields.note.value = it.note || '';
     if(els.gearUrl) els.gearUrl.value = it.url || '';
+    if(els.gearNoInput) els.gearNoInput.value = it.gearNo || '';
     els.deleteBtn.hidden = false;
   } else {
     els.modalTitle.textContent = 'ギア登録';
     els.fields.category.value = state.filters.category || (state.categories[0] || '');
     if(els.gearUrl) els.gearUrl.value = '';
+    if(els.gearNoInput) els.gearNoInput.value = '';
     els.deleteBtn.hidden = true;
   }
   els.modal.classList.add('show');
@@ -2064,7 +2082,12 @@ function onSubmit(e) {
     date: els.fields.date.value,
     note: els.fields.note.value.trim(),
     url: (els.gearUrl ? els.gearUrl.value.trim() : ''),
+    gearNo: (els.gearNoInput ? els.gearNoInput.value.trim() : ''),
   });
+  // Auto-assign gearNo if blank (new item)
+  if(!item.gearNo && id == null){
+    item.gearNo = nextGearNo();
+  }
 
   if (!item.name) { alert('名称を入力してください。'); return; }
   if (!item.category) { alert('カテゴリを選択してください。'); return; }
@@ -2891,13 +2914,15 @@ function addSupply(){
   const cat = els.newSupplyCategory.value || 'その他';
   const wt = Number(els.newSupplyWeight.value || 0);
 
-  state.supplies.push(normalizeSupply({
+  const newSp = normalizeSupply({
     id: Date.now(),
     category: cat,
     name: n,
     weight: wt,
     checked: false
-  }));
+  });
+  if(!newSp.supplyNo) newSp.supplyNo = nextSupplyNo();
+  state.supplies.push(newSp);
 
   saveSupplies();
   els.newSupplyName.value = '';
@@ -2981,7 +3006,7 @@ function renderSupplies(){
 
   if(supplies.length === 0){
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="5"><span class="empty-note">該当する消耗品がありません。</span></td>';
+    tr.innerHTML = '<td colspan="6"><span class="empty-note">該当する消耗品がありません。</span></td>';
     body.appendChild(tr);
     return;
   }
@@ -2990,6 +3015,9 @@ function renderSupplies(){
     const tr=document.createElement('tr');
     tr.className = 'supply-table-row';
 
+    const td0 = document.createElement('td');
+    td0.textContent = s.supplyNo || '';
+    td0.style.cssText = 'font-size:12px;color:var(--muted);';
     const td1 = document.createElement('td');
     td1.textContent = s.category || 'その他';
     const td2 = document.createElement('td');
@@ -3019,6 +3047,7 @@ function renderSupplies(){
 
     td4.appendChild(editBtn);
     td4.appendChild(delBtn);
+    tr.appendChild(td0);
     tr.appendChild(td1);
     tr.appendChild(td2);
     tr.appendChild(td3);
@@ -3033,6 +3062,7 @@ function openSupplyEditModal(supplyId){
   const s = state.supplies.find(x => x.id === supplyId);
   if(!s) return;
   els.spEditId.value = s.id;
+  if(els.spEditSupplyNo) els.spEditSupplyNo.value = s.supplyNo || '';
   els.spEditCategory.value = s.category || 'その他';
   els.spEditName.value = s.name || '';
   els.spEditWeight.value = s.weight != null ? s.weight : '';
@@ -3060,6 +3090,7 @@ function saveSupplyEditModal(){
   s.weight = Number(els.spEditWeight.value) || 0;
   s.price = numOrNull(els.spEditPrice.value);
   s.memo = els.spEditMemo.value.trim();
+  if(els.spEditSupplyNo) s.supplyNo = els.spEditSupplyNo.value.trim() || s.supplyNo;
   closeSupplyEditModal();
   saveSupplies();
 }
@@ -3086,6 +3117,18 @@ function deleteSupply(supplyId){
   saveEquipmentSets();
 }
 
+function nextGearNo(){
+  var existing=new Set(state.items.map(function(x){return x.gearNo;}).filter(Boolean));
+  var n=1;
+  while(existing.has('G'+String(n).padStart(3,'0')))n++;
+  return 'G'+String(n).padStart(3,'0');
+}
+function nextSupplyNo(){
+  var existing=new Set(state.supplies.map(function(x){return x.supplyNo;}).filter(Boolean));
+  var n=1;
+  while(existing.has('S'+String(n).padStart(3,'0')))n++;
+  return 'S'+String(n).padStart(3,'0');
+}
 function updateBulkDeleteUI(){
   const count = state.selectedGearIds.size;
   if(els.bulkDeleteBtn){
@@ -3116,11 +3159,11 @@ function confirmBulkDelete(){
 /* ── ギア管理 CSV ── */
 function exportGearCsv(){
   if(!state.items || state.items.length === 0){ alert('出力するギアがありません。'); return; }
-  var headers = ['名前','メーカー','カテゴリ','重量(g)','定価(円)','購入価格(円)','購入日','メモ','URL'];
+  var headers = ['管理番号','名前','メーカー','カテゴリ','重量(g)','定価(円)','購入価格(円)','購入日','メモ','URL'];
   var rows = [headers.join(',')];
   state.items.forEach(function(it){
     var cols = [
-      it.name||'', it.maker||'', it.category||'',
+      it.gearNo||'', it.name||'', it.maker||'', it.category||'',
       it.weight!=null?String(it.weight):'',
       it.msrp!=null?String(it.msrp):'',
       it.paid!=null?String(it.paid):'',
@@ -3135,27 +3178,79 @@ function importGearCsv(file){
   var reader=new FileReader();
   reader.onload=function(){
     try{
-      var lines=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+      var text=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      var lines=text.split('\n').filter(function(l){return l.trim();});
       if(lines.length<2){alert('データがありません。');return;}
-      var headers=parseCsvRow(lines[0]).map(h=>h.trim());
-      var colMap={name:['名前','ギア名','name'],maker:['メーカー','maker','brand'],category:['カテゴリ','category'],weight:['重量(g)','重量','weight'],msrp:['定価(円)','定価','msrp'],paid:['購入価格(円)','購入価格','paid'],date:['購入日','date'],note:['メモ','備考','note'],url:['URL','url']};
-      var ci={};
-      Object.keys(colMap).forEach(f=>{ci[f]=-1;colMap[f].forEach(a=>{if(ci[f]<0){const i=headers.findIndex(h=>h.toLowerCase()===a.toLowerCase());if(i>=0)ci[f]=i;}});});
-      if(ci['name']<0){alert('「名前」列が見つかりません。');return;}
-      var newItems=[];
-      for(var i=1;i<lines.length;i++){
-        var cols=parseCsvRow(lines[i]);
-        var g=function(f){return ci[f]>=0?(cols[ci[f]]||'').trim():''};
-        var name=g('name');if(!name)continue;
-        newItems.push(normalizeItem({id:Date.now()+i,name:name,maker:g('maker'),category:g('category'),weight:g('weight').replace(/,/g,'')||null,msrp:g('msrp').replace(/[,¥￥]/g,'')||null,paid:g('paid').replace(/[,¥￥]/g,'')||null,date:g('date'),note:g('note'),url:g('url')}));
+      var headers=parseCsvRow(lines[0]).map(function(h){return h.trim();});
+      function findCol(aliases){
+        return aliases.reduce(function(a,al){
+          if(a>=0)return a;
+          return headers.findIndex(function(h){return h.toLowerCase()===al.toLowerCase();});
+        },-1);
       }
-      if(!newItems.length){alert('登録できるデータがありませんでした。');return;}
-      if(!confirm(newItems.length+'件のギアを追加しますか？'))return;
-      newItems.forEach(function(it){if(it.category&&!state.categories.includes(it.category))state.categories.push(it.category);});
-      state.items=state.items.concat(newItems);
-      saveItems();saveCategories();render();
-      alert(newItems.length+'件登録しました！');
-    }catch(e){alert('CSV読込失敗: '+e.message);}
+      var ci={
+        gearNo: findCol(['管理番号','gearno','gear_no','id']),
+        name:   findCol(['名前','ギア名','アイテム名','name','item']),
+        maker:  findCol(['メーカー','ブランド','maker','brand']),
+        cat:    findCol(['カテゴリ','category']),
+        weight: findCol(['重量(g)','重量','weight']),
+        msrp:   findCol(['定価(円)','定価','msrp','retail']),
+        paid:   findCol(['購入価格(円)','購入価格','purchased','paid']),
+        date:   findCol(['購入日','date']),
+        note:   findCol(['メモ','備考','note','memo']),
+        url:    findCol(['URL','url'])
+      };
+      if(ci.name<0&&ci.gearNo<0){alert('「名前」または「管理番号」列が見つかりません。');return;}
+      var result={updated:0,added:0,unchanged:0,errors:0};
+      var toSave=false;
+      for(var i=1;i<lines.length;i++){
+        try{
+          var cols=parseCsvRow(lines[i]);
+          function gc(k){return ci[k]>=0?(cols[ci[k]]||'').trim():'';}
+          var gearNo=gc('gearNo');
+          var name=gc('name');
+          if(!gearNo&&!name)continue;
+          // Find existing item
+          var existing=null;
+          if(gearNo) existing=state.items.find(function(x){return x.gearNo===gearNo;});
+          if(!existing&&name) existing=state.items.find(function(x){return x.name===name;});
+          var csvWeight=gc('weight').replace(/,/g,'')||null;
+          var csvMsrp=gc('msrp').replace(/[,¥￥]/g,'')||null;
+          var csvPaid=gc('paid').replace(/[,¥￥]/g,'')||null;
+          if(existing){
+            // Upsert: update changed fields only
+            var changed=false;
+            if(name&&existing.name!==name){existing.name=name;changed=true;}
+            if(ci.maker>=0&&gc('maker')&&existing.maker!==gc('maker')){existing.maker=gc('maker');changed=true;}
+            if(ci.cat>=0&&gc('cat')&&existing.category!==gc('cat')){existing.category=gc('cat');changed=true;}
+            if(csvWeight!==null&&String(existing.weight)!==csvWeight){existing.weight=numOrNull(csvWeight);changed=true;}
+            if(csvMsrp!==null&&String(existing.msrp)!==csvMsrp){existing.msrp=numOrNull(csvMsrp);changed=true;}
+            if(csvPaid!==null&&String(existing.paid)!==csvPaid){existing.paid=numOrNull(csvPaid);changed=true;}
+            if(ci.date>=0&&gc('date')&&existing.date!==gc('date')){existing.date=gc('date');changed=true;}
+            if(ci.note>=0&&gc('note')&&existing.note!==gc('note')){existing.note=gc('note');changed=true;}
+            if(ci.url>=0&&gc('url')&&existing.url!==gc('url')){existing.url=gc('url');changed=true;}
+            if(gearNo&&existing.gearNo!==gearNo){existing.gearNo=gearNo;changed=true;}
+            if(changed){result.updated++;toSave=true;}
+            else result.unchanged++;
+          } else {
+            // New item
+            var newItem=normalizeItem({
+              id:Date.now()+i,
+              gearNo:gearNo||nextGearNo(),
+              name:name||'（名称なし）',
+              maker:gc('maker'),category:gc('cat'),
+              weight:csvWeight,msrp:csvMsrp,paid:csvPaid,
+              date:gc('date'),note:gc('note'),url:gc('url')
+            });
+            if(newItem.category&&!state.categories.includes(newItem.category))state.categories.push(newItem.category);
+            state.items.push(newItem);
+            result.added++;toSave=true;
+          }
+        }catch(rowErr){result.errors++;console.warn('Row '+i+':',rowErr);}
+      }
+      if(toSave){saveItems();saveCategories();render();}
+      alert('CSV取込完了\n更新：'+result.updated+'件\n新規追加：'+result.added+'件\n変更なし：'+result.unchanged+'件\nエラー：'+result.errors+'件');
+    }catch(e){alert('CSV読込失敗: '+e.message);console.error(e);}
   };
   reader.readAsText(file,'UTF-8');
 }
@@ -3163,10 +3258,10 @@ function importGearCsv(file){
 /* ── 消耗品管理 CSV ── */
 function exportSupplyCsv(){
   if(!state.supplies||!state.supplies.length){alert('出力する消耗品がありません。');return;}
-  var headers=['カテゴリ','名称','重量(g)','価格(円)','メモ'];
+  var headers=['管理番号','カテゴリ','名称','重量(g)','価格(円)','メモ'];
   var rows=[headers.join(',')];
   state.supplies.forEach(function(s){
-    var cols=[s.category||'その他',s.name||'',String(Number(s.weight)||0),s.price!=null?String(s.price):'',s.memo||'']
+    var cols=[s.supplyNo||'',s.category||'その他',s.name||'',String(Number(s.weight)||0),s.price!=null?String(s.price):'',s.memo||'']
       .map(function(v){ return (v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0)?'"'+v.replace(/"/g,'""')+'"':v; });
     rows.push(cols.join(','));
   });
@@ -3177,25 +3272,67 @@ function importSupplyCsv(file){
   var reader=new FileReader();
   reader.onload=function(){
     try{
-      var lines=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(function(l){return l.trim();});
+      var text=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      var lines=text.split('\n').filter(function(l){return l.trim();});
       if(lines.length<2){alert('データがありません。');return;}
       var headers=parseCsvRow(lines[0]).map(function(h){return h.trim();});
-      function findCol(aliases){return aliases.reduce(function(a,al){if(a>=0)return a;var i=headers.findIndex(function(h){return h.toLowerCase()===al.toLowerCase();});return i;},-1);}
-      var ci={cat:findCol(['カテゴリ','category']),name:findCol(['名称','名前','name']),weight:findCol(['重量(g)','重量','weight']),price:findCol(['価格(円)','価格','price']),memo:findCol(['メモ','memo'])};
-      if(ci.name<0){alert('「名称」列が見つかりません。');return;}
-      var newSupplies=[];
-      for(var i=1;i<lines.length;i++){
-        var cols=parseCsvRow(lines[i]);
-        function g(k){return ci[k]>=0?(cols[ci[k]]||'').trim():'';}
-        var name=g('name');if(!name)continue;
-        newSupplies.push(normalizeSupply({id:Date.now()+i,name:name,category:g('cat')||'その他',weight:Number(g('weight').replace(/,/g,''))||0,price:numOrNull(g('price').replace(/[,¥￥]/g,'')),memo:g('memo')}));
+      function findCol(aliases){
+        return aliases.reduce(function(a,al){
+          if(a>=0)return a;
+          return headers.findIndex(function(h){return h.toLowerCase()===al.toLowerCase();});
+        },-1);
       }
-      if(!newSupplies.length){alert('登録できるデータがありませんでした。');return;}
-      if(!confirm(newSupplies.length+'件の消耗品を追加しますか？'))return;
-      state.supplies=state.supplies.concat(newSupplies);
-      saveSupplies();
-      alert(newSupplies.length+'件登録しました！');
-    }catch(e){alert('CSV読込失敗: '+e.message);}
+      var ci={
+        supplyNo: findCol(['管理番号','supplyno','supply_no','id']),
+        cat:      findCol(['カテゴリ','category']),
+        name:     findCol(['名称','名前','name']),
+        weight:   findCol(['重量(g)','重量','weight']),
+        price:    findCol(['価格(円)','価格','price']),
+        memo:     findCol(['メモ','memo'])
+      };
+      if(ci.name<0&&ci.supplyNo<0){alert('「名称」または「管理番号」列が見つかりません。');return;}
+      var result={updated:0,added:0,unchanged:0,errors:0};
+      var toSave=false;
+      for(var i=1;i<lines.length;i++){
+        try{
+          var cols=parseCsvRow(lines[i]);
+          function gc(k){return ci[k]>=0?(cols[ci[k]]||'').trim():'';}
+          var supplyNo=gc('supplyNo');
+          var name=gc('name');
+          if(!supplyNo&&!name)continue;
+          var existing=null;
+          if(supplyNo) existing=state.supplies.find(function(x){return x.supplyNo===supplyNo;});
+          if(!existing&&name) existing=state.supplies.find(function(x){return x.name===name;});
+          var csvWeight=gc('weight').replace(/,/g,'');
+          if(existing){
+            var changed=false;
+            if(name&&existing.name!==name){existing.name=name;changed=true;}
+            if(ci.cat>=0&&gc('cat')&&existing.category!==gc('cat')){existing.category=gc('cat');changed=true;}
+            if(csvWeight!==''&&String(existing.weight)!==csvWeight){existing.weight=Number(csvWeight)||0;changed=true;}
+            var csvPrice=gc('price').replace(/[,¥￥]/g,'');
+            if(csvPrice!==''&&String(existing.price||'')!==csvPrice){existing.price=numOrNull(csvPrice);changed=true;}
+            if(ci.memo>=0&&gc('memo')&&existing.memo!==gc('memo')){existing.memo=gc('memo');changed=true;}
+            if(supplyNo&&existing.supplyNo!==supplyNo){existing.supplyNo=supplyNo;changed=true;}
+            if(changed){result.updated++;toSave=true;}
+            else result.unchanged++;
+          } else {
+            var newSp=normalizeSupply({
+              id:Date.now()+i,
+              supplyNo:supplyNo||nextSupplyNo(),
+              category:gc('cat')||'その他',
+              name:name||'（名称なし）',
+              weight:Number(csvWeight)||0,
+              price:numOrNull(gc('price').replace(/[,¥￥]/g,'')),
+              memo:gc('memo')
+            });
+            state.supplies.push(newSp);
+            result.added++;toSave=true;
+          }
+        }catch(rowErr){result.errors++;console.warn('Row '+i+':',rowErr);}
+      }
+      if(toSave)saveSupplies();
+      alert('CSV取込完了\n更新：'+result.updated+'件\n新規追加：'+result.added+'件\n変更なし：'+result.unchanged+'件\nエラー：'+result.errors+'件');
+    }catch(e){alert('CSV読込失敗: '+e.message);console.error(e);}
   };
   reader.readAsText(file,'UTF-8');
 }
