@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>登山ギア管理アプリ Ver10.5</title>
+<title>登山ギア管理アプリ Ver11.0</title>
 <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
@@ -492,6 +492,25 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .gear-check-row{display:flex;align-items:center;gap:5px;margin:1px 0;padding:1px 0;}
 .gear-check-row label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
 .gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;}
+/* ── Ver11.0 Auth & Sync UI ── */
+.sync-badge{font-size:11px;padding:3px 7px;border-radius:10px;background:rgba(255,255,255,0.18);color:#fff;font-weight:600;white-space:nowrap;display:none;}
+.sync-badge.visible{display:inline-block;}
+.sync-badge.syncing{background:rgba(242,140,40,0.35);}
+.sync-badge.synced{background:rgba(42,200,100,0.3);}
+.sync-badge.error{background:rgba(200,60,60,0.35);}
+.sync-badge.offline{background:rgba(150,150,150,0.3);}
+.sync-badge.pending{background:rgba(242,140,40,0.25);}
+.user-display-name{font-size:12px;color:rgba(255,255,255,0.85);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none;}
+#syncChoiceModal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;}
+#syncChoiceModal .sc-box{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:390px;box-shadow:0 8px 32px rgba(0,0,0,.28);}
+#syncChoiceModal h3{margin:0 0 12px;font-size:16px;}
+#syncChoiceModal p{font-size:13px;color:#333;margin:0 0 16px;line-height:1.65;}
+#syncChoiceModal .sc-btn{display:block;width:100%;padding:11px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;margin-bottom:8px;border:1px solid #c5d8f0;background:#eaf3ff;color:#1a3a6e;}
+#syncChoiceModal .sc-btn:last-child{background:#f5f5f5;color:#666;font-weight:400;font-size:13px;border-color:#ddd;margin-bottom:0;}
+body.dark-mode #syncChoiceModal .sc-box{background:#1e1e2e;color:#ddd;}
+body.dark-mode #syncChoiceModal p{color:#bbb;}
+body.dark-mode #syncChoiceModal .sc-btn{background:#253050;border-color:#3a5080;color:#b8d0f8;}
+body.dark-mode #syncChoiceModal .sc-btn:last-child{background:#2a2a3a;color:#999;border-color:#444;}
 .loc-toggle{border:1px solid #ccc;border-radius:6px;padding:2px 7px;font-size:15px;cursor:pointer;background:#f0f4ff;min-width:34px;min-height:28px;flex-shrink:0;line-height:1;}
 .loc-toggle[data-loc="worn"]{background:#fff3e8;}
 .loc-toggle:active{opacity:0.7;}
@@ -534,6 +553,10 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 body.dark .sp-modal-box{background:var(--card);color:var(--text);}
 @media(max-width:768px){.gear-toolbar button{font-size:13px;padding:6px 8px;}}
 </style>
+  <!-- Firebase SDK (Ver11.0) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <header class="app-header">
@@ -548,6 +571,11 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
     <button id="clearAllDataBtn" class="icon-btn" style="color:#c0392b;border-color:#e8b4b8;">🗑 全削除</button>
     <button id="manageCategoriesBtn" class="icon-btn">カテゴリ管理</button>
     <button id="themeToggleBtn" class="icon-btn">🌙</button><button id="addGearBtn" class="primary-btn">+ 新規登録</button>
+    <span id="syncStatusBadge" class="sync-badge"></span>
+    <span id="userDisplayName" class="user-display-name"></span>
+    <button id="manualSyncBtn" class="icon-btn" title="今すぐ同期" style="display:none;">🔄</button>
+    <button id="loginBtn" class="icon-btn" title="Googleでログイン">👤 ログイン</button>
+    <button id="logoutBtn" class="icon-btn" style="display:none;">ログアウト</button>
   </div>
   <input type="file" id="importJsonFile" accept=".json,application/json" style="display:none;">
   <input type="file" id="importCsvFile" accept=".csv,text/csv" style="display:none;">
@@ -880,7 +908,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
 (function registerInlineSW(){
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-    const CACHE_NAME = 'mount-gear-cache-v1000';
+    const CACHE_NAME = 'mount-gear-cache-v1100';
     const ASSETS = ['./'];
     self.addEventListener('install', (event) => {
       event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
@@ -1161,6 +1189,7 @@ async function saveItems(){
   const store = tx.objectStore(STORE_ITEMS);
   await promisifyRequest(store.clear());
   for(const item of state.items){ store.put(item); }
+  queueSync();
 }
 
 async function loadItems(){
@@ -1192,6 +1221,7 @@ async function saveCategories(){
   }catch(e){
     console.error('[saveCategories] IndexedDB 書き込み失敗:', e);
   }
+  queueSync();
 }
 
 async function loadCategories(){
@@ -1269,6 +1299,7 @@ async function saveEquipmentSets(){
   }catch(e){
     console.error('[saveEquipmentSets] IndexedDB 書き込み失敗:', e);
   }
+  queueSync();
 }
 
 async function loadSupplies(){
@@ -1324,6 +1355,7 @@ async function saveSupplies(){
   }catch(e){
     console.error('[saveSupplies] IndexedDB 書き込み失敗:', e);
   }
+  queueSync();
 }
 
 function promisifyRequest(req){
@@ -1525,6 +1557,7 @@ async function init() {
   renderSupplies();
   renderEquipmentSets();
   switchTab('gear');
+  initFirebase();
 }
 
 function switchTab(tab){
@@ -3647,5 +3680,357 @@ document.addEventListener('DOMContentLoaded',()=>{
   img.src=url;
 })();
 </script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   Ver11.0 — Firebase / Google Authentication / Firestore 同期
+   
+   【セットアップ手順】
+   1. https://console.firebase.google.com でプロジェクト作成
+   2. Authentication → ログイン方法 → Google を有効化
+   3. Authentication → 承認済みドメイン → GitHub Pagesドメインを追加
+      例: yourusername.github.io
+   4. Firestore Database → データベースを作成（本番モード）
+   5. Firestore → ルール → 以下を貼り付けてデプロイ:
+      ────────────────────────────────────────
+      rules_version = '2';
+      service cloud.firestore {
+        match /databases/{database}/documents {
+          match /users/{userId}/{document=**} {
+            allow read, write: if request.auth != null
+                               && request.auth.uid == userId;
+          }
+        }
+      }
+      ────────────────────────────────────────
+   6. プロジェクトの設定 → 全般 → ウェブアプリを追加 → 設定をコピー
+   7. 下の FIREBASE_CONFIG に貼り付ける
+═══════════════════════════════════════════════════════════════════ */
+
+// ──────────────────────────────────────────────────────────────────
+// ★ ここにFirebaseの設定を貼り付けてください
+// ──────────────────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB37npM7do4oAsRtwM-bIk88x2r3r5D1zE",
+  authDomain: "tozan-gear.firebaseapp.com",
+  projectId: "tozan-gear",
+  storageBucket: "tozan-gear.firebasestorage.app",
+  messagingSenderId: "784588534133",
+  appId: "1:784588534133:web:8c99eb0661c647f676233c"
+};
+// ──────────────────────────────────────────────────────────────────
+
+var fbApp = null;
+var fbAuth = null;
+var fbDb = null;
+var fbUser = null;
+var fbSyncStatus = 'idle'; // 'idle'|'syncing'|'synced'|'error'|'offline'|'pending'
+var syncDebounceTimer = null;
+var fbSuppressSync = false; // suppress queueSync during pull-from-cloud
+
+function fbConfigured() {
+  return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+}
+
+function initFirebase() {
+  if (!fbConfigured()) {
+    console.info('[Firebase] FIREBASE_CONFIG 未設定のため、クラウド同期は無効です。');
+    return;
+  }
+  try {
+    fbApp  = firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+    fbDb   = firebase.firestore();
+
+    // auth state listener
+    fbAuth.onAuthStateChanged(function(user) {
+      fbUser = user;
+      updateAuthUI(user);
+      if (user) {
+        handleLoginSync(user);
+      }
+    });
+
+    // back-online → trigger sync
+    window.addEventListener('online', function() {
+      if (fbUser) {
+        updateSyncBadge('pending');
+        queueSync();
+      }
+    });
+    window.addEventListener('offline', function() {
+      updateSyncBadge('offline');
+    });
+
+    // button listeners
+    var loginBtn      = document.getElementById('loginBtn');
+    var logoutBtn     = document.getElementById('logoutBtn');
+    var manualSyncBtn = document.getElementById('manualSyncBtn');
+    if (loginBtn)      loginBtn.addEventListener('click', loginWithGoogle);
+    if (logoutBtn)     logoutBtn.addEventListener('click', logoutFirebase);
+    if (manualSyncBtn) manualSyncBtn.addEventListener('click', function() { syncToFirebase(); });
+
+  } catch(e) {
+    console.error('[Firebase] 初期化失敗:', e);
+  }
+}
+
+function updateAuthUI(user) {
+  var loginBtn      = document.getElementById('loginBtn');
+  var logoutBtn     = document.getElementById('logoutBtn');
+  var userNameEl    = document.getElementById('userDisplayName');
+  var manualSyncBtn = document.getElementById('manualSyncBtn');
+  if (user) {
+    if (loginBtn)      { loginBtn.style.display = 'none'; }
+    if (logoutBtn)     { logoutBtn.style.display = ''; }
+    if (userNameEl)    { userNameEl.textContent = user.displayName || user.email || ''; userNameEl.style.display = ''; }
+    if (manualSyncBtn) { manualSyncBtn.style.display = ''; }
+    updateSyncBadge('synced');
+  } else {
+    if (loginBtn)      { loginBtn.style.display = ''; }
+    if (logoutBtn)     { logoutBtn.style.display = 'none'; }
+    if (userNameEl)    { userNameEl.textContent = ''; userNameEl.style.display = 'none'; }
+    if (manualSyncBtn) { manualSyncBtn.style.display = 'none'; }
+    updateSyncBadge('idle');
+  }
+}
+
+function updateSyncBadge(status) {
+  fbSyncStatus = status;
+  var badge = document.getElementById('syncStatusBadge');
+  if (!badge) return;
+  var MAP = {
+    idle:    { text: '',              cls: '' },
+    syncing: { text: '☁️ 同期中…', cls: 'syncing' },
+    synced:  { text: '☁️ 同期済',     cls: 'synced'  },
+    error:   { text: '⚠️ 同期エラー', cls: 'error'  },
+    offline: { text: '📵 オフライン', cls: 'offline' },
+    pending: { text: '☁️ 同期待機中', cls: 'pending' }
+  };
+  var s = MAP[status] || MAP.idle;
+  badge.textContent = s.text;
+  badge.className = 'sync-badge' + (s.cls ? ' visible ' + s.cls : '');
+}
+
+async function loginWithGoogle() {
+  if (!fbConfigured()) {
+    alert('Firebase が未設定です。\nindex.html 内の FIREBASE_CONFIG を設定してください。');
+    return;
+  }
+  if (!fbAuth) return;
+  try {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    await fbAuth.signInWithPopup(provider);
+  } catch(e) {
+    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      console.error('[Auth] ログイン失敗:', e);
+      alert('ログインに失敗しました。\n' + (e.message || e.code));
+    }
+  }
+}
+
+async function logoutFirebase() {
+  if (!fbAuth) return;
+  if (!confirm('ログアウトしますか？\nローカルデータ（IndexedDB）は保持されます。')) return;
+  try {
+    await fbAuth.signOut();
+  } catch(e) {
+    console.error('[Auth] ログアウト失敗:', e);
+  }
+}
+
+function getUserDataRef() {
+  if (!fbDb || !fbUser) return null;
+  return fbDb.collection('users').doc(fbUser.uid).collection('data');
+}
+
+async function syncToFirebase() {
+  if (!fbUser || !fbDb) return;
+  if (!navigator.onLine) { updateSyncBadge('offline'); return; }
+  var ref = getUserDataRef();
+  if (!ref) return;
+  updateSyncBadge('syncing');
+  try {
+    // Collect packing state from localStorage
+    var packingData = {};
+    Object.keys(localStorage).forEach(function(k) {
+      if (k.indexOf('mountGear.packing.') === 0) packingData[k] = localStorage.getItem(k);
+    });
+
+    await ref.doc('main').set({
+      items:         (state.items || []).map(normalizeItem),
+      categories:    state.categories || [],
+      supplies:      (state.supplies || []).map(normalizeSupply),
+      equipmentSets: (state.equipmentSets || []).map(normalizeEquipmentSet),
+      updatedAt:     firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    if (Object.keys(packingData).length > 0) {
+      await ref.doc('packing').set({
+        data:      packingData,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    updateSyncBadge('synced');
+    console.info('[Sync] → Firebase 完了');
+  } catch(e) {
+    console.error('[Sync] Firebase 保存失敗:', e);
+    updateSyncBadge('error');
+  }
+}
+
+async function syncFromFirebase() {
+  if (!fbUser || !fbDb) return false;
+  if (!navigator.onLine) { updateSyncBadge('offline'); return false; }
+  var ref = getUserDataRef();
+  if (!ref) return false;
+  updateSyncBadge('syncing');
+  try {
+    var doc = await ref.doc('main').get();
+    if (!doc.exists) { updateSyncBadge('synced'); return false; }
+    var data = doc.data();
+
+    var merged = normalizeState({
+      items:         Array.isArray(data.items)         ? data.items         : [],
+      categories:    Array.isArray(data.categories)    ? data.categories    : DEFAULT_CATEGORY_LIST.slice(),
+      equipmentSets: Array.isArray(data.equipmentSets) ? data.equipmentSets : [],
+      supplies:      Array.isArray(data.supplies)      ? data.supplies      : []
+    });
+    state.items         = merged.items;
+    state.categories    = merged.categories;
+    state.equipmentSets = merged.equipmentSets;
+    state.supplies      = merged.supplies;
+
+    fbSuppressSync = true;
+    await saveItems();
+    await saveCategories();
+    await saveEquipmentSets();
+    await saveSupplies();
+    fbSuppressSync = false;
+
+    // Restore packing state
+    var packDoc = await ref.doc('packing').get();
+    if (packDoc.exists && packDoc.data().data) {
+      Object.entries(packDoc.data().data).forEach(function(entry) {
+        localStorage.setItem(entry[0], entry[1]);
+      });
+    }
+
+    syncCategorySelects();
+    render();
+    renderSupplies();
+    renderEquipmentSets();
+    updateSyncBadge('synced');
+    console.info('[Sync] ← Firebase 取得完了');
+    return true;
+  } catch(e) {
+    console.error('[Sync] Firebase 読込失敗:', e);
+    updateSyncBadge('error');
+    return false;
+  }
+}
+
+async function handleLoginSync(user) {
+  if (!navigator.onLine) {
+    updateSyncBadge('offline');
+    return;
+  }
+  updateSyncBadge('syncing');
+  try {
+    var ref = getUserDataRef();
+    var doc = await ref.doc('main').get();
+    var hasCloud = doc.exists && Array.isArray(doc.data().items) && doc.data().items.length > 0;
+    var hasLocal = (state.items.length > 0) || (state.supplies.length > 0) || (state.equipmentSets.length > 0);
+
+    // ① 両方空
+    if (!hasCloud && !hasLocal) {
+      updateSyncBadge('synced');
+      return;
+    }
+    // ② クラウドなし・ローカルあり → アップロード確認
+    if (!hasCloud && hasLocal) {
+      if (confirm('クラウドにデータがありません。\nローカルのデータ（ギア ' + state.items.length + '件）をアップロードしますか？')) {
+        await syncToFirebase();
+      } else {
+        updateSyncBadge('synced');
+      }
+      return;
+    }
+    // ③ クラウドあり・ローカルなし → ダウンロード確認
+    if (hasCloud && !hasLocal) {
+      var ci = (doc.data().items || []).length;
+      if (confirm('クラウドにデータがあります（ギア ' + ci + '件）。\nダウンロードして使用しますか？')) {
+        await syncFromFirebase();
+      } else {
+        updateSyncBadge('synced');
+      }
+      return;
+    }
+    // ④ 両方あり → 選択ダイアログ
+    var cloudUpdated = '';
+    try {
+      var ts = doc.data().updatedAt;
+      if (ts && ts.toDate) cloudUpdated = ts.toDate().toLocaleString('ja-JP');
+    } catch(_) {}
+    var choice = await showSyncChoiceDialog({
+      cloudCount:   (doc.data().items || []).length,
+      cloudUpdated: cloudUpdated || '不明',
+      localCount:   state.items.length
+    });
+    if (choice === 'download') {
+      await syncFromFirebase();
+    } else if (choice === 'upload') {
+      await syncToFirebase();
+    } else {
+      updateSyncBadge('synced');
+    }
+  } catch(e) {
+    console.error('[Sync] ログイン時同期エラー:', e);
+    updateSyncBadge('error');
+  }
+}
+
+function showSyncChoiceDialog(opts) {
+  return new Promise(function(resolve) {
+    // Remove existing modal if any
+    var existing = document.getElementById('syncChoiceModal');
+    if (existing) existing.parentNode.removeChild(existing);
+
+    var overlay = document.createElement('div');
+    overlay.id = 'syncChoiceModal';
+    overlay.innerHTML =
+      '<div class="sc-box">' +
+      '<h3>☁️ データ同期</h3>' +
+      '<p>' +
+        '<strong>クラウド:</strong> ギア ' + opts.cloudCount + '件（更新: ' + opts.cloudUpdated + '）<br>' +
+        '<strong>ローカル:</strong> ギア ' + opts.localCount + '件<br><br>' +
+        'どちらのデータを使用しますか？' +
+      '</p>' +
+      '<button class="sc-btn" id="scDown">⬇️ クラウドを使用（ローカルを上書き）</button>' +
+      '<button class="sc-btn" id="scUp">⬆️ ローカルを使用（クラウドを上書き）</button>' +
+      '<button class="sc-btn" id="scSkip">後で決める（ローカルのまま）</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    function finish(val) {
+      document.body.removeChild(overlay);
+      resolve(val);
+    }
+    document.getElementById('scDown').onclick  = function() { finish('download'); };
+    document.getElementById('scUp').onclick    = function() { finish('upload');   };
+    document.getElementById('scSkip').onclick  = function() { finish('skip');     };
+  });
+}
+
+function queueSync() {
+  if (!fbUser || !fbDb) return;
+  if (fbSuppressSync) return;
+  if (!navigator.onLine) { updateSyncBadge('offline'); return; }
+  updateSyncBadge('pending');
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(function() { syncToFirebase(); }, 3000);
+}
+</script>
+
 </body>
 </html>
