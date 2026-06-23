@@ -528,6 +528,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
     <button id="exportCsvBtn" class="icon-btn">CSV出力</button>
     <button id="importJsonBtn" class="icon-btn">JSON読込</button>
     <button id="exportJsonBtn" class="icon-btn">JSON出力</button>
+    <button id="clearAllDataBtn" class="icon-btn" style="color:#c0392b;border-color:#e8b4b8;">🗑 全削除</button>
     <button id="manageCategoriesBtn" class="icon-btn">カテゴリ管理</button>
     <button id="themeToggleBtn" class="icon-btn">🌙</button><button id="addGearBtn" class="primary-btn">+ 新規登録</button>
   </div>
@@ -1350,6 +1351,7 @@ async function init() {
     e.target.value='';
   });
   els.exportJsonBtn.addEventListener('click', exportJsonBackup);
+  document.getElementById('clearAllDataBtn').addEventListener('click', clearAllData);
 
   els.manageCatsBtn.addEventListener('click', openCatModal);
   els.closeCatModal.addEventListener('click', closeCatModal);
@@ -2590,6 +2592,73 @@ function openPackingMode(setId){
   renderPacking();
   overlay.appendChild(box);
   document.body.appendChild(overlay);
+}
+
+async function clearAllData(){
+  // 確認ダイアログ
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  const box=document.createElement('div');
+  box.style.cssText='background:#fff;width:100%;max-width:380px;border-radius:14px;padding:22px 20px;box-shadow:0 8px 32px rgba(0,0,0,.3);';
+  box.innerHTML=
+    '<h3 style="margin:0 0 10px;color:#c0392b;font-size:16px;">🗑 全データ削除</h3>'+
+    '<p style="font-size:13px;color:#333;margin:0 0 14px;line-height:1.6;">この操作は<strong>元に戻せません</strong>。<br>ギア・装備セット・消耗品・カテゴリ・パッキング状態がすべて削除されます。</p>'+
+    '<p style="font-size:13px;margin:0 0 6px;">確認のため <strong>DELETE</strong> と入力してください：</p>'+
+    '<input id="deleteConfirmInput" type="text" placeholder="DELETE" style="width:100%;box-sizing:border-box;padding:8px 10px;border:2px solid #e8b4b8;border-radius:8px;font-size:14px;margin-bottom:14px;">'+
+    '<div style="display:flex;gap:8px;">'+
+    '<button id="cancelDeleteBtn" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;background:#f5f5f5;cursor:pointer;font-size:14px;">キャンセル</button>'+
+    '<button id="confirmDeleteBtn" style="flex:1;padding:10px;border:none;border-radius:8px;background:#c0392b;color:#fff;cursor:pointer;font-size:14px;font-weight:700;" disabled>削除する</button>'+
+    '</div>';
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  const input=box.querySelector('#deleteConfirmInput');
+  const confirmBtn=box.querySelector('#confirmDeleteBtn');
+  const cancelBtn=box.querySelector('#cancelDeleteBtn');
+
+  input.addEventListener('input',()=>{
+    confirmBtn.disabled=input.value!=='DELETE';
+    confirmBtn.style.opacity=input.value==='DELETE'?'1':'0.5';
+  });
+  cancelBtn.onclick=()=>document.body.removeChild(overlay);
+  confirmBtn.onclick=async()=>{
+    if(input.value!=='DELETE')return;
+    confirmBtn.textContent='削除中…';
+    confirmBtn.disabled=true;
+    try{
+      // IndexedDB: 全ストアをclear
+      const db=await openDB();
+      await new Promise((res,rej)=>{
+        const tx=db.transaction([STORE_ITEMS,STORE_META,STORE_SETS,STORE_SUPPLIES],'readwrite');
+        tx.objectStore(STORE_ITEMS).clear();
+        tx.objectStore(STORE_META).clear();
+        tx.objectStore(STORE_SETS).clear();
+        tx.objectStore(STORE_SUPPLIES).clear();
+        tx.oncomplete=res;
+        tx.onerror=()=>rej(tx.error);
+      });
+      // localStorage: mountGear.* をすべて削除（ダークモード除く）
+      Object.keys(localStorage).filter(k=>k.startsWith('mountGear.')&&k!=='mountGear.darkMode')
+        .forEach(k=>localStorage.removeItem(k));
+      // state初期化
+      state.items=[];
+      state.categories=[];
+      state.equipmentSets=[];
+      state.supplies=[];
+      document.body.removeChild(overlay);
+      // 再描画
+      renderGearList();
+      renderEquipmentSets();
+      renderSupplies();
+      renderCategories?.();
+      alert('全データを削除しました。');
+    }catch(e){
+      console.error('[clearAllData]',e);
+      alert('削除中にエラーが発生しました: '+e.message);
+      document.body.removeChild(overlay);
+    }
+  };
+  input.focus();
 }
 
 function resetPackingState(setId,setName){
