@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>登山ギア管理アプリ Ver10.0</title>
+<title>登山ギア管理アプリ Ver10.5</title>
 <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
@@ -514,6 +514,22 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .thumb-td{display:none!important;}
   th.is-static:first-child{display:none!important;}
 }
+
+/* ─── Ver10.5 新規スタイル ─── */
+.gear-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center;}
+.card{position:relative;}
+.card-cb-wrap{position:absolute;top:6px;left:6px;z-index:2;background:rgba(255,255,255,.85);border-radius:4px;padding:2px;}
+.card.is-selected{outline:2px solid var(--green);outline-offset:1px;}
+.url-link{color:var(--green);font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;}
+.url-link:hover{text-decoration:underline;}
+/* 消耗品モーダル */
+.sp-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:10000;padding:14px;}
+.sp-modal.show{display:flex;}
+.sp-modal-box{background:#fff;border-radius:14px;padding:16px;width:100%;max-width:400px;box-shadow:0 8px 28px rgba(0,0,0,.2);display:grid;gap:10px;}
+.sp-modal-box h3{margin:0;font-size:16px;}
+.sp-modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+body.dark .sp-modal-box{background:var(--card);color:var(--text);}
+@media(max-width:768px){.gear-toolbar button{font-size:13px;padding:6px 8px;}}
 </style>
 </head>
 <body>
@@ -524,8 +540,6 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
     <h1>登山ギア管理アプリ</h1>
   </div>
   <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-    <button id="importCsvBtn" class="icon-btn">CSV一括登録</button>
-    <button id="exportCsvBtn" class="icon-btn">CSV出力</button>
     <button id="importJsonBtn" class="icon-btn">JSON読込</button>
     <button id="exportJsonBtn" class="icon-btn">JSON出力</button>
     <button id="clearAllDataBtn" class="icon-btn" style="color:#c0392b;border-color:#e8b4b8;">🗑 全削除</button>
@@ -534,6 +548,9 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   </div>
   <input type="file" id="importJsonFile" accept=".json,application/json" style="display:none;">
   <input type="file" id="importCsvFile" accept=".csv,text/csv" style="display:none;">
+  <input type="file" id="gearCsvImportFile" accept=".csv,text/csv" style="display:none;">
+  <input type="file" id="supplyCsvImportFile" accept=".csv,text/csv" style="display:none;">
+  <input type="file" id="setCsvImportFile" accept=".csv,text/csv" style="display:none;">
 </header>
 
 <main class="container">
@@ -589,12 +606,19 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
       </div>
     </section>
 
+    <div class="gear-toolbar">
+      <button id="gearExportCsvBtn" class="icon-btn">📥 CSV出力</button>
+      <button id="gearImportCsvBtn" class="icon-btn">📤 CSV取込</button>
+      <button id="bulkDeleteBtn" class="danger-btn" style="display:none;">🗑 選択削除</button>
+      <span id="selectedCountLabel" style="font-size:13px;color:var(--muted);display:none;"></span>
+    </div>
     <section id="gearList" class="gear-list" aria-label="ギア一覧（カード表示）"></section>
 
     <section id="gearTableWrap" class="table-wrap" aria-label="ギア一覧（表）" style="display:none;">
       <table class="table" id="gearTable">
         <thead>
           <tr>
+            <th class="is-static" style="width:36px;"></th>
             <th class="is-static">写真</th>
             <th data-key="name">名称 <span class="sort-indicator"></span></th>
             <th data-key="maker">メーカー <span class="sort-indicator"></span></th>
@@ -603,6 +627,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
             <th data-key="msrp">定価 <span class="sort-indicator"></span></th>
             <th data-key="purchasePrice">購入価格 <span class="sort-indicator"></span></th>
             <th data-key="purchaseDate">購入日 <span class="sort-indicator"></span></th>
+            <th class="is-static">URL</th>
             <th class="is-static">操作</th>
           </tr>
         </thead>
@@ -683,6 +708,7 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
               <th>カテゴリ</th>
               <th>名称</th>
               <th>重量(g)</th>
+              <th>価格(円)</th>
               <th class="is-static">操作</th>
             </tr>
           </thead>
@@ -690,16 +716,9 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
         </table>
       </div>
 
-      <div class="supply-edit-box">
-        <h3 style="margin-top:0;">消耗品編集</h3>
-        <div class="supply-edit-grid">
-          <select id="editSupplyCategory"></select>
-          <input id="editSupplyName" type="text" placeholder="名称">
-          <input id="editSupplyWeight" type="number" min="0" step="1" placeholder="重量(g)">
-          <button id="saveSupplyEditBtn" class="icon-btn">保存</button>
-          <button id="clearSupplyEditBtn" class="icon-btn">クリア</button>
-        </div>
-        <div id="supplyEditStatus" class="supply-edit-note">一覧の行をクリックするとここに反映されます。</div>
+      <div class="gear-toolbar">
+        <button id="supplyExportCsvBtn" class="icon-btn">📥 CSV出力</button>
+        <button id="supplyImportCsvBtn" class="icon-btn">📤 CSV取込</button>
       </div>
     </div>
   </section>
@@ -757,6 +776,10 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
         <label for="gearNote">メモ</label>
         <textarea id="gearNote" rows="3"></textarea>
       </div>
+      <div class="form-row">
+        <label for="gearUrl">URL（商品ページ・購入先など）</label>
+        <input type="text" id="gearUrl" placeholder="https://..." />
+      </div>
       <div class="form-actions">
         <button type="button" id="deleteGearBtn" class="danger-btn" hidden>削除</button>
         <div class="spacer"></div>
@@ -780,6 +803,37 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
         <span class="small">既存ギアのカテゴリは変更しません（名称変更・一括置換は下のリストで可能）</span>
       </div>
       <ul id="catList" class="cat-list"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- 消耗品編集モーダル -->
+<div id="supplyEditModal" class="sp-modal" aria-hidden="true" role="dialog">
+  <div class="sp-modal-box">
+    <h3>消耗品編集</h3>
+    <div class="form-row">
+      <label>カテゴリ</label>
+      <select id="spEditCategory">
+        <option>燃料</option><option>食料</option><option>行動食</option>
+        <option>飲料</option><option>医療</option><option>電子機器</option><option>その他</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>名称</label>
+      <input type="text" id="spEditName" placeholder="名称" />
+    </div>
+    <div class="form-row two-col">
+      <div><label>重量(g)</label><input type="number" id="spEditWeight" min="0" step="1" placeholder="0" /></div>
+      <div><label>価格(円)</label><input type="number" id="spEditPrice" min="0" step="1" placeholder="0" /></div>
+    </div>
+    <div class="form-row">
+      <label>メモ</label>
+      <textarea id="spEditMemo" rows="2" placeholder="メモ"></textarea>
+    </div>
+    <input type="hidden" id="spEditId" />
+    <div class="sp-modal-actions">
+      <button id="spEditCancelBtn" class="icon-btn">キャンセル</button>
+      <button id="spEditSaveBtn" class="primary-btn">保存</button>
     </div>
   </div>
 </div>
@@ -891,7 +945,8 @@ let state = {
     search: '',
     sort: 'category'
   },
-  selectedSupplyId: null
+  selectedSupplyId: null,
+  selectedGearIds: new Set()
 };
 
 const els = {
@@ -977,7 +1032,30 @@ const els = {
   supplyTotalWeightValue: document.getElementById('supplyTotalWeightValue'),
   supplyAvgWeightValue: document.getElementById('supplyAvgWeightValue'),
   supplyCategorySummary: document.getElementById('supplyCategorySummary'),
-  supplyEditStatus: document.getElementById('supplyEditStatus')
+  supplyEditStatus: null,
+
+  gearExportCsvBtn: document.getElementById('gearExportCsvBtn'),
+  gearImportCsvBtn: document.getElementById('gearImportCsvBtn'),
+  gearCsvImportFile: document.getElementById('gearCsvImportFile'),
+  bulkDeleteBtn: document.getElementById('bulkDeleteBtn'),
+  selectedCountLabel: document.getElementById('selectedCountLabel'),
+
+  supplyExportCsvBtn: document.getElementById('supplyExportCsvBtn'),
+  supplyImportCsvBtn: document.getElementById('supplyImportCsvBtn'),
+  supplyCsvImportFile: document.getElementById('supplyCsvImportFile'),
+  setCsvImportFile: document.getElementById('setCsvImportFile'),
+
+  supplyEditModal: document.getElementById('supplyEditModal'),
+  spEditCategory: document.getElementById('spEditCategory'),
+  spEditName: document.getElementById('spEditName'),
+  spEditWeight: document.getElementById('spEditWeight'),
+  spEditPrice: document.getElementById('spEditPrice'),
+  spEditMemo: document.getElementById('spEditMemo'),
+  spEditId: document.getElementById('spEditId'),
+  spEditSaveBtn: document.getElementById('spEditSaveBtn'),
+  spEditCancelBtn: document.getElementById('spEditCancelBtn'),
+
+  gearUrl: document.getElementById('gearUrl')
 };
 
 function normalizeItem(item){
@@ -991,7 +1069,8 @@ function normalizeItem(item){
     msrp: numOrNull(item?.msrp),
     paid: numOrNull(item?.paid),
     date: item?.date || '',
-    note: item?.note || ''
+    note: item?.note || '',
+    url: item?.url || ''
   };
 }
 
@@ -1001,6 +1080,8 @@ function normalizeSupply(s){
     name: s?.name || '',
     category: s?.category || 'その他',
     weight: Number.isFinite(Number(s?.weight)) ? Number(s.weight) : 0,
+    price: numOrNull(s?.price),
+    memo: s?.memo || '',
     checked: !!s?.checked
   };
 }
@@ -1338,19 +1419,46 @@ async function init() {
   });
 
   els.importJsonBtn.addEventListener('click', () => els.importJsonFile.click());
-  els.importCsvBtn.addEventListener('click', () => els.importCsvFile.click());
-  els.importCsvFile.addEventListener('change', (e) => {
-    const f = e.target.files?.[0];
-    if(f) importCsv(f);
-    e.target.value='';
-  });
-  els.exportCsvBtn.addEventListener('click', exportCsv);
   els.importJsonFile.addEventListener('change', (e) => {
     const f = e.target.files?.[0];
     if(f) importJsonBackup(f);
     e.target.value='';
   });
   els.exportJsonBtn.addEventListener('click', exportJsonBackup);
+
+  // ギア管理 CSV
+  els.gearExportCsvBtn.addEventListener('click', exportGearCsv);
+  els.gearImportCsvBtn.addEventListener('click', () => els.gearCsvImportFile.click());
+  els.gearCsvImportFile.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if(f) importGearCsv(f);
+    e.target.value='';
+  });
+  // 消耗品管理 CSV
+  els.supplyExportCsvBtn.addEventListener('click', exportSupplyCsv);
+  els.supplyImportCsvBtn.addEventListener('click', () => els.supplyCsvImportFile.click());
+  els.supplyCsvImportFile.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if(f) importSupplyCsv(f);
+    e.target.value='';
+  });
+  // 装備セット CSV (動的バインド: renderEquipmentSets内)
+  els.setCsvImportFile.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    const id = Number(els.setCsvImportFile.dataset.setId);
+    if(f && id) importSetCsv(id, f);
+    e.target.value='';
+  });
+
+  // 選択削除
+  els.bulkDeleteBtn.addEventListener('click', confirmBulkDelete);
+
+  // 消耗品モーダル
+  els.spEditSaveBtn.addEventListener('click', saveSupplyEditModal);
+  els.spEditCancelBtn.addEventListener('click', closeSupplyEditModal);
+  document.addEventListener('click', (e) => {
+    if(e.target === els.supplyEditModal) closeSupplyEditModal();
+  });
   document.getElementById('clearAllDataBtn').addEventListener('click', clearAllData);
 
   els.manageCatsBtn.addEventListener('click', openCatModal);
@@ -1390,8 +1498,6 @@ async function init() {
   }
 
   window.currentSupplyEditId = null;
-  if(els.saveSupplyEditBtn) els.saveSupplyEditBtn.addEventListener('click', saveSupplyEdit);
-  if(els.clearSupplyEditBtn) els.clearSupplyEditBtn.addEventListener('click', clearSupplyEdit);
 
   renderViewToggle();
   render();
@@ -1726,6 +1832,16 @@ function renderCards(items) {
     badges.appendChild(badge(it.paid != null && it.paid !== '' ? `購入 ¥${formatNumber(it.paid)}` : '購入 -'));
     content.appendChild(badges);
 
+    if(it.url){
+      const uLink = document.createElement('a');
+      uLink.href = it.url;
+      uLink.target = '_blank';
+      uLink.rel = 'noopener noreferrer';
+      uLink.className = 'url-link';
+      uLink.textContent = '🔗 商品ページ';
+      content.appendChild(uLink);
+    }
+
     const actions = document.createElement('div');
     actions.className = 'actions';
     const editBtn = document.createElement('button');
@@ -1740,6 +1856,23 @@ function renderCards(items) {
     actions.appendChild(delBtn);
     content.appendChild(actions);
 
+    // checkbox (multi-select)
+    const cbWrap = document.createElement('div');
+    cbWrap.className = 'card-cb-wrap';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'gear-select-cb';
+    cb.checked = state.selectedGearIds.has(it.id);
+    cb.addEventListener('change', () => {
+      if(cb.checked) state.selectedGearIds.add(it.id);
+      else state.selectedGearIds.delete(it.id);
+      card.classList.toggle('is-selected', cb.checked);
+      updateBulkDeleteUI();
+    });
+    cbWrap.appendChild(cb);
+    card.appendChild(cbWrap);
+    if(state.selectedGearIds.has(it.id)) card.classList.add('is-selected');
+
     card.appendChild(content);
     root.appendChild(card);
   }
@@ -1751,7 +1884,7 @@ function renderTable(items) {
   if (items.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 9;
+    td.colSpan = 10;
     td.innerHTML = `<span class="meta">該当するギアがありません。右上「+ 新規登録」から追加してください。</span>`;
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -1759,6 +1892,20 @@ function renderTable(items) {
   }
   for (const it of items) {
     const tr = document.createElement('tr');
+
+    // checkbox
+    const tdCb = document.createElement('td');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'gear-select-cb';
+    cb.checked = state.selectedGearIds.has(it.id);
+    cb.addEventListener('change', () => {
+      if(cb.checked) state.selectedGearIds.add(it.id);
+      else state.selectedGearIds.delete(it.id);
+      updateBulkDeleteUI();
+    });
+    tdCb.appendChild(cb);
+    tr.appendChild(tdCb);
 
     const tdPhoto = document.createElement('td');
     tdPhoto.className = 'thumb-td';
@@ -1775,6 +1922,19 @@ function renderTable(items) {
     tr.appendChild(tdText(it.msrp != null ? '¥' + formatNumber(it.msrp) : ''));
     tr.appendChild(tdText(it.paid != null ? '¥' + formatNumber(it.paid) : ''));
     tr.appendChild(tdText(it.date || ''));
+
+    // URL cell
+    const tdUrl = document.createElement('td');
+    if(it.url){
+      const uLink = document.createElement('a');
+      uLink.href = it.url;
+      uLink.target = '_blank';
+      uLink.rel = 'noopener noreferrer';
+      uLink.className = 'url-link';
+      uLink.textContent = '🔗';
+      tdUrl.appendChild(uLink);
+    }
+    tr.appendChild(tdUrl);
 
     const tdAct = document.createElement('td');
     tdAct.className = 'actions-td';
@@ -1863,10 +2023,12 @@ function openModal(id) {
     els.fields.paid.value = it.paid ?? '';
     els.fields.date.value = it.date || '';
     els.fields.note.value = it.note || '';
+    if(els.gearUrl) els.gearUrl.value = it.url || '';
     els.deleteBtn.hidden = false;
   } else {
     els.modalTitle.textContent = 'ギア登録';
     els.fields.category.value = state.filters.category || (state.categories[0] || '');
+    if(els.gearUrl) els.gearUrl.value = '';
     els.deleteBtn.hidden = true;
   }
   els.modal.classList.add('show');
@@ -1901,6 +2063,7 @@ function onSubmit(e) {
     paid: numOrNull(els.fields.paid.value),
     date: els.fields.date.value,
     note: els.fields.note.value.trim(),
+    url: (els.gearUrl ? els.gearUrl.value.trim() : ''),
   });
 
   if (!item.name) { alert('名称を入力してください。'); return; }
@@ -2194,12 +2357,33 @@ function renderEquipmentSets(){
     resetBtn.textContent = 'リセット';
     resetBtn.onclick = () => resetPackingState(s.id, s.name);
 
+    const csvExBtn = document.createElement('button');
+    csvExBtn.className = 'icon-inline set-csv-btn';
+    csvExBtn.textContent = '📥 CSV出力';
+    csvExBtn.onclick = () => exportSetCsv(s.id);
+
+    const csvImBtn = document.createElement('button');
+    csvImBtn.className = 'icon-inline set-csv-btn';
+    csvImBtn.textContent = '📤 CSV取込';
+    csvImBtn.onclick = () => {
+      els.setCsvImportFile.dataset.setId = s.id;
+      els.setCsvImportFile.click();
+    };
+
+    const pdfBtn = document.createElement('button');
+    pdfBtn.className = 'icon-inline set-pdf-btn';
+    pdfBtn.textContent = '📄 PDF出力';
+    pdfBtn.onclick = () => exportSetPdf(s.id);
+
     actions.appendChild(editBtn);
     actions.appendChild(copyBtn);
     actions.appendChild(delBtn);
     actions.appendChild(packBtn);
     actions.appendChild(resetBtn);
-    if(s.memo){ const m=document.createElement('div'); m.style.marginTop='8px'; m.textContent='📝 メモあり'; card.appendChild(m);} 
+    actions.appendChild(csvExBtn);
+    actions.appendChild(csvImBtn);
+    actions.appendChild(pdfBtn);
+    if(s.memo){ const m=document.createElement('div'); m.style.marginTop='8px'; m.textContent='📝 メモあり'; card.appendChild(m);}
     card.appendChild(actions);
 
     root.appendChild(card);
@@ -2797,7 +2981,7 @@ function renderSupplies(){
 
   if(supplies.length === 0){
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="4"><span class="empty-note">該当する消耗品がありません。</span></td>';
+    tr.innerHTML = '<td colspan="5"><span class="empty-note">該当する消耗品がありません。</span></td>';
     body.appendChild(tr);
     return;
   }
@@ -2805,9 +2989,6 @@ function renderSupplies(){
   supplies.forEach(s=>{
     const tr=document.createElement('tr');
     tr.className = 'supply-table-row';
-    if(state.selectedSupplyId === s.id) {
-      tr.classList.add('selected-row');
-    }
 
     const td1 = document.createElement('td');
     td1.textContent = s.category || 'その他';
@@ -2815,78 +2996,78 @@ function renderSupplies(){
     td2.textContent = s.name;
     const td3 = document.createElement('td');
     td3.textContent = Number(s.weight) || 0;
+    const td3b = document.createElement('td');
+    td3b.textContent = s.price != null ? '¥' + formatNumber(s.price) : '';
     const td4 = document.createElement('td');
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'icon-inline';
+    editBtn.textContent = '✏️ 編集';
+    editBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openSupplyEditModal(s.id);
+    });
 
     const delBtn = document.createElement('button');
     delBtn.className = 'icon-inline';
     delBtn.textContent = '削除';
+    delBtn.style.marginLeft = '4px';
     delBtn.addEventListener('click', (e)=>{
       e.stopPropagation();
       deleteSupply(s.id);
     });
 
+    td4.appendChild(editBtn);
     td4.appendChild(delBtn);
     tr.appendChild(td1);
     tr.appendChild(td2);
     tr.appendChild(td3);
+    tr.appendChild(td3b);
     tr.appendChild(td4);
 
-    tr.addEventListener('click', ()=>editSupply(s.id));
     body.appendChild(tr);
   });
 }
 
-function editSupply(supplyId){
+function openSupplyEditModal(supplyId){
   const s = state.supplies.find(x => x.id === supplyId);
   if(!s) return;
-  window.currentSupplyEditId = s.id;
-  state.selectedSupplyId = s.id;
-
-  if(els.editSupplyCategory) els.editSupplyCategory.value = s.category || 'その他';
-  if(els.editSupplyName) els.editSupplyName.value = s.name || '';
-  if(els.editSupplyWeight) els.editSupplyWeight.value = s.weight || 0;
-  if(els.supplyEditStatus) {
-    els.supplyEditStatus.textContent = '選択中: ' + s.name + ' / ' + (s.category || 'その他');
-  }
-  renderSupplies();
+  els.spEditId.value = s.id;
+  els.spEditCategory.value = s.category || 'その他';
+  els.spEditName.value = s.name || '';
+  els.spEditWeight.value = s.weight != null ? s.weight : '';
+  els.spEditPrice.value = s.price != null ? s.price : '';
+  els.spEditMemo.value = s.memo || '';
+  els.supplyEditModal.classList.add('show');
+  els.supplyEditModal.setAttribute('aria-hidden','false');
+  els.spEditName.focus();
 }
 
-function saveSupplyEdit(){
-  const id = window.currentSupplyEditId;
-  if(!id) {
-    alert('先に一覧から編集する消耗品を選択してください。');
-    return;
-  }
+function closeSupplyEditModal(){
+  els.supplyEditModal.classList.remove('show');
+  els.supplyEditModal.setAttribute('aria-hidden','true');
+}
+
+function saveSupplyEditModal(){
+  const id = Number(els.spEditId.value);
+  if(!id) return;
   const s = state.supplies.find(x=>x.id===id);
   if(!s) return;
-
-  const name = els.editSupplyName.value.trim();
-  if(!name){
-    alert('名称を入力してください。');
-    return;
-  }
-
-  s.category = els.editSupplyCategory.value;
+  const name = els.spEditName.value.trim();
+  if(!name){ alert('名称を入力してください。'); return; }
+  s.category = els.spEditCategory.value;
   s.name = name;
-  s.weight = Number(els.editSupplyWeight.value) || 0;
+  s.weight = Number(els.spEditWeight.value) || 0;
+  s.price = numOrNull(els.spEditPrice.value);
+  s.memo = els.spEditMemo.value.trim();
+  closeSupplyEditModal();
   saveSupplies();
-
-  if(els.supplyEditStatus) {
-    els.supplyEditStatus.textContent = '保存しました: ' + s.name;
-  }
 }
 
-function clearSupplyEdit(){
-  window.currentSupplyEditId = null;
-  state.selectedSupplyId = null;
-  if(els.editSupplyCategory) els.editSupplyCategory.value = '燃料';
-  if(els.editSupplyName) els.editSupplyName.value = '';
-  if(els.editSupplyWeight) els.editSupplyWeight.value = '';
-  if(els.supplyEditStatus) {
-    els.supplyEditStatus.textContent = '一覧の行をクリックするとここに反映されます。';
-  }
-  renderSupplies();
-}
+// stub for backward compat
+function editSupply(supplyId){ openSupplyEditModal(supplyId); }
+function saveSupplyEdit(){}
+function clearSupplyEdit(){}
 
 function deleteSupply(supplyId){
   if(!confirm('この消耗品を削除しますか？')) return;
@@ -2903,6 +3084,327 @@ function deleteSupply(supplyId){
 
   saveSupplies();
   saveEquipmentSets();
+}
+
+function updateBulkDeleteUI(){
+  const count = state.selectedGearIds.size;
+  if(els.bulkDeleteBtn){
+    els.bulkDeleteBtn.style.display = count > 0 ? '' : 'none';
+  }
+  if(els.selectedCountLabel){
+    els.selectedCountLabel.style.display = count > 0 ? '' : 'none';
+    els.selectedCountLabel.textContent = count + '件選択中';
+  }
+}
+
+function confirmBulkDelete(){
+  const ids = [...state.selectedGearIds];
+  if(!ids.length) return;
+  if(!confirm('選択した ' + ids.length + ' 件を削除しますか？')) return;
+  state.items = state.items.filter(x => !ids.includes(x.id));
+  state.equipmentSets = state.equipmentSets.map(set => ({
+    ...set,
+    gearIds: (set.gearIds||[]).filter(gid => !ids.includes(gid))
+  }));
+  state.selectedGearIds = new Set();
+  updateBulkDeleteUI();
+  saveItems();
+  saveEquipmentSets();
+  render();
+}
+
+/* ── ギア管理 CSV ── */
+function exportGearCsv(){
+  if(!state.items || state.items.length === 0){ alert('出力するギアがありません。'); return; }
+  var headers = ['名前','メーカー','カテゴリ','重量(g)','定価(円)','購入価格(円)','購入日','メモ','URL'];
+  var rows = [headers.join(',')];
+  state.items.forEach(function(it){
+    var cols = [
+      it.name||'', it.maker||'', it.category||'',
+      it.weight!=null?String(it.weight):'',
+      it.msrp!=null?String(it.msrp):'',
+      it.paid!=null?String(it.paid):'',
+      it.date||'', it.note||'', it.url||''
+    ].map(function(v){ return (v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0)?'"'+v.replace(/"/g,'""')+'"':v; });
+    rows.push(cols.join(','));
+  });
+  downloadCsv(rows.join('\n'), 'gear_' + dateStr() + '.csv');
+}
+
+function importGearCsv(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var lines=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+      if(lines.length<2){alert('データがありません。');return;}
+      var headers=parseCsvRow(lines[0]).map(h=>h.trim());
+      var colMap={name:['名前','ギア名','name'],maker:['メーカー','maker','brand'],category:['カテゴリ','category'],weight:['重量(g)','重量','weight'],msrp:['定価(円)','定価','msrp'],paid:['購入価格(円)','購入価格','paid'],date:['購入日','date'],note:['メモ','備考','note'],url:['URL','url']};
+      var ci={};
+      Object.keys(colMap).forEach(f=>{ci[f]=-1;colMap[f].forEach(a=>{if(ci[f]<0){const i=headers.findIndex(h=>h.toLowerCase()===a.toLowerCase());if(i>=0)ci[f]=i;}});});
+      if(ci['name']<0){alert('「名前」列が見つかりません。');return;}
+      var newItems=[];
+      for(var i=1;i<lines.length;i++){
+        var cols=parseCsvRow(lines[i]);
+        var g=function(f){return ci[f]>=0?(cols[ci[f]]||'').trim():''};
+        var name=g('name');if(!name)continue;
+        newItems.push(normalizeItem({id:Date.now()+i,name:name,maker:g('maker'),category:g('category'),weight:g('weight').replace(/,/g,'')||null,msrp:g('msrp').replace(/[,¥￥]/g,'')||null,paid:g('paid').replace(/[,¥￥]/g,'')||null,date:g('date'),note:g('note'),url:g('url')}));
+      }
+      if(!newItems.length){alert('登録できるデータがありませんでした。');return;}
+      if(!confirm(newItems.length+'件のギアを追加しますか？'))return;
+      newItems.forEach(function(it){if(it.category&&!state.categories.includes(it.category))state.categories.push(it.category);});
+      state.items=state.items.concat(newItems);
+      saveItems();saveCategories();render();
+      alert(newItems.length+'件登録しました！');
+    }catch(e){alert('CSV読込失敗: '+e.message);}
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+/* ── 消耗品管理 CSV ── */
+function exportSupplyCsv(){
+  if(!state.supplies||!state.supplies.length){alert('出力する消耗品がありません。');return;}
+  var headers=['カテゴリ','名称','重量(g)','価格(円)','メモ'];
+  var rows=[headers.join(',')];
+  state.supplies.forEach(function(s){
+    var cols=[s.category||'その他',s.name||'',String(Number(s.weight)||0),s.price!=null?String(s.price):'',s.memo||'']
+      .map(function(v){ return (v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0)?'"'+v.replace(/"/g,'""')+'"':v; });
+    rows.push(cols.join(','));
+  });
+  downloadCsv(rows.join('\n'), 'supplies_' + dateStr() + '.csv');
+}
+
+function importSupplyCsv(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var lines=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(function(l){return l.trim();});
+      if(lines.length<2){alert('データがありません。');return;}
+      var headers=parseCsvRow(lines[0]).map(function(h){return h.trim();});
+      function findCol(aliases){return aliases.reduce(function(a,al){if(a>=0)return a;var i=headers.findIndex(function(h){return h.toLowerCase()===al.toLowerCase();});return i;},-1);}
+      var ci={cat:findCol(['カテゴリ','category']),name:findCol(['名称','名前','name']),weight:findCol(['重量(g)','重量','weight']),price:findCol(['価格(円)','価格','price']),memo:findCol(['メモ','memo'])};
+      if(ci.name<0){alert('「名称」列が見つかりません。');return;}
+      var newSupplies=[];
+      for(var i=1;i<lines.length;i++){
+        var cols=parseCsvRow(lines[i]);
+        function g(k){return ci[k]>=0?(cols[ci[k]]||'').trim():'';}
+        var name=g('name');if(!name)continue;
+        newSupplies.push(normalizeSupply({id:Date.now()+i,name:name,category:g('cat')||'その他',weight:Number(g('weight').replace(/,/g,''))||0,price:numOrNull(g('price').replace(/[,¥￥]/g,'')),memo:g('memo')}));
+      }
+      if(!newSupplies.length){alert('登録できるデータがありませんでした。');return;}
+      if(!confirm(newSupplies.length+'件の消耗品を追加しますか？'))return;
+      state.supplies=state.supplies.concat(newSupplies);
+      saveSupplies();
+      alert(newSupplies.length+'件登録しました！');
+    }catch(e){alert('CSV読込失敗: '+e.message);}
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+/* ── 装備セット CSV ── */
+function exportSetCsv(setId){
+  var s=state.equipmentSets.find(function(x){return x.id===setId;});
+  if(!s){alert('セットが見つかりません。');return;}
+  var locs=s.gearLocations||{};
+  var rows=[];
+  function q(v){var sv=String(v==null?'':v);return(sv.indexOf(',')>=0||sv.indexOf('"')>=0||sv.indexOf('\n')>=0)?'"'+sv.replace(/"/g,'""')+'"':sv;}
+  rows.push('type,col1,col2,col3,col4,col5');
+  rows.push('META,セット名,'+q(s.name)+',,,,');
+  rows.push('META,備考,'+q(s.memo)+',,,,');
+  rows.push('META,日数,'+q(s.days)+',,,,');
+  rows.push('GEAR_H,名称,メーカー,カテゴリ,重量(g),区分');
+  (s.gearIds||[]).forEach(function(gid){
+    var g=state.items.find(function(x){return x.id===gid;});
+    if(!g)return;
+    var loc=(locs[gid]==='worn')?'着用':'パック';
+    rows.push('GEAR,'+[q(g.name),q(g.maker),q(g.category),g.weight!=null?g.weight:'',loc].join(','));
+  });
+  rows.push('SUP_H,名称,カテゴリ,重量(g),数量,');
+  (s.supplyIds||[]).forEach(function(sid){
+    var sp=state.supplies.find(function(x){return x.id===sid;});
+    if(!sp)return;
+    var qty=(s.supplyQuantities||{})[String(sid)]||(s.supplyQuantities||{})[sid]||1;
+    rows.push('SUP,'+[q(sp.name),q(sp.category),sp.weight!=null?sp.weight:'',qty,''].join(','));
+  });
+  var MEALS=['朝食','昼食','夕食'];
+  rows.push('MEAL_H,日,食事,名称,,');
+  var mp=s.mealPlan||{};
+  Object.keys(mp).sort(function(a,b){return Number(a)-Number(b);}).forEach(function(day){
+    MEALS.forEach(function(mt){
+      ((mp[day]||{})[mt]||[]).forEach(function(sid){
+        var sp=state.supplies.find(function(x){return x.id===Number(sid);});
+        if(sp)rows.push('MEAL,'+[day,q(mt),q(sp.name),'',''].join(','));
+      });
+    });
+  });
+  rows.push('SNACK_H,名称,数量,,,');
+  var snp=s.snackPlan||{};
+  Object.keys(snp).forEach(function(sid){
+    if(!(snp[sid]>0))return;
+    var sp=state.supplies.find(function(x){return x.id===Number(sid);});
+    if(sp)rows.push('SNACK,'+[q(sp.name),snp[sid],'','',''].join(','));
+  });
+  downloadCsv(rows.join('\n'), 'set_'+s.name.replace(/[\\/:*?"<>|]/g,'_')+'_'+dateStr()+'.csv');
+}
+
+function importSetCsv(setId, file){
+  var s=state.equipmentSets.find(function(x){return x.id===setId;});
+  if(!s){alert('セットが見つかりません。');return;}
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var lines=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(function(l){return l.trim();});
+      if(lines.length<2){alert('データがありません。');return;}
+      var newGearIds=[],newSupplyIds=[],newLocs={},newMealPlan={},newSnackPlan={},newSupplyQty={};
+      var meta={};
+      var warnings=[];
+      lines.slice(1).forEach(function(line){
+        var cols=parseCsvRow(line);
+        var type=(cols[0]||'').trim().toUpperCase();
+        if(type==='META'){meta[(cols[1]||'').trim()]=(cols[2]||'').trim();}
+        else if(type==='GEAR'){
+          var name=(cols[1]||'').trim(),maker=(cols[2]||'').trim(),cat=(cols[3]||'').trim(),wt=Number(cols[4])||null,loc=(cols[5]||'').trim()==='着用'?'worn':'pack';
+          var g=state.items.find(function(x){return x.name===name&&(!maker||x.maker===maker);});
+          if(!g){g=normalizeItem({id:Date.now()+(Math.random()*1000|0),name:name,maker:maker,category:cat,weight:wt});if(cat&&!state.categories.includes(cat))state.categories.push(cat);state.items.push(g);warnings.push('新規ギア追加: '+name);}
+          if(!newGearIds.includes(g.id))newGearIds.push(g.id);
+          newLocs[g.id]=loc;
+        }
+        else if(type==='SUP'){
+          var name=(cols[1]||'').trim(),cat=(cols[2]||'').trim(),wt=Number(cols[3])||0,qty=Number(cols[4])||1;
+          var sp=state.supplies.find(function(x){return x.name===name;});
+          if(!sp){sp=normalizeSupply({id:Date.now()+(Math.random()*1000|0),name:name,category:cat||'その他',weight:wt});state.supplies.push(sp);warnings.push('新規消耗品追加: '+name);}
+          if(!newSupplyIds.includes(sp.id))newSupplyIds.push(sp.id);
+          newSupplyQty[String(sp.id)]=qty;
+        }
+        else if(type==='MEAL'){
+          var day=String(Number(cols[1])||1),mt=(cols[2]||'').trim(),name=(cols[3]||'').trim();
+          var sp=state.supplies.find(function(x){return x.name===name;});
+          if(sp){if(!newMealPlan[day])newMealPlan[day]={};if(!newMealPlan[day][mt])newMealPlan[day][mt]=[];if(!newMealPlan[day][mt].includes(sp.id))newMealPlan[day][mt].push(sp.id);}
+        }
+        else if(type==='SNACK'){
+          var name=(cols[1]||'').trim(),qty=Number(cols[2])||1;
+          var sp=state.supplies.find(function(x){return x.name===name;});
+          if(sp)newSnackPlan[sp.id]=qty;
+        }
+      });
+      if(meta['セット名'])s.name=meta['セット名'];
+      if(meta['備考'])s.memo=meta['備考'];
+      if(meta['日数'])s.days=Number(meta['日数'])||s.days;
+      s.gearIds=newGearIds;s.gearLocations=newLocs;s.supplyIds=newSupplyIds;s.supplyQuantities=newSupplyQty;s.mealPlan=newMealPlan;s.snackPlan=newSnackPlan;
+      var msg='CSV取込完了。';if(warnings.length)msg+='\n\n'+warnings.join('\n');
+      saveItems();saveCategories();saveSupplies();saveEquipmentSets();
+      alert(msg);
+    }catch(e){alert('CSV読込失敗: '+e.message);console.error(e);}
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+/* ── 装備セット PDF ── */
+function exportSetPdf(setId){
+  const s=state.equipmentSets.find(x=>x.id===setId);
+  if(!s){alert('セットが見つかりません。');return;}
+  const locs=s.gearLocations||{};
+  const wt=getEquipmentSetWeights(s);
+  const gears=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
+  const MEALS=['朝食','昼食','夕食'];
+  const mp=s.mealPlan||{};
+  const snp=s.snackPlan||{};
+  const sq=s.supplyQuantities||{};
+
+  // gear by category
+  const gearByCat={};
+  gears.forEach(g=>{const c=g.category||'未分類';if(!gearByCat[c])gearByCat[c]=[];gearByCat[c].push(g);});
+
+  let gearHtml='';
+  Object.keys(gearByCat).sort().forEach(cat=>{
+    gearHtml+=`<div class="cat-head">${escapeHtml(cat)}</div>`;
+    gearByCat[cat].forEach(g=>{
+      const loc=locs[g.id]==='worn'?'👕':'🎒';
+      gearHtml+=`<div class="gear-row"><span class="gear-name">${loc} ${escapeHtml(g.maker?g.maker+'｜':'')}${escapeHtml(g.name)}</span><span class="gear-w">${g.weight!=null?formatNumber(g.weight)+'g':'-'}</span></div>`;
+    });
+  });
+
+  // meal plan
+  let mealHtml='';
+  for(let d=1;d<=Math.max(1,s.days||1);d++){
+    const dk=String(d);
+    const dayObj=mp[dk]||{};
+    mealHtml+=`<div class="day-head">${d}日目</div>`;
+    MEALS.forEach(mt=>{
+      const ids=(dayObj[mt]||[]);
+      if(!ids.length)return;
+      mealHtml+=`<div class="meal-row"><span class="meal-type">${mt}</span><span class="meal-items">`;
+      ids.forEach(sid=>{const sp=state.supplies.find(x=>x.id===Number(sid));if(sp)mealHtml+=escapeHtml(sp.name)+' ';});
+      mealHtml+=`</span></div>`;
+    });
+  }
+
+  // snack
+  let snackHtml='';
+  Object.keys(snp).forEach(sid=>{
+    if(!(snp[sid]>0))return;
+    const sp=state.supplies.find(x=>x.id===Number(sid));
+    if(sp)snackHtml+=`<div class="snack-row">${escapeHtml(sp.name)} <strong>×${snp[sid]}</strong></div>`;
+  });
+
+  const printHtml=`<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8">
+<title>${escapeHtml(s.name)} 山行記録</title>
+<style>
+body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;margin:0;padding:24px;color:#1b1b1b;font-size:14px;line-height:1.6;}
+h1{font-size:22px;margin:0 0 4px;}
+.subtitle{font-size:14px;color:#555;margin-bottom:4px;}
+.memo{font-size:13px;color:#333;margin-bottom:16px;white-space:pre-wrap;}
+.section{margin:16px 0;}
+.section-title{font-size:16px;font-weight:700;border-bottom:2px solid #1f3b73;padding-bottom:4px;margin-bottom:10px;color:#1f3b73;}
+.weight-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+.wt-item{background:#f5f7f5;border-radius:6px;padding:6px 10px;}
+.wt-label{font-size:11px;color:#667a6b;}
+.wt-val{font-size:16px;font-weight:800;}
+.wt-total{background:#1f3b73;color:#fff;border-radius:6px;padding:6px 10px;font-weight:700;}
+.cat-head{font-size:12px;font-weight:700;color:#1f3b73;background:#eef2ff;padding:2px 8px;border-radius:4px;margin:8px 0 4px;}
+.gear-row{display:flex;justify-content:space-between;padding:2px 4px;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.gear-w{color:#667a6b;flex-shrink:0;margin-left:8px;}
+.day-head{font-size:13px;font-weight:700;color:#1f3b73;margin:8px 0 4px;padding:2px 8px;background:#eef2ff;border-radius:4px;}
+.meal-row{display:flex;gap:8px;padding:2px 4px;font-size:13px;}
+.meal-type{min-width:36px;color:#667a6b;}
+.snack-row{padding:2px 4px;font-size:13px;}
+@media print{body{padding:12px;}@page{margin:12mm;}}
+</style></head><body>
+<h1>${escapeHtml(s.name)}</h1>
+${s.memo?`<div class="memo">${escapeHtml(s.memo)}</div>`:''}
+<div class="section">
+  <div class="section-title">【重量】</div>
+  <div class="weight-grid">
+    <div class="wt-item"><div class="wt-label">👕 着用重量</div><div class="wt-val">${Math.round(wt.wornWeight).toLocaleString('ja-JP')}g</div></div>
+    <div class="wt-item"><div class="wt-label">🎒 パック重量</div><div class="wt-val">${Math.round(wt.packWeight).toLocaleString('ja-JP')}g</div></div>
+    <div class="wt-item"><div class="wt-label">🍙 消耗品重量</div><div class="wt-val">${Math.round(wt.consumablesWeight).toLocaleString('ja-JP')}g</div></div>
+    <div class="wt-total">🏔️ 総重量 ${Math.round(wt.totalWeight).toLocaleString('ja-JP')}g</div>
+  </div>
+</div>
+${gearHtml?`<div class="section"><div class="section-title">【装備一覧】</div>${gearHtml}</div>`:''}
+${mealHtml?`<div class="section"><div class="section-title">【食料プラン】</div>${mealHtml}</div>`:''}
+${snackHtml?`<div class="section"><div class="section-title">【行動食】</div>${snackHtml}</div>`:''}
+<div style="margin-top:24px;font-size:11px;color:#aaa;">出力日: ${new Date().toLocaleDateString('ja-JP')}</div>
+</body></html>`;
+
+  const w=window.open('','_blank','width=800,height=900');
+  if(!w){alert('ポップアップがブロックされました。ブラウザのポップアップ許可を確認してください。');return;}
+  w.document.write(printHtml);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),600);
+}
+
+/* ── ユーティリティ ── */
+function dateStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function downloadCsv(content,filename){
+  const bom='﻿';
+  const blob=new Blob([bom+content],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
 }
 
 function escapeHtml(str){
