@@ -4111,8 +4111,25 @@ async function syncFromFirebase() {
     if (!doc.exists) { updateSyncBadge('synced'); return false; }
     var data = doc.data();
 
+    // クラウドの items にローカルの画像フィールドをマージ（画像はローカル資産として保持）
+    var IMAGE_FIELDS = ['photo','imageData','image','thumbnail','preview'];
+    var localImageMap = {};
+    (state.items || []).forEach(function(localItem) {
+      var imgs = {};
+      IMAGE_FIELDS.forEach(function(f) { if (localItem[f]) imgs[f] = localItem[f]; });
+      if (Object.keys(imgs).length) localImageMap[localItem.id] = imgs;
+    });
+
+    var cloudItems = Array.isArray(data.items) ? data.items : [];
+    var mergedItems = cloudItems.map(function(cloudItem) {
+      var localImgs = localImageMap[cloudItem.id];
+      if (!localImgs) return cloudItem;
+      // 同一IDが存在する場合: クラウドの全フィールドを採用しつつ、画像フィールドはローカル優先
+      return Object.assign({}, cloudItem, localImgs);
+    });
+
     var merged = normalizeState({
-      items:         Array.isArray(data.items)         ? data.items         : [],
+      items:         mergedItems,
       categories:    Array.isArray(data.categories)    ? data.categories    : DEFAULT_CATEGORY_LIST.slice(),
       equipmentSets: Array.isArray(data.equipmentSets) ? data.equipmentSets : [],
       supplies:      Array.isArray(data.supplies)      ? data.supplies      : []
