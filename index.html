@@ -3843,6 +3843,24 @@ function getUserDataRef() {
   return fbDb.collection('users').doc(fbUser.uid).collection('data');
 }
 
+
+function stripImageFields(obj) {
+  var copy = Object.assign({}, obj);
+  // 画像関連フィールドをクラウド同期から除外（IndexedDBには残る）
+  delete copy.photo;
+  delete copy.imageData;
+  delete copy.image;
+  delete copy.thumbnail;
+  delete copy.preview;
+  // 残っている base64 data URI を全て除去
+  Object.keys(copy).forEach(function(k) {
+    if (typeof copy[k] === 'string' && copy[k].indexOf('data:') === 0) {
+      delete copy[k];
+    }
+  });
+  return copy;
+}
+
 async function syncToFirebase() {
   if (!fbUser || !fbDb) return;
   if (!navigator.onLine) { updateSyncBadge('offline'); return; }
@@ -3857,7 +3875,7 @@ async function syncToFirebase() {
     });
 
     await ref.doc('main').set({
-      items:         (state.items || []).map(normalizeItem),
+      items:         (state.items || []).map(function(i){ return stripImageFields(normalizeItem(i)); }),
       categories:    state.categories || [],
       supplies:      (state.supplies || []).map(normalizeSupply),
       equipmentSets: (state.equipmentSets || []).map(normalizeEquipmentSet),
