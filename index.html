@@ -4,7 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>登山ギア管理アプリ Ver11.0</title>
-<meta name="theme-color" content="#2a5c3d" />
+<meta name="app-version" content="v1100">
+  <meta name="theme-color" content="#2a5c3d" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%201024%201024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M512%2C108%20L730%2C452%20793%2C408%20940%2C755%20Q940%2C775%20920%2C775%20L104%2C775%20Q84%2C775%2084%2C755%20L225%2C435%20261%2C378%20Z%22%20fill%3D%22%233a5175%22/%3E%3Cpath%20d%3D%22M512%2C108%20L415%2C293%20490%2C258%20512%2C250%20535%2C258%20612%2C293%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M261%2C378%20L303%2C463%20261%2C436%20219%2C463%20Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M793%2C408%20L840%2C494%20793%2C465%20746%2C494%20Z%22%20fill%3D%22white%22/%3E%3C/svg%3E" />
 <link rel="manifest" id="inline-manifest" />
@@ -494,6 +495,32 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;}
 /* ── スマホ版ギア一覧（Ver11.1） ── */
 .gear-mobile-list{display:none;}
+/* ── PWA 更新バナー ── */
+.pwa-update-banner{
+  position:fixed;bottom:-80px;left:0;right:0;z-index:99998;
+  display:flex;align-items:center;gap:10px;
+  background:#1a3a6e;color:#fff;
+  padding:12px 16px;
+  box-shadow:0 -2px 12px rgba(0,0,0,.25);
+  transition:bottom .3s ease;
+  border-radius:14px 14px 0 0;
+}
+.pwa-update-banner.visible{bottom:0;}
+.pwa-update-msg{flex:1;font-size:14px;font-weight:600;}
+.pwa-update-btn{
+  padding:7px 16px;border:none;border-radius:8px;
+  background:#4caf82;color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+}
+.pwa-update-btn:disabled{opacity:.6;cursor:default;}
+.pwa-update-dismiss{
+  background:transparent;border:none;color:rgba(255,255,255,.7);
+  font-size:18px;cursor:pointer;padding:4px 6px;flex-shrink:0;line-height:1;
+}
+@media(max-width:768px){
+  .pwa-update-banner{padding:14px 14px;border-radius:12px 12px 0 0;}
+  .pwa-update-msg{font-size:13px;}
+}
 @media(max-width:768px){
   /* テーブルを隠してモバイルリストを出す */
   #gearTableWrap{display:none!important;}
@@ -959,11 +986,35 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
     });
     self.addEventListener('fetch', (event) => {
       const req = event.request;
+      const reqUrl = new URL(req.url);
+
+      // バージョンチェック用リクエスト: SWキャッシュをバイパスしてネットワークへ直接送信
+      if (reqUrl.searchParams.has('_vcheck')) {
+        event.respondWith(fetch(reqUrl.origin + reqUrl.pathname, {cache: 'no-store'}));
+        return;
+      }
+
+      // ナビゲーション（メインHTML取得）: ネットワーク優先 → オフライン時にキャッシュへフォールバック
+      // これによりGitHub更新後に次回起動で自動的に最新版を取得できる
+      if (req.mode === 'navigate') {
+        event.respondWith(
+          fetch(req).then(res => {
+            if (res.ok) {
+              const clone = res.clone();
+              caches.open(CACHE_NAME).then(c => c.put(req, clone));
+            }
+            return res;
+          }).catch(() => caches.match(req).then(c => c || Response.error()))
+        );
+        return;
+      }
+
+      // その他のリソース: キャッシュ優先（オフライン動作を維持）
       event.respondWith(
         caches.match(req).then(cached => {
           if (cached) return cached;
           return fetch(req).then(res => {
-            if (req.method === 'GET' && new URL(req.url).origin === location.origin) {
+            if (req.method === 'GET' && reqUrl.origin === location.origin) {
               const resClone = res.clone();
               caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
             }
@@ -971,7 +1022,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
           }).catch(() => {
             if (req.destination === 'image') {
               return new Response(\`
-                <svg xmlns="[w3.org](http://www.w3.org/2000/svg)" width="640" height="480" viewBox="0 0 640 480">
+                <svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
                   <rect width="640" height="480" fill="#eef2ee"/>
                   <path d="M80 360 L200 240 L280 320 L360 200 L560 360 Z" fill="#cfe3d7"/>
                   <circle cx="520" cy="120" r="36" fill="#d8e9de"/>
@@ -979,14 +1030,16 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
                 </svg>
               \`, { headers: { 'Content-Type': 'image/svg+xml' }});
             }
-          })
+          });
         })
       );
     });
   `;
   const blob = new Blob([swCode], {type: 'text/javascript'});
   const url = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(url).catch(console.warn);
+  navigator.serviceWorker.register(url)
+    .then(reg => { window._swReg = reg; })
+    .catch(console.warn);
 })();
 function makeTentIconSVGDataURL(size=192){
   const paths = ['M512,108 L730,452 793,408 940,755 Q940,775 920,775 L104,775 Q84,775 84,755 L225,435 261,378 Z','M512,108 L415,293 490,258 512,250 535,258 612,293 Z','M261,378 L303,463 261,436 219,463 Z','M793,408 L840,494 793,465 746,494 Z'];
@@ -998,6 +1051,64 @@ function makeTentIconSVGDataURL(size=192){
     + '<path d="' + paths[3] + '" fill="white"/>'
     + '</svg>';
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+
+// ── PWA バージョン管理 (Ver11.1) ──
+const APP_VERSION = 'v1100'; // <meta name="app-version"> と一致させること
+
+async function checkForUpdate() {
+  if (!navigator.onLine) return;
+  try {
+    // _vcheck パラメータで SW キャッシュを完全バイパスして最新 HTML を取得
+    const res = await fetch(location.pathname + '?_vcheck=1', { cache: 'no-store' });
+    if (!res.ok) return;
+    const text = await res.text();
+    const m = text.match(/<meta name="app-version" content="([^"]+)"/);
+    if (m && m[1] !== APP_VERSION) {
+      showUpdateBanner(m[1]);
+    }
+  } catch(e) {
+    // オフラインまたはタイムアウト — 無視
+  }
+}
+
+function showUpdateBanner(newVer) {
+  if (document.getElementById('pwaUpdateBanner')) return; // 既に表示中
+  const banner = document.createElement('div');
+  banner.id = 'pwaUpdateBanner';
+  banner.className = 'pwa-update-banner';
+  banner.innerHTML =
+    '<span class="pwa-update-msg">🆕 新しいバージョンがあります</span>' +
+    '<button id="pwaUpdateBtn" class="pwa-update-btn">今すぐ更新</button>' +
+    '<button id="pwaUpdateDismiss" class="pwa-update-dismiss" aria-label="閉じる">✕</button>';
+  document.body.appendChild(banner);
+  // アニメーション
+  requestAnimationFrame(() => banner.classList.add('visible'));
+  document.getElementById('pwaUpdateBtn').addEventListener('click', applyUpdate);
+  document.getElementById('pwaUpdateDismiss').addEventListener('click', () => {
+    banner.classList.remove('visible');
+    setTimeout(() => banner.remove(), 300);
+  });
+}
+
+async function applyUpdate() {
+  const btn = document.getElementById('pwaUpdateBtn');
+  if (btn) { btn.textContent = '更新中…'; btn.disabled = true; }
+  try {
+    // SW 登録解除（次のロードでキャッシュなしで取得させる）
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    // SW キャッシュを全削除
+    const cacheKeys = await caches.keys();
+    await Promise.all(cacheKeys.map(k => caches.delete(k)));
+  } catch(e) {
+    console.warn('[Update] キャッシュ削除失敗:', e);
+  }
+  // ハードリロード（IndexedDB・Firebase ログインは保持される）
+  location.reload(true);
 }
 
 const STORAGE_KEY = 'mountGear.items.v1';
@@ -1593,6 +1704,8 @@ async function init() {
   renderEquipmentSets();
   switchTab('gear');
   initFirebase();
+  // バックグラウンドでバージョンチェック（起動から2秒後）
+  setTimeout(checkForUpdate, 2000);
 }
 
 function switchTab(tab){
