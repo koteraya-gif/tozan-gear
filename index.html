@@ -634,36 +634,69 @@ body.dark-mode .pack-filter-bar{background:#1a1a2a;}
   .pwa-update-banner{padding:14px 14px;border-radius:12px 12px 0 0;}
   .pwa-update-msg{font-size:13px;}
 }
+/* mobile lists: hidden by default, shown at ≤768px via media query */
+.gear-mobile-list{display:none;}
+.supply-mobile-list{display:none;}
 @media(max-width:768px){
   /* テーブルを隠してモバイルリストを出す */
   #gearTableWrap{display:none!important;}
-  .gear-mobile-list{display:block;padding:0 2px;}
+  #supplyTableWrap{display:none!important;}
+  .gear-mobile-list{display:block;padding:0;}
+  .supply-mobile-list{display:block;}
+
+  /* ── ギアモバイル: 2行レイアウト ── */
   .gear-mobile-row{
-    display:flex;align-items:center;gap:6px;
-    padding:3px 4px;border-bottom:1px solid var(--border);
-    min-height:28px;
+    display:flex;align-items:flex-start;gap:8px;
+    padding:6px 4px;border-bottom:1px solid var(--border);
   }
   .gear-mobile-row:last-child{border-bottom:none;}
   .gear-mobile-row input[type=checkbox]{
-    flex-shrink:0;width:16px;height:16px;cursor:pointer;
+    flex-shrink:0;width:17px;height:17px;cursor:pointer;margin-top:3px;
   }
   .gear-mobile-info{
-    flex:1;display:flex;gap:0;min-width:0;
-    font-size:12px;line-height:1.3;overflow:hidden;
+    flex:1;min-width:0;cursor:pointer;
   }
   .gear-mobile-name{
-    flex:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    font-weight:500;color:var(--text);padding-right:4px;
+    font-size:14px;font-weight:600;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    line-height:1.35;
   }
-  .gear-mobile-maker{
-    flex:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    color:var(--muted);font-size:11px;padding-right:4px;
+  .gear-mobile-sub{
+    display:flex;align-items:center;gap:2px;margin-top:1px;
+    font-size:12px;color:var(--muted);line-height:1.2;
   }
+  .gear-mobile-maker{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:48%;}
+  .gear-mobile-sep{color:#bbb;margin:0 2px;flex-shrink:0;}
   .gear-mobile-cat{
-    flex:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    color:var(--muted);font-size:11px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:48%;
     background:var(--surface);border-radius:4px;padding:0 4px;
   }
+
+  /* ── 消耗品モバイル: フラットリスト ── */
+  .supply-mobile-list{padding:0;}
+  .supply-mobile-row{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 4px;border-bottom:1px solid var(--border);
+  }
+  .supply-mobile-row:last-child{border-bottom:none;}
+  .supply-mobile-left{flex:1;min-width:0;}
+  .supply-mobile-cat{
+    display:inline-block;font-size:10px;color:var(--muted);
+    background:var(--surface);border-radius:3px;padding:0 4px;
+    margin-bottom:2px;white-space:nowrap;
+  }
+  .supply-mobile-name{
+    font-size:14px;font-weight:600;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .supply-mobile-right{
+    display:flex;align-items:center;gap:5px;flex-shrink:0;
+  }
+  .supply-mobile-num{font-size:12px;color:var(--muted);white-space:nowrap;}
+  .supply-mobile-cal{color:#b06000;}
+
+  /* ── 共通: 横スクロール禁止 ── */
+  .supply-layout,.table-wrap{overflow-x:hidden;}
 }
 /* ── Ver11.0 Auth & Sync UI ── */
 .sync-badge{font-size:11px;padding:3px 7px;border-radius:10px;background:rgba(255,255,255,0.18);color:#fff;font-weight:600;white-space:nowrap;display:none;}
@@ -912,7 +945,8 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
         <div id="supplyCategorySummary" class="supply-cat-summary"></div>
       </div>
 
-      <div class="table-wrap">
+      <div id="supplyMobileList" class="supply-mobile-list"></div>
+      <div class="table-wrap" id="supplyTableWrap">
         <table class="table">
           <thead>
             <tr>
@@ -920,7 +954,8 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
               <th>カテゴリ</th>
               <th>名称</th>
               <th>重量(g)</th>
-              <th>価格(円)</th>
+              <th>kcal</th>
+              <th>水(ml)</th>
               <th class="is-static">操作</th>
             </tr>
           </thead>
@@ -2362,27 +2397,40 @@ function renderTable(items) {
         });
         row.appendChild(cb);
 
-        // 名称・メーカー・カテゴリ
+        // 2行レイアウト: 1行目=名称, 2行目=メーカー|カテゴリ
         const info = document.createElement('div');
         info.className = 'gear-mobile-info';
+        info.addEventListener('click', () => openModal(it.id));
 
         const nameEl = document.createElement('div');
         nameEl.className = 'gear-mobile-name';
         nameEl.textContent = it.name || '';
         nameEl.title = it.name || '';
-        nameEl.addEventListener('click', () => openModal(it.id));
 
-        const makerEl = document.createElement('div');
+        const subRow = document.createElement('div');
+        subRow.className = 'gear-mobile-sub';
+
+        const makerEl = document.createElement('span');
         makerEl.className = 'gear-mobile-maker';
         makerEl.textContent = it.maker || '';
 
-        const catEl = document.createElement('div');
+        const catEl = document.createElement('span');
         catEl.className = 'gear-mobile-cat';
         catEl.textContent = it.category || '';
 
+        if(it.maker || it.category){
+          if(it.maker) subRow.appendChild(makerEl);
+          if(it.maker && it.category){
+            const sep = document.createElement('span');
+            sep.className = 'gear-mobile-sep';
+            sep.textContent = '｜';
+            subRow.appendChild(sep);
+          }
+          if(it.category) subRow.appendChild(catEl);
+        }
+
         info.appendChild(nameEl);
-        info.appendChild(makerEl);
-        info.appendChild(catEl);
+        if(it.maker || it.category) info.appendChild(subRow);
         row.appendChild(info);
         mobileList.appendChild(row);
       }
@@ -3987,9 +4035,65 @@ function renderSupplies(){
     });
   }
 
+  // ── モバイルリスト ──
+  const supplyMobileList = document.getElementById('supplyMobileList');
+  if(supplyMobileList){
+    supplyMobileList.innerHTML = '';
+    if(supplies.length === 0){
+      const msg = document.createElement('div');
+      msg.style.cssText='padding:12px 8px;font-size:13px;color:var(--muted);';
+      msg.textContent='該当する消耗品がありません。';
+      supplyMobileList.appendChild(msg);
+    } else {
+      supplies.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'supply-mobile-row';
+
+        const left = document.createElement('div');
+        left.className = 'supply-mobile-left';
+
+        const catEl = document.createElement('span');
+        catEl.className = 'supply-mobile-cat';
+        catEl.textContent = s.category || 'その他';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'supply-mobile-name';
+        nameEl.textContent = s.name || '';
+
+        left.appendChild(catEl);
+        left.appendChild(nameEl);
+
+        const right = document.createElement('div');
+        right.className = 'supply-mobile-right';
+
+        const wEl = document.createElement('span');
+        wEl.className = 'supply-mobile-num';
+        if(Number(s.weight)) wEl.textContent = (Number(s.weight)||0)+'g';
+
+        const calEl = document.createElement('span');
+        calEl.className = 'supply-mobile-num supply-mobile-cal';
+        if(Number(s.calories)) calEl.textContent = (Number(s.calories)||0)+'kcal';
+
+        const editBtn2 = document.createElement('button');
+        editBtn2.className = 'icon-inline';
+        editBtn2.textContent = '✏️';
+        editBtn2.title='編集';
+        editBtn2.addEventListener('click', ()=>openSupplyEditModal(s.id));
+
+        right.appendChild(wEl);
+        right.appendChild(calEl);
+        right.appendChild(editBtn2);
+        row.appendChild(left);
+        row.appendChild(right);
+        supplyMobileList.appendChild(row);
+      });
+    }
+  }
+
+  // ── PCテーブル ──
   if(supplies.length === 0){
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="6"><span class="empty-note">該当する消耗品がありません。</span></td>';
+    tr.innerHTML = '<td colspan="7"><span class="empty-note">該当する消耗品がありません。</span></td>';
     body.appendChild(tr);
     return;
   }
@@ -4008,7 +4112,9 @@ function renderSupplies(){
     const td3 = document.createElement('td');
     td3.textContent = Number(s.weight) || 0;
     const td3b = document.createElement('td');
-    td3b.textContent = s.price != null ? '¥' + formatNumber(s.price) : '';
+    td3b.textContent = Number(s.calories) || '';
+    const td3c = document.createElement('td');
+    td3c.textContent = Number(s.waterMl) || '';
     const td4 = document.createElement('td');
 
     const editBtn = document.createElement('button');
@@ -4035,6 +4141,7 @@ function renderSupplies(){
     tr.appendChild(td2);
     tr.appendChild(td3);
     tr.appendChild(td3b);
+    tr.appendChild(td3c);
     tr.appendChild(td4);
 
     body.appendChild(tr);
