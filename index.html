@@ -481,16 +481,78 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .ssc-sub{display:flex;flex-wrap:wrap;gap:8px;margin-top:0;margin-left:8px;font-size:12px;color:#555;align-items:baseline;}
 .ssc-sub span{white-space:nowrap;}
 @media(max-width:768px){
-  /* スマホ版: 縦積みコンパクト表示 */
+  /* ── 集計バー ── */
+  .set-stats-compact{padding:4px 8px;}
   .ssc-main{flex-wrap:nowrap;}
-  .ssc-total{font-size:16px;}
-  .ssc-sub{margin-left:0;margin-top:3px;gap:6px;}
-  /* ギア行: 上下余白を詰める */
-  .gear-check-row{margin:0 !important;padding:3px 0 !important;}
-  /* loc-toggle: サイズ縮小 */
-  .loc-toggle{min-width:28px!important;min-height:28px!important;font-size:14px!important;padding:1px 5px!important;}
-  /* gear-cmp-select: フォント縮小 */
-  .gear-cmp-select{font-size:11px!important;padding:2px 4px!important;}
+  .ssc-total{font-size:14px;}
+  .ssc-sub{margin-left:6px;margin-top:0;gap:6px;font-size:11px;}
+
+  /* ── 使用ザック行 ── */
+  .bp-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:nowrap;}
+  .bp-row-lbl{font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;}
+  .bp-row-sel{flex:1;min-width:0;font-size:12px;padding:4px 6px;border:1px solid var(--border,#ccc);border-radius:6px;}
+
+  /* ── ギアカード（スマホ専用） ── */
+  .gear-check-row{
+    display:grid;
+    grid-template-areas:"label toggle" "select select";
+    grid-template-columns:1fr auto;
+    grid-template-rows:auto auto;
+    gap:3px 6px;
+    background:#fff;
+    border:1px solid #e4e8e4;
+    border-radius:8px;
+    padding:6px 8px;
+    margin:3px 0 !important;
+  }
+  .gcr-label{
+    grid-area:label;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+  }
+  .gcr-label input[type=checkbox]{
+    flex-shrink:0;
+    width:16px;height:16px;
+  }
+  .gcr-name{
+    font-size:13px;
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    flex:1;
+    min-width:0;
+  }
+  .gcr-wt{
+    font-size:11px;
+    color:var(--muted,#888);
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .gear-cmp-select{
+    grid-area:select;
+    width:100%;
+    max-width:100% !important;
+    min-width:0 !important;
+    font-size:12px !important;
+    padding:4px 6px !important;
+    border-radius:6px;
+  }
+  .loc-toggle{
+    grid-area:toggle;
+    min-width:32px!important;
+    min-height:32px!important;
+    font-size:15px!important;
+    padding:2px 5px!important;
+    align-self:center;
+  }
+
+  /* ── section-block ── */
+  .section-block{padding:8px;margin:6px 0;}
+  .section-block h3{font-size:13px;margin-bottom:6px;}
+  .section-block h4{font-size:11px;padding:1px 5px;margin:4px 0 2px;}
 }
 
 /* Ver12.4 食料プラン動的食事追加 */
@@ -578,8 +640,12 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 
 /* Ver9.1 着用/パック重量管理 */
 .gear-check-row{display:flex;align-items:center;gap:5px;margin:1px 0;padding:1px 0;}
-.gear-check-row label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
-.gear-check-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;}
+.bp-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.bp-row-lbl{font-size:13px;font-weight:600;}
+.bp-row-sel{flex:1;min-width:0;max-width:240px;padding:5px 8px;border:1px solid var(--border,#ccc);border-radius:8px;font-size:13px;}
+.gear-check-row label,.gcr-label{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0;}
+.gear-check-row label span,.gcr-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;}
+.gcr-wt{font-size:11px;color:var(--muted,#888);white-space:nowrap;flex-shrink:0;}
 /* ── スマホ版ギア一覧（Ver11.1） ── */
 .gear-mobile-list{display:none;}
 /* ── Ver12.0 パッキング画面 ── */
@@ -866,10 +932,9 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
           <label for="sortBy">並び替え:</label>
           <select id="sortBy" aria-label="並び替え">
             <option value="gearNo">管理番号順</option>
-            <option value="name">名称順</option>
+            <option value="maker">メーカー順</option>
+            <option value="category">カテゴリ順</option>
             <option value="weight">重量順</option>
-            <option value="purchasePrice">購入価格順</option>
-            <option value="purchaseDate">購入日順</option>
           </select>
           <button id="sortDirBtn" class="ghost-btn" title="昇順/降順">▲</button>
         </div>
@@ -954,7 +1019,16 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
       <!-- 追加・並び替えバー -->
       <div class="supply-toolbar-row">
         <button id="addSupplyBtn" class="primary-btn">＋ 消耗品追加</button>
-        <button id="supplySortCatBtn" class="icon-btn">↕ カテゴリ順</button>
+        <div class="sort-group">
+          <label for="supplySort">並び替え:</label>
+          <select id="supplySort" aria-label="消耗品並び替え">
+            <option value="supplyNo">管理番号順</option>
+            <option value="category" selected>カテゴリ順</option>
+            <option value="name">名称順</option>
+            <option value="weight">重量順</option>
+          </select>
+          <button id="supplySortDirBtn" class="ghost-btn" title="昇順/降順">▲</button>
+        </div>
       </div>
       <!-- 一括操作バー -->
       <div class="supply-bulk-bar" id="supplyBulkBar">
@@ -1323,8 +1397,8 @@ let state = {
   sortDir: 'asc',
   viewMode: 'list',
   supplyFilters: {
-    search: '',
-    sort: 'category'
+    sort: 'category',
+    sortDir: 'asc'
   },
   selectedSupplyId: null,
   selectedGearIds: new Set(),
@@ -1398,7 +1472,8 @@ const els = {
 
 
   addSupplyBtn: document.getElementById('addSupplyBtn'),
-  supplySortCatBtn: document.getElementById('supplySortCatBtn'),
+  supplySort: document.getElementById('supplySort'),
+  supplySortDirBtn: document.getElementById('supplySortDirBtn'),
   supplySummary: document.getElementById('supplySummary'),
   supplyTableBody: document.getElementById('supplyTableBody'),
   supplyStats: document.getElementById('supplyStats'),
@@ -1918,9 +1993,16 @@ async function init() {
   if(els.supplySelectAllBtn) els.supplySelectAllBtn.addEventListener('click', toggleSelectAllSupplies);
   if(els.supplyBulkDeleteBtn) els.supplyBulkDeleteBtn.addEventListener('click', confirmBulkDeleteSupplies);
 
-  if(els.supplySortCatBtn) {
-    els.supplySortCatBtn.addEventListener('click', () => {
-      state.supplyFilters.sort = 'category';
+  if(els.supplySort) {
+    els.supplySort.addEventListener('change', () => {
+      state.supplyFilters.sort = els.supplySort.value;
+      renderSupplies();
+    });
+  }
+  if(els.supplySortDirBtn) {
+    els.supplySortDirBtn.addEventListener('click', () => {
+      state.supplyFilters.sortDir = state.supplyFilters.sortDir === 'asc' ? 'desc' : 'asc';
+      els.supplySortDirBtn.textContent = state.supplyFilters.sortDir === 'asc' ? '▲' : '▼';
       renderSupplies();
     });
   }
@@ -2953,12 +3035,12 @@ function openSetEditor(setId){
   }).join('');
   h += '<div class="section-block"><h3>ギア</h3>';
   if(state.backpacks.length){
-    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'+
-      '<label style="font-size:13px;font-weight:600;">🎒 使用ザック</label>'+
-      '<select id="setDefaultBp" style="flex:1;min-width:0;max-width:240px;">'+
+    h += '<div class="bp-row">'+
+      '<label class="bp-row-lbl">🎒 使用ザック</label>'+
+      '<select id="setDefaultBp" class="bp-row-sel">'+
         '<option value="">未設定</option>'+bpOpts12+
       '</select>'+
-      '<button type="button" id="setBpMgrBtn" class="pack-icon-btn">⚙️ ザック管理</button>'+
+      '<button type="button" id="setBpMgrBtn" class="pack-icon-btn">⚙</button>'+
     '</div>';
   }
   const gearCats = Object.keys(gearGroups).sort((a,b)=>a.localeCompare(b,'ja'));
@@ -2979,8 +3061,9 @@ function openSetEditor(setId){
         }).join('');
         const cmpVis12 = loc==='worn'?' style="display:none;"':'';
         h += '<div class="gear-check-row">'+
-          '<label><input type="checkbox" name="setGearIds" value="'+g.id+'" '+checked+'>'+
-          '<span>'+makerLabel+escapeHtml(g.name)+' ('+formatWeight(g.weight||0)+')</span></label>'+
+          '<label class="gcr-label"><input type="checkbox" name="setGearIds" value="'+g.id+'" '+checked+'>'+
+          '<span class="gcr-name">'+makerLabel+escapeHtml(g.name)+'</span>'+
+          '<span class="gcr-wt">'+formatWeight(g.weight||0)+'</span></label>'+
           '<select class="gear-cmp-select" data-gearid="'+g.id+'"'+cmpVis12+'>'+
             '<option value="">収納先…</option>'+cmpOpts12+
           '</select>'+
@@ -4153,17 +4236,20 @@ function addSupply(){
 function getFilteredSupplies(){
   let supplies = [...(state.supplies || [])];
   const sort = state.supplyFilters.sort || 'category';
+  const dir  = state.supplyFilters.sortDir === 'desc' ? -1 : 1;
   supplies.sort((a,b)=>{
-    if(sort === 'name') {
-      return (a.name || '').localeCompare((b.name || ''), 'ja');
+    let v=0;
+    if(sort === 'supplyNo') {
+      v=(a.supplyNo||'').localeCompare(b.supplyNo||'','ja',{numeric:true});
+    } else if(sort === 'name') {
+      v=(a.name||'').localeCompare(b.name||'','ja');
+    } else if(sort === 'weight') {
+      v=(Number(a.weight)||0)-(Number(b.weight)||0);
+    } else {
+      // category: カテゴリ→名称の2段ソート
+      v=(a.category||'').localeCompare(b.category||'','ja')||(a.name||'').localeCompare(b.name||'','ja');
     }
-    if(sort === 'weightAsc') {
-      return (Number(a.weight) || 0) - (Number(b.weight) || 0);
-    }
-    if(sort === 'weightDesc') {
-      return (Number(b.weight) || 0) - (Number(a.weight) || 0);
-    }
-    return (a.category || '').localeCompare((b.category || ''), 'ja') || (a.name || '').localeCompare((b.name || ''), 'ja');
+    return v*dir;
   });
 
   return supplies;
