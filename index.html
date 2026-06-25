@@ -480,10 +480,59 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .ssc-count{font-size:12px;color:var(--muted);}
 .ssc-sub{display:flex;flex-wrap:wrap;gap:8px;margin-top:0;margin-left:8px;font-size:12px;color:#555;align-items:baseline;}
 .ssc-sub span{white-space:nowrap;}
-/* PC: モバイル専用要素は非表示 */
-.gcr-cmp-info,.gcr-cmp-btn{display:none;}
+/* PC: モバイル専用要素は非表示、スマホカードも非表示 */
+.gcr-cmp-info,.sp-gear-card{display:none;}
 
 @media(max-width:768px){
+  /* ── PC行を非表示にしてスマホカードに切替 ── */
+  .gear-check-row{display:none!important;}
+  .sp-gear-card{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    border-bottom:1px solid #e8eae8;
+    padding:7px 10px;
+    background:#fff;
+  }
+  /* 行1: チェック + ギア名 */
+  .sp-card-row1{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    cursor:pointer;
+    min-width:0;
+  }
+  .sp-card-row1 input[type=checkbox]{
+    flex-shrink:0;width:17px;height:17px;margin-top:2px;
+  }
+  .sp-gear-name{
+    font-size:13px;font-weight:600;
+    white-space:normal;word-break:break-word;
+    line-height:1.4;flex:1;min-width:0;
+  }
+  /* 行2: 重量 */
+  .sp-gear-wt{
+    font-size:11px;color:var(--muted,#888);
+    margin:2px 0 0 23px;
+    line-height:1.2;
+  }
+  /* 行3: 収納先（タップで展開） */
+  .sp-gear-cmp{
+    font-size:12px;color:var(--green,#2a7a4f);
+    margin:3px 0 0 23px;
+    cursor:pointer;user-select:none;
+    line-height:1.3;
+  }
+  .sp-gear-cmp:active{opacity:0.6;}
+  /* 収納先プルダウン: タップで表示 */
+  .sp-gear-cmp-sel{
+    margin:3px 0 0 23px;
+    width:calc(100% - 23px);max-width:100%;
+    font-size:12px;padding:4px 6px;
+    border:1px solid var(--border,#ccc);
+    border-radius:6px;background:#f9f9f9;
+  }
+
   /* ── 集計バー: コンパクト化 ── */
   .set-stats-compact{padding:3px 8px;}
   .ssc-main{flex-wrap:nowrap;gap:6px;}
@@ -496,76 +545,6 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .bp-row-lbl{font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;}
   .bp-row-sel{flex:1;min-width:0;font-size:12px;padding:3px 6px;border:1px solid var(--border,#ccc);border-radius:6px;}
   .pack-icon-btn{font-size:11px!important;padding:3px 7px!important;}
-
-  /* ── ギアカード: スマホ専用グリッドレイアウト ── */
-  .gear-check-row{
-    display:grid;
-    grid-template-areas:
-      "label  toggle"
-      "cmpinfo cmpinfo"
-      "cmpbtn  cmpbtn"
-      "select  select";
-    grid-template-columns:1fr auto;
-    gap:2px 6px;
-    background:#fff;
-    border:1px solid #e4e8e4;
-    border-radius:8px;
-    padding:5px 8px;
-    margin:2px 0 !important;
-  }
-  .gcr-label{
-    grid-area:label;
-    display:flex;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:4px 5px;
-    min-width:0;
-  }
-  .gcr-label input[type=checkbox]{
-    flex-shrink:0;width:16px;height:16px;
-  }
-  .gcr-name{
-    font-size:13px;font-weight:600;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    flex:1;min-width:0;
-  }
-  .gcr-wt{
-    flex:0 0 100%;
-    margin-left:21px;
-    font-size:11px;color:var(--muted,#888);
-    line-height:1.2;
-  }
-  .loc-toggle{
-    grid-area:toggle;
-    align-self:start;
-    min-width:28px!important;min-height:28px!important;
-    font-size:14px!important;padding:1px 4px!important;
-  }
-  /* モバイル専用: 収納先情報・変更ボタン ── */
-  .gcr-cmp-info{
-    grid-area:cmpinfo;
-    display:block;
-    font-size:11px;color:#666;
-    margin-left:21px;line-height:1.3;
-  }
-  .gcr-cmp-btn{
-    grid-area:cmpbtn;
-    display:inline-block;
-    font-size:11px;color:var(--green,#2a7a4f);
-    background:none;border:1px solid var(--green,#2a7a4f);
-    border-radius:5px;padding:2px 8px;
-    cursor:pointer;margin-left:21px;
-    align-self:start;width:auto;
-  }
-  /* 収納先セレクト: タップで表示 (.cmp-open クラス付与時のみ) ── */
-  .gear-cmp-select{
-    grid-area:select;
-    display:none;
-    width:100%;max-width:100%!important;min-width:0!important;
-    font-size:12px!important;padding:4px 6px!important;
-    border-radius:6px;margin-top:2px;
-  }
-  .gear-cmp-select.cmp-open{display:block;}
 
   /* ── section-block: 余白削減 ── */
   .section-block{padding:6px 8px;margin:4px 0;}
@@ -3080,17 +3059,30 @@ function openSetEditor(setId){
         const cmpVis12 = loc==='worn'?' style="display:none;"':'';
         const activeCmpName=(gCmpId?((activeBp12?.compartments||[]).find(c=>c.id===gCmpId)||{}).name||'':'');
         const cmpElemHide=(loc==='worn')?' style="display:none;"':'';
-        const cmpInfoTxt=activeCmpName?'収納：'+escapeHtml(activeCmpName):'収納先：未設定';
+        const cmpInfoTxt=(activeCmpName?'収納：'+escapeHtml(activeCmpName):'収納先：未設定')+' ▼';
         h += '<div class="gear-check-row">'+
           '<label class="gcr-label"><input type="checkbox" name="setGearIds" value="'+g.id+'" '+checked+'>'+
           '<span class="gcr-name">'+makerLabel+escapeHtml(g.name)+'</span>'+
           '<span class="gcr-wt">'+formatWeight(g.weight||0)+'</span></label>'+
           '<button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'">'+locEmoji+'</button>'+
-          '<span class="gcr-cmp-info" data-gearid="'+g.id+'"'+cmpElemHide+'>'+cmpInfoTxt+'</span>'+
-          '<button type="button" class="gcr-cmp-btn" data-gearid="'+g.id+'"'+cmpElemHide+'>収納先を変更</button>'+
+          '<span class="gcr-cmp-info" data-gearid="'+g.id+'" role="button" tabindex="0"'+cmpElemHide+'>'+cmpInfoTxt+'</span>'+
           '<select class="gear-cmp-select" data-gearid="'+g.id+'"'+cmpVis12+'>'+
             '<option value="">収納先…</option>'+cmpOpts12+
           '</select>'+
+          '</div>';
+        /* スマホ専用カード */
+        h += '<div class="sp-gear-card">'+
+          '<label class="sp-card-row1">'+
+            '<input type="checkbox" class="sp-cb" data-gearid="'+g.id+'" '+(checked?'checked':'')+'>'+
+            '<span class="sp-gear-name">'+makerLabel+escapeHtml(g.name)+'</span>'+
+          '</label>'+
+          '<div class="sp-gear-wt">'+formatWeight(g.weight||0)+'</div>'+
+          (activeBp12
+            ? '<div class="sp-gear-cmp" data-gearid="'+g.id+'"'+cmpElemHide+'>'+cmpInfoTxt+'</div>'+
+              '<select class="sp-gear-cmp-sel" data-gearid="'+g.id+'" style="display:none">'+
+                '<option value="">収納先…</option>'+cmpOpts12+
+              '</select>'
+            : '')+
           '</div>';
       });
     });
@@ -3194,9 +3186,9 @@ function openSetEditor(setId){
     }
     updateStats();
   }));
-  // 収納先変更ボタン（スマホ専用トグル）
-  box.querySelectorAll('.gcr-cmp-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    const sel=box.querySelector('.gear-cmp-select[data-gearid="'+btn.dataset.gearid+'"]');
+  // 収納先タップで展開（スマホ専用）
+  box.querySelectorAll('.gcr-cmp-info').forEach(info=>info.addEventListener('click',()=>{
+    const sel=box.querySelector('.gear-cmp-select[data-gearid="'+info.dataset.gearid+'"]');
     if(sel)sel.classList.toggle('cmp-open');
   }));
   // 収納先変更時にラベルテキスト更新
@@ -3204,7 +3196,34 @@ function openSetEditor(setId){
     const info=box.querySelector('.gcr-cmp-info[data-gearid="'+sel.dataset.gearid+'"]');
     if(!info)return;
     const opt=sel.options[sel.selectedIndex];
-    info.textContent=(opt&&opt.value)?'収納：'+opt.text:'収納先：未設定';
+    info.textContent=((opt&&opt.value)?'収納：'+opt.text:'収納先：未設定')+' ▼';
+  }));
+
+  /* ── スマホ専用カード: イベントハンドラ ── */
+  // sp-cb チェック → PC checkbox に同期 → updateStats
+  box.querySelectorAll('.sp-cb').forEach(cb=>cb.addEventListener('change',()=>{
+    const pcCb=box.querySelector('input[name="setGearIds"][value="'+cb.dataset.gearid+'"]');
+    if(pcCb){pcCb.checked=cb.checked;}
+    updateStats();
+  }));
+  // sp-gear-cmp タップ → セレクト展開
+  box.querySelectorAll('.sp-gear-cmp').forEach(div=>div.addEventListener('click',()=>{
+    const sel=box.querySelector('.sp-gear-cmp-sel[data-gearid="'+div.dataset.gearid+'"]');
+    if(!sel)return;
+    sel.style.display=sel.style.display==='none'?'':'none';
+  }));
+  // sp-gear-cmp-sel 変更 → ラベル更新 + PC select 同期 + 自動クローズ
+  box.querySelectorAll('.sp-gear-cmp-sel').forEach(sel=>sel.addEventListener('change',()=>{
+    const gid=sel.dataset.gearid;
+    const info=box.querySelector('.sp-gear-cmp[data-gearid="'+gid+'"]');
+    if(info){
+      const opt=sel.options[sel.selectedIndex];
+      info.textContent=((opt&&opt.value)?'収納：'+opt.text:'収納先：未設定')+' ▼';
+    }
+    // PC select に同期（保存時に gear-cmp-select を読むため）
+    const pcSel=box.querySelector('.gear-cmp-select[data-gearid="'+gid+'"]');
+    if(pcSel)pcSel.value=sel.value;
+    sel.style.display='none'; // 自動クローズ
   }));
 
   /* ===== 🍙 食料プラン (functions) ===== */
