@@ -4965,96 +4965,175 @@ function importSetCsv(setId, file){
   reader.readAsText(file,'UTF-8');
 }
 
-/* ── 装備セット PDF ── */
+/* ── 装備セット PDF（チェックリスト専用レイアウト） ── */
 function exportSetPdf(setId){
   const s=state.equipmentSets.find(x=>x.id===setId);
   if(!s){alert('セットが見つかりません。');return;}
   const locs=s.gearLocations||{};
+  const cmps=s.gearCompartments||{};
   const wt=getEquipmentSetWeights(s);
   const gears=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
   const MEALS=['朝食','昼食','夕食'];
   const mp=s.mealPlan||{};
-  const snp=s.snackPlan||{};
-  const sq=s.supplyQuantities||{};
+  const snp=s.snackPlan||{};   // 新形式: {dk:{sid:qty}} または旧形式
 
-  // gear by category
+  /* ── ギア: カテゴリ別 ── */
   const gearByCat={};
-  gears.forEach(g=>{const c=g.category||'未分類';if(!gearByCat[c])gearByCat[c]=[];gearByCat[c].push(g);});
-
-  let gearHtml='';
-  Object.keys(gearByCat).sort().forEach(cat=>{
-    gearHtml+=`<div class="cat-head">${escapeHtml(cat)}</div>`;
-    gearByCat[cat].forEach(g=>{
-      const loc=locs[g.id]==='worn'?'👕':'🎒';
-      gearHtml+=`<div class="gear-row"><span class="gear-name">${loc} ${escapeHtml(g.maker?g.maker+'｜':'')}${escapeHtml(g.name)}</span><span class="gear-w">${g.weight!=null?formatNumber(g.weight)+'g':'-'}</span></div>`;
-    });
+  gears.forEach(g=>{
+    const c=g.category||'未分類';
+    if(!gearByCat[c])gearByCat[c]=[];
+    gearByCat[c].push(g);
   });
 
-  // meal plan
-  let mealHtml='';
-  for(let d=1;d<=Math.max(1,s.days||1);d++){
-    const dk=String(d);
-    const dayObj=mp[dk]||{};
-    mealHtml+=`<div class="day-head">${d}日目</div>`;
-    MEALS.forEach(mt=>{
-      const ids=(dayObj[mt]||[]);
-      if(!ids.length)return;
-      mealHtml+=`<div class="meal-row"><span class="meal-type">${mt}</span><span class="meal-items">`;
-      ids.forEach(sid=>{const sp=state.supplies.find(x=>x.id===Number(sid));if(sp)mealHtml+=escapeHtml(sp.name)+' ';});
-      mealHtml+=`</span></div>`;
-    });
+  // コンパートメント名取得ヘルパー
+  const bp=state.backpacks.find(b=>b.id===(s.defaultBackpackId||''))||state.backpacks[0];
+  function cmpName(gid){
+    const cid=cmps[gid];
+    if(!cid||!bp)return'';
+    const c=(bp.compartments||[]).find(x=>x.id===cid);
+    return c?c.name:'';
   }
 
-  // snack
-  let snackHtml='';
-  Object.keys(snp).forEach(sid=>{
-    if(!(snp[sid]>0))return;
-    const sp=state.supplies.find(x=>x.id===Number(sid));
-    if(sp)snackHtml+=`<div class="snack-row">${escapeHtml(sp.name)} <strong>×${snp[sid]}</strong></div>`;
+  let gearColsHtml='';
+  const cats=Object.keys(gearByCat).sort();
+  cats.forEach(cat=>{
+    let rows='';
+    gearByCat[cat].forEach(g=>{
+      const worn=locs[g.id]==='worn';
+      const cn=cmpName(g.id);
+      const nameStr=escapeHtml((g.maker?g.maker+'｜':'')+g.name);
+      const locStr=worn?'<span class="loc-worn">着用</span>':'';
+      const cmpStr=cn?`<span class="cmp-tag">${escapeHtml(cn)}</span>`:'';
+      const wStr=g.weight!=null?formatNumber(g.weight)+'g':'-';
+      rows+=`<div class="gr"><span class="cb">&#x2610;</span><span class="gn">${nameStr}${locStr}${cmpStr}</span><span class="gw">${wStr}</span></div>`;
+    });
+    gearColsHtml+=`<div class="cat-block"><div class="ch">${escapeHtml(cat)}</div>${rows}</div>`;
   });
+
+  /* ── 食料プラン ── */
+  let foodHtml='';
+  const hasMeal=Object.keys(mp).some(dk=>MEALS.some(mt=>(mp[dk]?.[mt]||[]).length>0));
+  if(hasMeal){
+    for(let d=1;d<=Math.max(1,s.days||1);d++){
+      const dk=String(d);
+      const dayObj=mp[dk]||{};
+      const dayRows=[];
+      MEALS.forEach(mt=>{
+        const ids=dayObj[mt]||[];
+        if(!ids.length)return;
+        const names=ids.map(sid=>{const sp=state.supplies.find(x=>x.id===Number(sid));return sp?escapeHtml(sp.name):'';}).filter(Boolean).join('・');
+        dayRows.push(`<span class="mt">${mt}</span><span class="mi">${names}</span>`);
+      });
+      if(dayRows.length){
+        foodHtml+=`<div class="day-blk"><span class="dk">${d}日目</span>${dayRows.map(r=>'<span class="meal-pair">'+r+'</span>').join('')}</div>`;
+      }
+    }
+  }
+
+  /* ── 行動食 ── */
+  let snackRows='';
+  // 新旧両形式に対応
+  function eachSnack(cb){
+    const keys=Object.keys(snp);
+    if(!keys.length)return;
+    if(typeof snp[keys[0]]==='number'){
+      keys.forEach(sid=>{if(snp[sid]>0)cb(sid,snp[sid]);});
+    } else {
+      Object.values(snp).forEach(dayObj=>{
+        if(!dayObj||typeof dayObj!=='object')return;
+        Object.keys(dayObj).forEach(sid=>{if(dayObj[sid]>0)cb(sid,dayObj[sid]);});
+      });
+    }
+  }
+  const snackAgg={};
+  eachSnack((sid,qty)=>{snackAgg[sid]=(snackAgg[sid]||0)+qty;});
+  Object.keys(snackAgg).forEach(sid=>{
+    const sp=state.supplies.find(x=>x.id===Number(sid));
+    if(sp)snackRows+=`<span class="snack-item">&#x2610; ${escapeHtml(sp.name)} ×${snackAgg[sid]}</span>`;
+  });
+
+  const today=new Date().toLocaleDateString('ja-JP');
+  const totalG=Math.round(wt.totalWeight).toLocaleString('ja-JP');
+  const wornG=Math.round(wt.wornWeight).toLocaleString('ja-JP');
+  const packG=Math.round(wt.packWeight).toLocaleString('ja-JP');
+  const foodG=Math.round(wt.consumablesWeight).toLocaleString('ja-JP');
 
   const printHtml=`<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
-<title>${escapeHtml(s.name)} 山行記録</title>
+<title>${escapeHtml(s.name)} 装備チェックリスト</title>
 <style>
-body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;margin:0;padding:24px;color:#1b1b1b;font-size:14px;line-height:1.6;}
-h1{font-size:22px;margin:0 0 4px;}
-.subtitle{font-size:14px;color:#555;margin-bottom:4px;}
-.memo{font-size:13px;color:#333;margin-bottom:16px;white-space:pre-wrap;}
-.section{margin:16px 0;}
-.section-title{font-size:16px;font-weight:700;border-bottom:2px solid #1f3b73;padding-bottom:4px;margin-bottom:10px;color:#1f3b73;}
-.weight-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
-.wt-item{background:#f5f7f5;border-radius:6px;padding:6px 10px;}
-.wt-label{font-size:11px;color:#667a6b;}
-.wt-val{font-size:16px;font-weight:800;}
-.wt-total{background:#1f3b73;color:#fff;border-radius:6px;padding:6px 10px;font-weight:700;}
-.cat-head{font-size:12px;font-weight:700;color:#1f3b73;background:#eef2ff;padding:2px 8px;border-radius:4px;margin:8px 0 4px;}
-.gear-row{display:flex;justify-content:space-between;padding:2px 4px;border-bottom:1px solid #f0f0f0;font-size:13px;}
-.gear-w{color:#667a6b;flex-shrink:0;margin-left:8px;}
-.day-head{font-size:13px;font-weight:700;color:#1f3b73;margin:8px 0 4px;padding:2px 8px;background:#eef2ff;border-radius:4px;}
-.meal-row{display:flex;gap:8px;padding:2px 4px;font-size:13px;}
-.meal-type{min-width:36px;color:#667a6b;}
-.snack-row{padding:2px 4px;font-size:13px;}
-@media print{body{padding:12px;}@page{margin:12mm;}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Meiryo",sans-serif;
+  font-size:9.5pt;line-height:1.45;color:#111;
+  padding:10mm 10mm 8mm;
+}
+@page{size:A4 portrait;margin:0;}
+
+/* ── ヘッダー ── */
+.hdr{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2pt solid #1f3b73;padding-bottom:3pt;margin-bottom:4pt;}
+.title{font-size:15pt;font-weight:700;color:#1f3b73;}
+.outdate{font-size:7.5pt;color:#888;}
+.memo{font-size:8pt;color:#444;margin:3pt 0 5pt;white-space:pre-wrap;border-left:2pt solid #ccc;padding-left:6pt;}
+
+/* ── 重量バー ── */
+.wt-bar{display:flex;gap:0;border:1pt solid #1f3b73;border-radius:4pt;overflow:hidden;margin-bottom:6pt;font-size:8.5pt;}
+.wt-cell{flex:1;text-align:center;padding:3pt 2pt;}
+.wt-cell+.wt-cell{border-left:1pt solid #b0c0e0;}
+.wt-lbl{font-size:6.5pt;color:#555;display:block;}
+.wt-val{font-weight:700;display:block;}
+.wt-total{background:#1f3b73;color:#fff;flex:1.2;}
+.wt-total .wt-lbl{color:#c0d0f0;}
+.wt-total .wt-val{font-size:10pt;}
+
+/* ── セクション見出し ── */
+.sec-title{font-size:9pt;font-weight:700;color:#1f3b73;border-bottom:1pt solid #1f3b73;margin:6pt 0 3pt;padding-bottom:1pt;}
+
+/* ── 2列ギアグリッド ── */
+.gear-columns{column-count:2;column-gap:10pt;column-fill:auto;}
+.cat-block{break-inside:avoid;margin-bottom:3pt;}
+.ch{font-size:8pt;font-weight:700;background:#eef2ff;color:#1f3b73;padding:1pt 5pt;margin-bottom:1pt;border-radius:2pt;}
+.gr{display:flex;align-items:baseline;gap:3pt;padding:1.5pt 2pt;border-bottom:0.5pt solid #eee;font-size:8.5pt;}
+.cb{font-size:10pt;flex-shrink:0;line-height:1;color:#333;}
+.gn{flex:1;min-width:0;word-break:break-all;}
+.gw{flex-shrink:0;color:#666;font-size:7.5pt;margin-left:auto;padding-left:3pt;white-space:nowrap;}
+.loc-worn{font-size:6.5pt;background:#fff3e8;color:#a05000;border-radius:2pt;padding:0 2pt;margin-left:3pt;vertical-align:middle;}
+.cmp-tag{font-size:6.5pt;background:#eef2ff;color:#1f3b73;border-radius:2pt;padding:0 2pt;margin-left:3pt;vertical-align:middle;}
+
+/* ── 食料プラン ── */
+.food-section{margin-top:6pt;}
+.day-blk{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8pt;padding:2pt 0;border-bottom:0.5pt solid #eee;font-size:8pt;}
+.dk{font-weight:700;color:#1f3b73;flex-shrink:0;min-width:28pt;}
+.meal-pair{display:inline-flex;gap:3pt;margin-right:8pt;}
+.mt{color:#667a6b;flex-shrink:0;}
+.mi{color:#111;}
+
+/* ── 行動食 ── */
+.snack-wrap{display:flex;flex-wrap:wrap;gap:4pt 12pt;margin-top:3pt;font-size:8.5pt;}
+.snack-item{white-space:nowrap;}
+
+/* ── フッター ── */
+.footer{position:fixed;bottom:6mm;right:10mm;font-size:7pt;color:#aaa;}
 </style></head><body>
-<h1>${escapeHtml(s.name)}</h1>
-${s.memo?`<div class="memo">${escapeHtml(s.memo)}</div>`:''}
-<div class="section">
-  <div class="section-title">【重量】</div>
-  <div class="weight-grid">
-    <div class="wt-item"><div class="wt-label">👕 着用重量</div><div class="wt-val">${Math.round(wt.wornWeight).toLocaleString('ja-JP')}g</div></div>
-    <div class="wt-item"><div class="wt-label">🎒 パック重量</div><div class="wt-val">${Math.round(wt.packWeight).toLocaleString('ja-JP')}g</div></div>
-    <div class="wt-item"><div class="wt-label">🍙 消耗品重量</div><div class="wt-val">${Math.round(wt.consumablesWeight).toLocaleString('ja-JP')}g</div></div>
-    <div class="wt-total">🏔️ 総重量 ${Math.round(wt.totalWeight).toLocaleString('ja-JP')}g</div>
-  </div>
+<div class="hdr">
+  <span class="title">${escapeHtml(s.name)}</span>
+  <span class="outdate">出力日: ${today}</span>
 </div>
-${gearHtml?`<div class="section"><div class="section-title">【装備一覧】</div>${gearHtml}</div>`:''}
-${mealHtml?`<div class="section"><div class="section-title">【食料プラン】</div>${mealHtml}</div>`:''}
-${snackHtml?`<div class="section"><div class="section-title">【行動食】</div>${snackHtml}</div>`:''}
-<div style="margin-top:24px;font-size:11px;color:#aaa;">出力日: ${new Date().toLocaleDateString('ja-JP')}</div>
+${s.memo?`<div class="memo">${escapeHtml(s.memo)}</div>`:''}
+<div class="wt-bar">
+  <div class="wt-cell wt-total"><span class="wt-lbl">総重量</span><span class="wt-val">${totalG}g</span></div>
+  <div class="wt-cell"><span class="wt-lbl">着用</span><span class="wt-val">${wornG}g</span></div>
+  <div class="wt-cell"><span class="wt-lbl">パック</span><span class="wt-val">${packG}g</span></div>
+  <div class="wt-cell"><span class="wt-lbl">食料</span><span class="wt-val">${foodG}g</span></div>
+  <div class="wt-cell"><span class="wt-lbl">ギア数</span><span class="wt-val">${gears.length}点</span></div>
+</div>
+${gearColsHtml?`<div class="sec-title">装備チェックリスト</div><div class="gear-columns">${gearColsHtml}</div>`:''}
+${foodHtml?`<div class="food-section"><div class="sec-title">食料プラン (${s.days||1}日間)</div>${foodHtml}</div>`:''}
+${snackRows?`<div class="sec-title">行動食</div><div class="snack-wrap">${snackRows}</div>`:''}
+<div class="footer">Mountain Gear Manager</div>
 </body></html>`;
 
-  const w=window.open('','_blank','width=800,height=900');
+  const w=window.open('','_blank','width=850,height=1000');
   if(!w){alert('ポップアップがブロックされました。ブラウザのポップアップ許可を確認してください。');return;}
   w.document.write(printHtml);
   w.document.close();
