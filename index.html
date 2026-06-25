@@ -472,6 +472,54 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
   .summary-item .value{font-size:1.3rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin-top:4px!important;}
 }
 
+/* Ver12.2 水量・燃料追加 */
+.mp-summary-grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+@media(max-width:600px){.mp-summary-grid-4{grid-template-columns:1fr 1fr;}}
+.mp-sum-water{background:#e8f4fd;}
+.mp-sum-gas{background:#fff3e0;}
+.mp-meal-water{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.mp-mw-cell{display:flex;align-items:center;gap:4px;background:#e8f4fd;border-radius:6px;padding:4px 8px;font-size:12px;}
+.mp-mw-lbl{color:#555;}
+.mp-mw-val{font-weight:700;color:#1a6fa0;}
+.mp-day-water{font-size:10px;color:#1a6fa0;margin-top:2px;}
+.mp-cat-water{color:#1a6fa0;font-size:10px;}
+
+/* Ver12.2 食料プラン拡張 */
+.meal-cal{font-size:10px;color:#b06000;margin-left:3px;font-weight:600;}
+.meal-eff{font-size:9px;color:#888;margin-left:2px;}
+/* アコーディオン */
+.mp-acc{border:1px solid #e2e8e4;border-radius:10px;overflow:hidden;margin-bottom:6px;}
+.mp-acc-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;cursor:pointer;font-weight:700;font-size:13px;user-select:none;}
+.mp-acc-arrow{font-size:11px;color:#888;}
+.mp-acc-body{padding:8px 10px;}
+.mp-divider{border-top:2px dashed #cdd8d0;margin:10px 0 6px;opacity:.6;}
+/* ステッパーカード */
+.mp-stepper-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0;}
+.mp-stepper-card{border:1px solid #ddd;border-radius:10px;padding:8px 10px;min-width:90px;text-align:center;background:#fff;}
+.mp-sc-name{font-size:12px;font-weight:600;word-break:break-all;margin-bottom:3px;}
+.mp-sc-info{font-size:10px;color:#888;margin-bottom:5px;line-height:1.4;}
+.mp-sc-eff{color:#b06000;font-weight:600;}
+/* サマリーグリッド */
+.mp-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.mp-sum-cell{background:#f0f4f0;border-radius:8px;padding:8px 10px;text-align:center;}
+.mp-sum-lbl{font-size:11px;color:#667a6b;margin-bottom:2px;}
+.mp-sum-val{font-size:20px;font-weight:700;color:#1f3b73;line-height:1.1;}
+.mp-sum-unit{font-size:12px;font-weight:400;margin-left:2px;}
+/* カテゴリ別グリッド */
+.mp-cat-grid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.mp-cat-cell{background:#f5f7f5;border-radius:6px;padding:5px 8px;font-size:11px;text-align:center;min-width:70px;}
+.mp-cat-w{font-weight:700;color:#2a5c3d;}
+.mp-cat-cal{color:#b06000;}
+/* 日別カロリー */
+.mp-day-grid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
+.mp-day-cell{border-radius:8px;padding:6px 10px;text-align:center;min-width:64px;}
+.mp-day-low{background:#fff3cd;}
+.mp-day-ok{background:#d4edda;}
+.mp-day-high{background:#f8d7da;}
+.mp-day-lbl{font-size:10px;color:#555;margin-bottom:1px;}
+.mp-day-kcal{font-size:16px;font-weight:700;line-height:1;}
+.mp-day-unit{font-size:9px;color:#888;}
+
 /* Ver10.0 食料プラン レイアウト */
 .meal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
 .meal-col{background:#f5f7ff;border-radius:8px;padding:6px 5px;min-width:0;overflow:hidden;}
@@ -817,6 +865,8 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
             <option>燃料</option>
             <option>食料</option>
             <option>行動食</option>
+            <option>酒</option>
+            <option>つまみ</option>
             <option>飲料</option>
             <option>医療</option>
             <option>電子機器</option>
@@ -985,7 +1035,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
       <label>カテゴリ</label>
       <select id="spEditCategory">
         <option>燃料</option><option>食料</option><option>行動食</option>
-        <option>飲料</option><option>医療</option><option>電子機器</option><option>その他</option>
+        <option>酒</option><option>つまみ</option><option>飲料</option><option>医療</option><option>電子機器</option><option>その他</option>
       </select>
     </div>
     <div class="form-row">
@@ -996,6 +1046,11 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
       <div><label>重量(g)</label><input type="number" id="spEditWeight" min="0" step="1" placeholder="0" /></div>
       <div><label>価格(円)</label><input type="number" id="spEditPrice" min="0" step="1" placeholder="0" /></div>
     </div>
+    <div class="form-row two-col">
+      <div><label>カロリー(kcal)</label><input type="number" id="spEditCalories" min="0" step="1" placeholder="0" /></div>
+      <div><label>必要水量(ml)</label><input type="number" id="spEditWaterMl" min="0" step="1" placeholder="0" /></div>
+    </div>
+    <div class="form-row"><label style="color:#888;font-size:11px;">※カロリー・必要水量は1個(1食)あたり</label></div>
     <div class="form-row">
       <label>メモ</label>
       <textarea id="spEditMemo" rows="2" placeholder="メモ"></textarea>
@@ -1326,6 +1381,8 @@ const els = {
   spEditWeight: document.getElementById('spEditWeight'),
   spEditPrice: document.getElementById('spEditPrice'),
   spEditMemo: document.getElementById('spEditMemo'),
+  spEditCalories: document.getElementById('spEditCalories'),
+  spEditWaterMl:   document.getElementById('spEditWaterMl'),
   spEditId: document.getElementById('spEditId'),
   spEditSaveBtn: document.getElementById('spEditSaveBtn'),
   spEditCancelBtn: document.getElementById('spEditCancelBtn'),
@@ -1361,7 +1418,9 @@ function normalizeSupply(s){
     price: numOrNull(s?.price),
     memo: s?.memo || '',
     checked: !!s?.checked,
-    supplyNo: s?.supplyNo || ''
+    supplyNo: s?.supplyNo || '',
+    calories: (Number.isFinite(Number(s?.calories)) && Number(s.calories) >= 0) ? Number(s.calories) : 0,
+    waterMl: (Number.isFinite(Number(s?.waterMl)) && Number(s.waterMl) >= 0) ? Number(s.waterMl) : 0
   };
 }
 
@@ -2930,6 +2989,14 @@ function openSetEditor(setId){
 
   /* ===== 🍙 食料プラン (functions) ===== */
 
+  /* ── カテゴリ定義 ── */
+  const MEAL_CATS=['食料','燃料'];                          // 朝昼夕に登録可
+  const SNACK_CATS=['行動食','酒','つまみ'];                // ステッパー管理
+  const OTHER_CATS=['飲料','医療','電子機器','その他'];      // 別エリア表示
+  const CAT_EMOJI={'食料':'🍙','燃料':'🔥','行動食':'🍫','酒':'🍶','つまみ':'🧀',
+    '飲料':'💧','医療':'🩺','電子機器':'🔋','その他':'📦'};
+  const MEAL_ICONS={'朝食':'🌅','昼食':'☀️','夕食':'🌙'};
+
   function calcMealCounts(){
     const MEALS=['朝食','昼食','夕食']; // inlined — avoids TDZ of outer const
     const counts={};
@@ -2943,26 +3010,175 @@ function openSetEditor(setId){
     return counts;
   }
 
+  /* ── 集計サマリー更新 ── */
+  /* ── 燃料推定定数（1mlのお湯を沸かすのに必要なガス量の目安）── */
+  /* 一般的なガスストーブ: 水1mlを沸かすのに約0.025g消費（水400ml≒10g）*/
+  const GAS_ML_PER_WATER_ML = 0.025;
+
   function updateMealSummary(){
     const el=box.querySelector('#mealPlanTotal');
     if(!el)return;
     const counts=calcMealCounts();
     const ids=Object.keys(counts);
-    if(!ids.length){el.innerHTML='';return;}
-    let totalW=0,rows='';
+
+    // 全体集計（重量・カロリー・水量）
+    let totalW=0, totalCal=0, totalWater=0;
+    const catW={}, catCal={}, catWater={};
     ids.forEach(id=>{
       const sp=state.supplies.find(x=>x.id===Number(id));
       if(!sp)return;
-      const w=(Number(sp.weight)||0)*counts[id];
-      totalW+=w;
-      rows+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 4px;">'+
-        '<span>'+escapeHtml(sp.name)+' <strong style="color:#1f3b73;">×'+counts[id]+'</strong></span>'+
-        '<span style="color:#667a6b;">'+Math.round(w).toLocaleString('ja-JP')+'g</span></div>';
+      const qty=counts[id];
+      const w    =(Number(sp.weight)  ||0)*qty;
+      const cal  =(Number(sp.calories)||0)*qty;
+      const water=(Number(sp.waterMl) ||0)*qty;
+      totalW+=w; totalCal+=cal; totalWater+=water;
+      const cat=sp.category||'その他';
+      catW[cat]    =(catW[cat]    ||0)+w;
+      catCal[cat]  =(catCal[cat]  ||0)+cal;
+      catWater[cat]=(catWater[cat]||0)+water;
     });
-    el.innerHTML='<div style="font-weight:700;margin-bottom:6px;font-size:13px;">📊 食料集計</div>'+
-      '<div style="background:#f5f7f5;border-radius:6px;padding:6px 2px;">'+rows+'</div>'+
-      '<div style="border-top:1px solid #e2e8e4;margin-top:8px;padding-top:8px;font-weight:700;font-size:15px;">🍙 食料総重量：'+Math.round(totalW).toLocaleString('ja-JP')+'g</div>';
+
+    // 推定ガス使用量 (g)
+    const estimatedGas=Math.round(totalWater*GAS_ML_PER_WATER_ML);
+
+    // 日別カロリー・水量
+    const MEALS=['朝食','昼食','夕食'];
+    const dayStats=[]; // [{kcal, waterMl}]
+    const mealWater={'朝食':0,'昼食':0,'夕食':0};
+    for(let d=1;d<=localDays;d++){
+      const dk=String(d);
+      const dayObj=localMealPlan[dk]||{};
+      let dk_cal=0, dk_water=0;
+      MEALS.forEach(mt=>{
+        ((dayObj[mt])||[]).forEach(sid=>{
+          const sp=state.supplies.find(x=>x.id===Number(sid));
+          if(sp){
+            dk_cal  +=(Number(sp.calories)||0);
+            dk_water+=(Number(sp.waterMl) ||0);
+            if(d===1) mealWater[mt]=(mealWater[mt]||0)+(Number(sp.waterMl)||0); // 1日目のみサンプル表示
+          }
+        });
+      });
+      // スナック系を日数按分
+      let snackCal=0,snackWater=0;
+      Object.keys(localSnackPlan).forEach(sid=>{
+        const qty=localSnackPlan[sid]||0;
+        if(qty>0){
+          const sp=state.supplies.find(x=>x.id===Number(sid));
+          if(sp){
+            snackCal  +=(Number(sp.calories)||0)*qty;
+            snackWater+=(Number(sp.waterMl) ||0)*qty;
+          }
+        }
+      });
+      dayStats.push({
+        kcal : dk_cal  + Math.round(snackCal  /localDays),
+        water: dk_water+ Math.round(snackWater/localDays)
+      });
+    }
+
+    // ── HTML生成 ──
+    let html='';
+
+    // トップサマリー（4セル）
+    html+='<div class="mp-summary-grid mp-summary-grid-4">';
+    html+='<div class="mp-sum-cell"><div class="mp-sum-lbl">総重量</div><div class="mp-sum-val">'+Math.round(totalW).toLocaleString('ja-JP')+'<span class="mp-sum-unit">g</span></div></div>';
+    html+='<div class="mp-sum-cell"><div class="mp-sum-lbl">総カロリー</div><div class="mp-sum-val">'+Math.round(totalCal).toLocaleString('ja-JP')+'<span class="mp-sum-unit">kcal</span></div></div>';
+    html+='<div class="mp-sum-cell mp-sum-water"><div class="mp-sum-lbl">必要水量</div><div class="mp-sum-val">'+Math.round(totalWater).toLocaleString('ja-JP')+'<span class="mp-sum-unit">ml</span></div></div>';
+    html+='<div class="mp-sum-cell mp-sum-gas"><div class="mp-sum-lbl">推定ガス</div><div class="mp-sum-val">約'+estimatedGas+'<span class="mp-sum-unit">g</span></div></div>';
+    html+='</div>';
+
+    // 食事ごとの水量内訳（全日合計）
+    const totalMealWater=MEALS.reduce((a,mt)=>{
+      let mw=0;
+      for(let d=1;d<=localDays;d++){
+        const dayObj=localMealPlan[String(d)]||{};
+        ((dayObj[mt])||[]).forEach(sid=>{
+          const sp=state.supplies.find(x=>x.id===Number(sid));
+          if(sp) mw+=(Number(sp.waterMl)||0);
+        });
+      }
+      return a+mw;
+    },0);
+    if(totalMealWater>0){
+      html+='<div class="mp-meal-water">';
+      MEALS.forEach(mt=>{
+        let mw=0;
+        for(let d=1;d<=localDays;d++){
+          const dayObj=localMealPlan[String(d)]||{};
+          ((dayObj[mt])||[]).forEach(sid=>{
+            const sp=state.supplies.find(x=>x.id===Number(sid));
+            if(sp) mw+=(Number(sp.waterMl)||0);
+          });
+        }
+        if(mw>0) html+='<div class="mp-mw-cell"><span class="mp-mw-lbl">'+(MEAL_ICONS[mt]||'')+mt+'</span><span class="mp-mw-val">'+Math.round(mw).toLocaleString('ja-JP')+'ml</span></div>';
+      });
+      html+='</div>';
+    }
+
+    // カテゴリ別
+    const allCats=[...MEAL_CATS,...SNACK_CATS,...OTHER_CATS];
+    const activeCats=allCats.filter(c=>catW[c]||catCal[c]);
+    if(activeCats.length){
+      html+='<div class="mp-cat-grid">';
+      activeCats.forEach(cat=>{
+        html+='<div class="mp-cat-cell">'+(CAT_EMOJI[cat]||'📦')+' '+cat+'<br>'
+          +'<span class="mp-cat-w">'+Math.round(catW[cat]||0).toLocaleString('ja-JP')+'g</span>'
+          +(catCal[cat]  ?'<span class="mp-cat-cal"> / '+Math.round(catCal[cat]).toLocaleString('ja-JP')+'kcal</span>':'')
+          +(catWater[cat]?'<span class="mp-cat-water"> 💧'+Math.round(catWater[cat]).toLocaleString('ja-JP')+'ml</span>':'')
+          +'</div>';
+      });
+      html+='</div>';
+    }
+
+    // 日別カロリー＋水量
+    if(localDays>=1&&dayStats.some(s=>s.kcal>0||s.water>0)){
+      html+='<div class="mp-day-grid">';
+      dayStats.forEach((s,i)=>{
+        const level=s.kcal<2000?'low':s.kcal>3500?'high':'ok';
+        html+='<div class="mp-day-cell mp-day-'+level+'">'
+          +'<div class="mp-day-lbl">'+(i+1)+'日目</div>'
+          +(s.kcal>0?'<div class="mp-day-kcal">'+s.kcal.toLocaleString('ja-JP')+'</div><div class="mp-day-unit">kcal</div>':'')
+          +(s.water>0?'<div class="mp-day-water">💧'+s.water.toLocaleString('ja-JP')+'ml</div>':'')
+          +'</div>';
+      });
+      html+='</div>';
+    }
+
+    el.innerHTML=html||'<div style="color:#aaa;font-size:13px;text-align:center;">食料を選択すると集計が表示されます</div>';
     updateStats();
+  }
+
+  /* ── ステッパーカードHTML生成ヘルパー ── */
+  function makeStepperCard(sp, qty, borderColor){
+    const wt=Math.round(Number(sp.weight)||0);
+    const cal=Number(sp.calories)||0;
+    const eff=(cal&&wt)?(cal/wt).toFixed(2):null;
+    return '<div class="mp-stepper-card" style="border-color:'+borderColor+';">'
+      +'<div class="mp-sc-name">'+escapeHtml(sp.name)+'</div>'
+      +'<div class="mp-sc-info">'+(wt?wt+'g':'')+(cal?' / '+cal+'kcal':'')+(eff?'<span class="mp-sc-eff"> '+eff+'kcal/g</span>':'')+'</div>'
+      +'<div class="snack-stepper">'
+        +'<button class="snack-btn snack-dec" data-sid="'+sp.id+'">−</button>'
+        +'<span class="snack-qty-val" data-sid="'+sp.id+'">'+qty+'</span>'
+        +'<button class="snack-btn snack-inc" data-sid="'+sp.id+'">+</button>'
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── アコーディオン開閉状態 ── */
+  const mpAccOpen={};
+
+  function makeMpAccordion(id, label, color, content, defaultOpen){
+    if(!(id in mpAccOpen)) mpAccOpen[id]=defaultOpen!==false;
+    const open=mpAccOpen[id];
+    return '<div class="mp-acc" data-mp-acc="'+id+'">'
+      +'<div class="mp-acc-hdr" style="background:'+color+';" data-mp-acc-toggle="'+id+'">'
+        +label+'<span class="mp-acc-arrow">'+(open?'▲':'▼')+'</span>'
+      +'</div>'
+      +'<div class="mp-acc-body"'+(open?'':' style="display:none;"')+'>'
+        +content
+      +'</div>'
+      +'</div>';
   }
 
   function renderMealPlanSection(){
@@ -2971,53 +3187,87 @@ function openSetEditor(setId){
     if(daysEl) localDays=Number(daysEl.value)||1;
     const container=box.querySelector('#mealPlanDays');
     if(!container)return;
-    const mealSups=state.supplies.filter(sp=>sp.category!=='行動食');
-    const snackSups=state.supplies.filter(sp=>sp.category==='行動食');
+
+    // カテゴリ別に振り分け
+    const mealSups   =state.supplies.filter(sp=>MEAL_CATS.includes(sp.category));
+    const snackSups  =state.supplies.filter(sp=>SNACK_CATS.includes(sp.category));
+    const otherSups  =state.supplies.filter(sp=>OTHER_CATS.includes(sp.category));
+
     let html='';
+
+    /* ── 朝食/昼食/夕食 (日ごと) ── */
     for(let d=1;d<=localDays;d++){
       const dk=String(d);
       if(!localMealPlan[dk]||typeof localMealPlan[dk]!=='object')localMealPlan[dk]={};
-      html+='<div style="margin-bottom:10px;">';
-      html+='<div style="font-weight:700;font-size:13px;color:#1f3b73;padding:4px 8px;background:#eef2ff;border-radius:6px;margin-bottom:5px;">📅 '+d+'日目</div>';
-      html+='<div class="meal-grid">';
+
+      let dayContent='<div class="meal-grid">';
       MEALS.forEach(mt=>{
         const mealIds=new Set(((localMealPlan[dk][mt])||[]).map(Number));
-        html+='<div class="meal-col"><div class="meal-col-title">'+mt+'</div>';
+        dayContent+='<div class="meal-col"><div class="meal-col-title">'+(MEAL_ICONS[mt]||'')+' '+mt+'</div>';
         if(!mealSups.length){
-          html+='<p style="color:#999;font-size:11px;margin:2px 0;text-align:center;">なし</p>';
+          dayContent+='<p style="color:#999;font-size:11px;margin:4px 0;text-align:center;">消耗品タブで<br>食料/燃料を登録</p>';
         }else{
           mealSups.forEach(sp=>{
             const ck=mealIds.has(sp.id)?'checked':'';
-            html+='<label class="meal-label"><input type="checkbox" class="mcb" data-day="'+dk+'" data-mt="'+mt+'" data-sid="'+sp.id+'" '+ck+'><span class="meal-name">'+escapeHtml(sp.name)+'</span></label>';
+            const cal=Number(sp.calories)||0;
+            const wt=Math.round(Number(sp.weight)||0);
+            const eff=(cal&&wt)?(cal/wt).toFixed(1)+'kcal/g':'';
+            dayContent+='<label class="meal-label"><input type="checkbox" class="mcb" data-day="'+dk+'" data-mt="'+mt+'" data-sid="'+sp.id+'" '+ck+'>'
+              +'<span class="meal-name">'+escapeHtml(sp.name)
+                +(cal?'<span class="meal-cal">'+cal+'kcal</span>':'')
+                +(eff?'<span class="meal-eff">'+eff+'</span>':'')
+              +'</span></label>';
           });
         }
-        html+='</div>';
+        dayContent+='</div>';
       });
-      html+='</div></div>';
+      dayContent+='</div>';
+
+      html+=makeMpAccordion('day_'+dk,'📅 '+d+'日目','#eef2ff',dayContent,d===1);
     }
-    /* 行動食セクション */
-    html+='<div style="margin-top:10px;padding:10px;background:#fff8f0;border:1px solid #fde2b8;border-radius:10px;">';
-    html+='<div style="font-weight:700;font-size:14px;margin-bottom:8px;">🍫 行動食</div>';
-    if(!snackSups.length){
-      html+='<p style="color:#999;font-size:13px;margin:0;">消耗品タブでカテゴリ「行動食」の消耗品を登録してください。</p>';
-    }else{
-      html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
-      snackSups.forEach(sp=>{
-        const qty=localSnackPlan[sp.id]||0;
-        html+='<div style="background:#fff;border:1px solid #fde2b8;border-radius:8px;padding:6px 8px;min-width:72px;text-align:center;">';
-        html+='<div style="font-size:12px;margin-bottom:2px;word-break:break-all;">'+escapeHtml(sp.name)+'</div>';
-        html+='<div style="font-size:11px;color:#aaa;margin-bottom:4px;">'+(Math.round(Number(sp.weight)||0))+'g</div>';
-        html+='<div class="snack-stepper">';
-        html+='<button class="snack-btn snack-dec" data-sid="'+sp.id+'">−</button>';
-        html+='<span class="snack-qty-val" data-sid="'+sp.id+'">'+qty+'</span>';
-        html+='<button class="snack-btn snack-inc" data-sid="'+sp.id+'">+</button>';
-        html+='</div></div>';
+
+    /* ── 行動食・酒・つまみ ── */
+    const snackGroups=[
+      {cats:['行動食'],label:'🍫 行動食',color:'#fff8f0',border:'#fde2b8'},
+      {cats:['酒'],    label:'🍶 酒',    color:'#fff0f6',border:'#f9c4d8'},
+      {cats:['つまみ'],label:'🧀 つまみ', color:'#fffbf0',border:'#f5e2a0'},
+    ];
+    snackGroups.forEach(function(grp){
+      const sups=snackSups.filter(sp=>grp.cats.includes(sp.category));
+      if(!sups.length)return;
+      let content='<div class="mp-stepper-wrap">';
+      sups.forEach(sp=>{
+        content+=makeStepperCard(sp,localSnackPlan[sp.id]||0,grp.border);
       });
-      html+='</div>';
-    }
-    html+='</div>';
+      content+='</div>';
+      html+=makeMpAccordion('snack_'+grp.cats[0],grp.label,grp.color,content);
+    });
+
+    /* ── 仕切り ── */
+    html+='<div class="mp-divider"></div>';
+
+    /* ── 飲料・医療・電子機器・その他 ── */
+    const otherGroups=[
+      {cat:'飲料',    label:'💧 飲料',   color:'#f0f8ff',border:'#a8d0f0'},
+      {cat:'医療',    label:'🩺 医療',   color:'#f5fff5',border:'#a0d0a0'},
+      {cat:'電子機器',label:'🔋 電子機器',color:'#f8f5ff',border:'#c0a8f0'},
+      {cat:'その他',  label:'📦 その他', color:'#f8f8f8',border:'#ccc'},
+    ];
+    otherGroups.forEach(function(grp){
+      const sups=otherSups.filter(sp=>sp.category===grp.cat);
+      if(!sups.length)return;
+      let content='<div class="mp-stepper-wrap">';
+      sups.forEach(sp=>{
+        content+=makeStepperCard(sp,localSnackPlan[sp.id]||0,grp.border);
+      });
+      content+='</div>';
+      html+=makeMpAccordion('other_'+grp.cat,grp.label,grp.color,content,false);
+    });
+
     container.innerHTML=html;
     updateMealSummary();
+
+    /* ── イベント: チェックボックス ── */
     container.querySelectorAll('.mcb').forEach(cb=>{
       cb.addEventListener('change',()=>{
         const day=cb.dataset.day,mt=cb.dataset.mt,sid=Number(cb.dataset.sid);
@@ -3028,6 +3278,8 @@ function openSetEditor(setId){
         updateMealSummary();
       });
     });
+
+    /* ── イベント: ステッパー +/− ── */
     container.querySelectorAll('.snack-inc').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const sid=Number(btn.dataset.sid);
@@ -3044,6 +3296,20 @@ function openSetEditor(setId){
         const qEl=container.querySelector('.snack-qty-val[data-sid="'+sid+'"]');
         if(qEl)qEl.textContent=localSnackPlan[sid];
         updateMealSummary();
+      });
+    });
+
+    /* ── イベント: アコーディオン ── */
+    container.querySelectorAll('[data-mp-acc-toggle]').forEach(hdr=>{
+      hdr.addEventListener('click',()=>{
+        const id=hdr.dataset.mpAccToggle;
+        mpAccOpen[id]=!mpAccOpen[id];
+        const acc=container.querySelector('[data-mp-acc="'+id+'"]');
+        if(!acc)return;
+        const body=acc.querySelector('.mp-acc-body');
+        const arrow=acc.querySelector('.mp-acc-arrow');
+        if(body)body.style.display=mpAccOpen[id]?'':'none';
+        if(arrow)arrow.textContent=mpAccOpen[id]?'▲':'▼';
       });
     });
   }
@@ -3400,9 +3666,17 @@ function openPackingMode(setId){
       if(sec) box.appendChild(sec);
     }
 
-    /* ── 食料 ── */
-    const mealSups=supplies.filter(sp=>sp.category!=='行動食');
-    const snackSups=supplies.filter(sp=>sp.category==='行動食');
+    /* ── 食料・消耗品 ── */
+    const PACK_SUP_GROUPS=[
+      {label:'🍙 食料・燃料', color:'#e8f5e9', filter:sp=>['食料','燃料'].includes(sp.category)},
+      {label:'🍫 行動食',    color:'#fff3e0', filter:sp=>sp.category==='行動食'},
+      {label:'🍶 酒',        color:'#fff0f6', filter:sp=>sp.category==='酒'},
+      {label:'🧀 つまみ',    color:'#fffbf0', filter:sp=>sp.category==='つまみ'},
+      {label:'💧 飲料',      color:'#f0f8ff', filter:sp=>sp.category==='飲料'},
+      {label:'🩺 医療',      color:'#f5fff5', filter:sp=>sp.category==='医療'},
+      {label:'🔋 電子機器',  color:'#f8f5ff', filter:sp=>sp.category==='電子機器'},
+      {label:'📦 その他',    color:'#f8f8f8', filter:sp=>!['食料','燃料','行動食','酒','つまみ','飲料','医療','電子機器'].includes(sp.category)},
+    ];
 
     function addSupSection(label,color,supList){
       if(!supList.length) return;
@@ -3424,8 +3698,7 @@ function openPackingMode(setId){
         box.appendChild(row);
       });
     }
-    addSupSection('🍙 食料','#e8f5e9',mealSups);
-    addSupSection('🍫 行動食','#fff3e0',snackSups);
+    PACK_SUP_GROUPS.forEach(function(g){ addSupSection(g.label,g.color,supplies.filter(g.filter)); });
 
     /* ── 閉じるボタン（下部） ── */
     const footDiv=document.createElement('div');
@@ -3706,7 +3979,7 @@ function renderSupplies(){
 
   const catSelect=els.editSupplyCategory;
   if(catSelect && !catSelect.options.length){
-    ['燃料','食料','行動食','飲料','医療','電子機器','その他'].forEach(c=>{
+    ['燃料','食料','行動食','酒','つまみ','飲料','医療','電子機器','その他'].forEach(c=>{
       const o=document.createElement('option');
       o.value=c;
       o.textContent=c;
@@ -3778,6 +4051,8 @@ function openSupplyEditModal(supplyId){
   els.spEditWeight.value = s.weight != null ? s.weight : '';
   els.spEditPrice.value = s.price != null ? s.price : '';
   els.spEditMemo.value = s.memo || '';
+  if(els.spEditCalories) els.spEditCalories.value = s.calories != null ? s.calories : '';
+  if(els.spEditWaterMl)   els.spEditWaterMl.value   = s.waterMl  != null ? s.waterMl  : '';
   els.supplyEditModal.classList.add('show');
   els.supplyEditModal.setAttribute('aria-hidden','false');
   els.spEditName.focus();
@@ -3800,6 +4075,8 @@ function saveSupplyEditModal(){
   s.weight = Number(els.spEditWeight.value) || 0;
   s.price = numOrNull(els.spEditPrice.value);
   s.memo = els.spEditMemo.value.trim();
+  s.calories = Number(els.spEditCalories?.value) || 0;
+  s.waterMl  = Number(els.spEditWaterMl?.value)   || 0;
   if(els.spEditSupplyNo) s.supplyNo = els.spEditSupplyNo.value.trim() || s.supplyNo;
   closeSupplyEditModal();
   saveSupplies();
