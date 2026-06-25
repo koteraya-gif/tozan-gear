@@ -480,79 +480,97 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .ssc-count{font-size:12px;color:var(--muted);}
 .ssc-sub{display:flex;flex-wrap:wrap;gap:8px;margin-top:0;margin-left:8px;font-size:12px;color:#555;align-items:baseline;}
 .ssc-sub span{white-space:nowrap;}
+/* PC: モバイル専用要素は非表示 */
+.gcr-cmp-info,.gcr-cmp-btn{display:none;}
+
 @media(max-width:768px){
-  /* ── 集計バー ── */
-  .set-stats-compact{padding:4px 8px;}
-  .ssc-main{flex-wrap:nowrap;}
-  .ssc-total{font-size:14px;}
-  .ssc-sub{margin-left:6px;margin-top:0;gap:6px;font-size:11px;}
+  /* ── 集計バー: コンパクト化 ── */
+  .set-stats-compact{padding:3px 8px;}
+  .ssc-main{flex-wrap:nowrap;gap:6px;}
+  .ssc-total{font-size:13px;}
+  .ssc-count{font-size:11px;}
+  .ssc-sub{margin-left:4px;margin-top:0;gap:5px;font-size:11px;}
 
-  /* ── 使用ザック行 ── */
-  .bp-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:nowrap;}
+  /* ── 使用ザック行: 1行コンパクト ── */
+  .bp-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:nowrap;}
   .bp-row-lbl{font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;}
-  .bp-row-sel{flex:1;min-width:0;font-size:12px;padding:4px 6px;border:1px solid var(--border,#ccc);border-radius:6px;}
+  .bp-row-sel{flex:1;min-width:0;font-size:12px;padding:3px 6px;border:1px solid var(--border,#ccc);border-radius:6px;}
+  .pack-icon-btn{font-size:11px!important;padding:3px 7px!important;}
 
-  /* ── ギアカード（スマホ専用） ── */
+  /* ── ギアカード: スマホ専用グリッドレイアウト ── */
   .gear-check-row{
     display:grid;
-    grid-template-areas:"label toggle" "select select";
+    grid-template-areas:
+      "label  toggle"
+      "cmpinfo cmpinfo"
+      "cmpbtn  cmpbtn"
+      "select  select";
     grid-template-columns:1fr auto;
-    grid-template-rows:auto auto;
-    gap:3px 6px;
+    gap:2px 6px;
     background:#fff;
     border:1px solid #e4e8e4;
     border-radius:8px;
-    padding:6px 8px;
-    margin:3px 0 !important;
+    padding:5px 8px;
+    margin:2px 0 !important;
   }
   .gcr-label{
     grid-area:label;
     display:flex;
     align-items:center;
-    gap:5px;
+    flex-wrap:wrap;
+    gap:4px 5px;
     min-width:0;
   }
   .gcr-label input[type=checkbox]{
-    flex-shrink:0;
-    width:16px;height:16px;
+    flex-shrink:0;width:16px;height:16px;
   }
   .gcr-name{
-    font-size:13px;
-    font-weight:600;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    flex:1;
-    min-width:0;
+    font-size:13px;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    flex:1;min-width:0;
   }
   .gcr-wt{
-    font-size:11px;
-    color:var(--muted,#888);
-    white-space:nowrap;
-    flex-shrink:0;
-  }
-  .gear-cmp-select{
-    grid-area:select;
-    width:100%;
-    max-width:100% !important;
-    min-width:0 !important;
-    font-size:12px !important;
-    padding:4px 6px !important;
-    border-radius:6px;
+    flex:0 0 100%;
+    margin-left:21px;
+    font-size:11px;color:var(--muted,#888);
+    line-height:1.2;
   }
   .loc-toggle{
     grid-area:toggle;
-    min-width:32px!important;
-    min-height:32px!important;
-    font-size:15px!important;
-    padding:2px 5px!important;
-    align-self:center;
+    align-self:start;
+    min-width:28px!important;min-height:28px!important;
+    font-size:14px!important;padding:1px 4px!important;
   }
+  /* モバイル専用: 収納先情報・変更ボタン ── */
+  .gcr-cmp-info{
+    grid-area:cmpinfo;
+    display:block;
+    font-size:11px;color:#666;
+    margin-left:21px;line-height:1.3;
+  }
+  .gcr-cmp-btn{
+    grid-area:cmpbtn;
+    display:inline-block;
+    font-size:11px;color:var(--green,#2a7a4f);
+    background:none;border:1px solid var(--green,#2a7a4f);
+    border-radius:5px;padding:2px 8px;
+    cursor:pointer;margin-left:21px;
+    align-self:start;width:auto;
+  }
+  /* 収納先セレクト: タップで表示 (.cmp-open クラス付与時のみ) ── */
+  .gear-cmp-select{
+    grid-area:select;
+    display:none;
+    width:100%;max-width:100%!important;min-width:0!important;
+    font-size:12px!important;padding:4px 6px!important;
+    border-radius:6px;margin-top:2px;
+  }
+  .gear-cmp-select.cmp-open{display:block;}
 
-  /* ── section-block ── */
-  .section-block{padding:8px;margin:6px 0;}
-  .section-block h3{font-size:13px;margin-bottom:6px;}
-  .section-block h4{font-size:11px;padding:1px 5px;margin:4px 0 2px;}
+  /* ── section-block: 余白削減 ── */
+  .section-block{padding:6px 8px;margin:4px 0;}
+  .section-block h3{font-size:13px;margin:0 0 5px;}
+  .section-block h4{font-size:11px;padding:1px 5px;margin:3px 0 1px;}
 }
 
 /* Ver12.4 食料プラン動的食事追加 */
@@ -3060,14 +3078,19 @@ function openSetEditor(setId){
           return '<option value="'+c.id+'"'+(c.id===gCmpId?' selected':'')+'>'+escapeHtml(c.name)+'</option>';
         }).join('');
         const cmpVis12 = loc==='worn'?' style="display:none;"':'';
+        const activeCmpName=(gCmpId?((activeBp12?.compartments||[]).find(c=>c.id===gCmpId)||{}).name||'':'');
+        const cmpElemHide=(loc==='worn')?' style="display:none;"':'';
+        const cmpInfoTxt=activeCmpName?'収納：'+escapeHtml(activeCmpName):'収納先：未設定';
         h += '<div class="gear-check-row">'+
           '<label class="gcr-label"><input type="checkbox" name="setGearIds" value="'+g.id+'" '+checked+'>'+
           '<span class="gcr-name">'+makerLabel+escapeHtml(g.name)+'</span>'+
           '<span class="gcr-wt">'+formatWeight(g.weight||0)+'</span></label>'+
+          '<button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'">'+locEmoji+'</button>'+
+          '<span class="gcr-cmp-info" data-gearid="'+g.id+'"'+cmpElemHide+'>'+cmpInfoTxt+'</span>'+
+          '<button type="button" class="gcr-cmp-btn" data-gearid="'+g.id+'"'+cmpElemHide+'>収納先を変更</button>'+
           '<select class="gear-cmp-select" data-gearid="'+g.id+'"'+cmpVis12+'>'+
             '<option value="">収納先…</option>'+cmpOpts12+
           '</select>'+
-          '<button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'">'+locEmoji+'</button>'+
           '</div>';
       });
     });
@@ -3156,9 +3179,32 @@ function openSetEditor(setId){
     const newLoc=btn.dataset.loc==='pack'?'worn':'pack';
     btn.dataset.loc=newLoc;
     btn.textContent=newLoc==='worn'?'👕':'🎒';
-    const cmpSel=box.querySelector('.gear-cmp-select[data-gearid="'+btn.dataset.gearloc+'"]');
-    if(cmpSel) cmpSel.style.display=newLoc==='worn'?'none':'';
+    const gid=btn.dataset.gearloc;
+    const cmpSel=box.querySelector('.gear-cmp-select[data-gearid="'+gid+'"]');
+    const cmpInfo=box.querySelector('.gcr-cmp-info[data-gearid="'+gid+'"]');
+    const cmpBtn=box.querySelector('.gcr-cmp-btn[data-gearid="'+gid+'"]');
+    if(newLoc==='worn'){
+      if(cmpSel){cmpSel.style.display='none';cmpSel.classList.remove('cmp-open');}
+      if(cmpInfo)cmpInfo.style.display='none';
+      if(cmpBtn)cmpBtn.style.display='none';
+    }else{
+      if(cmpSel)cmpSel.style.display='';
+      if(cmpInfo)cmpInfo.style.display='';
+      if(cmpBtn)cmpBtn.style.display='';
+    }
     updateStats();
+  }));
+  // 収納先変更ボタン（スマホ専用トグル）
+  box.querySelectorAll('.gcr-cmp-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    const sel=box.querySelector('.gear-cmp-select[data-gearid="'+btn.dataset.gearid+'"]');
+    if(sel)sel.classList.toggle('cmp-open');
+  }));
+  // 収納先変更時にラベルテキスト更新
+  box.querySelectorAll('.gear-cmp-select').forEach(sel=>sel.addEventListener('change',()=>{
+    const info=box.querySelector('.gcr-cmp-info[data-gearid="'+sel.dataset.gearid+'"]');
+    if(!info)return;
+    const opt=sel.options[sel.selectedIndex];
+    info.textContent=(opt&&opt.value)?'収納：'+opt.text:'収納先：未設定';
   }));
 
   /* ===== 🍙 食料プラン (functions) ===== */
