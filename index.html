@@ -942,6 +942,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
   <input type="file" id="importCsvFile" accept=".csv,text/csv" style="display:none;">
   <input type="file" id="gearCsvImportFile" accept=".csv,text/csv" style="display:none;">
   <input type="file" id="supplyCsvImportFile" accept=".csv,text/csv" style="display:none;">
+  <input type="file" id="containerCsvImportFile" accept=".csv,text/csv" style="display:none;">
   <input type="file" id="setCsvImportFile" accept=".csv,text/csv" style="display:none;">
 </header>
 
@@ -1117,6 +1118,8 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
     <div class="supply-layout">
       <div class="supply-toolbar-row">
         <button id="addContainerBtn" class="primary-btn">＋ 収納ケース追加</button>
+        <button id="containerExportCsvBtn" class="icon-btn">📥 CSV出力</button>
+        <button id="containerImportCsvBtn" class="icon-btn">📤 CSV取込</button>
         <span style="font-size:12px;color:var(--muted);padding:4px 0;">収納ケースは装備セットのパッキングツリーで使い回せます</span>
       </div>
       <div id="containerList" class="container-list-wrap"></div>
@@ -1597,6 +1600,9 @@ const els = {
   supplyExportCsvBtn: document.getElementById('supplyExportCsvBtn'),
   supplyImportCsvBtn: document.getElementById('supplyImportCsvBtn'),
   supplyCsvImportFile: document.getElementById('supplyCsvImportFile'),
+  containerExportCsvBtn: document.getElementById('containerExportCsvBtn'),
+  containerImportCsvBtn: document.getElementById('containerImportCsvBtn'),
+  containerCsvImportFile: document.getElementById('containerCsvImportFile'),
   setCsvImportFile: document.getElementById('setCsvImportFile'),
 
   supplyEditModal: document.getElementById('supplyEditModal'),
@@ -2091,6 +2097,14 @@ async function init() {
   els.supplyCsvImportFile.addEventListener('change', (e) => {
     const f = e.target.files?.[0];
     if(f) importSupplyCsv(f);
+    e.target.value='';
+  });
+  // 収納ケース CSV
+  els.containerExportCsvBtn.addEventListener('click', exportContainerCsv);
+  els.containerImportCsvBtn.addEventListener('click', () => els.containerCsvImportFile.click());
+  els.containerCsvImportFile.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if(f) importContainerCsv(f);
     e.target.value='';
   });
   // 装備セット CSV (動的バインド: renderEquipmentSets内)
@@ -5546,6 +5560,88 @@ function importSupplyCsv(file){
         }catch(rowErr){result.errors++;console.warn('Row '+i+':',rowErr);}
       }
       if(toSave)saveSupplies();
+      alert('CSV取込完了\n更新：'+result.updated+'件\n新規追加：'+result.added+'件\n変更なし：'+result.unchanged+'件\nエラー：'+result.errors+'件');
+    }catch(e){alert('CSV読込失敗: '+e.message);console.error(e);}
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+/* ── 収納ケース CSV ── */
+function exportContainerCsv(){
+  if(!state.containers||!state.containers.length){alert('出力する収納ケースがありません。');return;}
+  var headers=['管理番号','アイコン','名称','自重(g)','メモ'];
+  var rows=[headers.join(',')];
+  state.containers.forEach(function(c){
+    var cols=[
+      String(c.id), c.icon||'📦', c.name||'',
+      String(Number(c.selfWeight)||0), c.notes||''
+    ].map(function(v){
+      return (v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0)
+        ?'"'+v.replace(/"/g,'""')+'"':v;
+    });
+    rows.push(cols.join(','));
+  });
+  downloadCsv(rows.join('\n'), 'containers_' + dateStr() + '.csv');
+}
+
+function importContainerCsv(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var text=reader.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      var lines=text.split('\n').filter(function(l){return l.trim();});
+      if(lines.length<2){alert('データがありません。');return;}
+      var headers=parseCsvRow(lines[0]).map(function(h){return h.trim();});
+      function findCol(aliases){
+        return aliases.reduce(function(a,al){
+          if(a>=0)return a;
+          return headers.findIndex(function(h){return h.toLowerCase()===al.toLowerCase();});
+        },-1);
+      }
+      var ci={
+        id:     findCol(['管理番号','id']),
+        icon:   findCol(['アイコン','icon']),
+        name:   findCol(['名称','名前','name']),
+        weight: findCol(['自重(g)','自重','selfweight','weight']),
+        notes:  findCol(['メモ','notes','memo'])
+      };
+      if(ci.name<0&&ci.id<0){alert('「名称」または「管理番号」列が見つかりません。');return;}
+      var result={updated:0,added:0,unchanged:0,errors:0};
+      var toSave=false;
+      for(var i=1;i<lines.length;i++){
+        try{
+          var cols=parseCsvRow(lines[i]);
+          function gc(k){return ci[k]>=0?(cols[ci[k]]||''). trim():''}
+          var csvId=gc('id');
+          var name=gc('name');
+          if(!csvId&&!name)continue;
+          var existing=null;
+          if(csvId) existing=state.containers.find(function(x){return String(x.id)===csvId;});
+          if(!existing&&name) existing=state.containers.find(function(x){return x.name===name;});
+          var csvWeight=gc('weight').replace(/,/g,'');
+          if(existing){
+            var changed=false;
+            if(name&&existing.name!==name){existing.name=name;changed=true;}
+            if(ci.icon>=0&&gc('icon')&&existing.icon!==gc('icon')){existing.icon=gc('icon').slice(0,4);changed=true;}
+            if(csvWeight!==''&&String(existing.selfWeight)!==csvWeight){existing.selfWeight=Number(csvWeight)||0;changed=true;}
+            if(ci.notes>=0&&gc('notes')!==''&&existing.notes!==gc('notes')){existing.notes=gc('notes');changed=true;}
+            if(changed){result.updated++;toSave=true;}
+            else result.unchanged++;
+          }else{
+            var newC=normalizeContainer({
+              id:csvId?Number(csvId):Date.now()+i,
+              name:name||'（名称なし）',
+              icon:(gc('icon')||'📦').slice(0,4),
+              selfWeight:Number(csvWeight)||0,
+              notes:gc('notes')
+            });
+            state.containers.push(newC);
+            result.added++;toSave=true;
+          }
+        }catch(rowErr){result.errors++;console.warn('Row '+i+':',rowErr);}
+      }
+      if(toSave)saveContainers().then(function(){renderContainers();});
+      else renderContainers();
       alert('CSV取込完了\n更新：'+result.updated+'件\n新規追加：'+result.added+'件\n変更なし：'+result.unchanged+'件\nエラー：'+result.errors+'件');
     }catch(e){alert('CSV読込失敗: '+e.message);console.error(e);}
   };
