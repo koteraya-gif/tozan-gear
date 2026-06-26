@@ -674,6 +674,54 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .pack-filter-label{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;}
 .pack-filter-btns{display:flex;gap:6px;margin-left:auto;}
 .pack-section{border-bottom:1px solid var(--border,#eee);}
+
+/* ── 収納ケース管理 ── */
+.container-list-wrap{padding:8px 0;}
+.container-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--bg);}
+.cont-icon{font-size:24px;flex-shrink:0;line-height:1;}
+.cont-info{flex:1;min-width:0;}
+.cont-name{font-weight:600;font-size:14px;}
+.cont-meta{font-size:12px;color:var(--muted,#888);margin-top:2px;}
+.cont-notes{font-size:12px;color:var(--muted,#888);margin-top:2px;white-space:pre-wrap;}
+
+/* ── パッキングツリービルダー（セット編集） ── */
+.pktree-wrap{padding:8px 0;}
+.pktree-comp{margin-bottom:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.pktree-comp-hdr{background:var(--green,#2a7a4f);color:#fff;padding:7px 12px;font-size:13px;font-weight:600;}
+.pktree-comp-body{padding:8px;}
+.pktree-node{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:7px;margin:3px 0;font-size:13px;background:var(--bg);border:1px solid var(--border);}
+.pktree-node.is-container{background:#eef2ff;border-color:#b8c8ee;}
+.pktree-node-icon{font-size:16px;flex-shrink:0;}
+.pktree-node-name{flex:1;font-weight:500;}
+.pktree-node-wt{color:var(--muted,#888);font-size:11px;white-space:nowrap;}
+.pktree-node-del{background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0 4px;line-height:1;flex-shrink:0;}
+.pktree-children{margin-left:20px;padding-left:8px;border-left:2px solid #c5d0ee;}
+.pktree-addbar{display:flex;gap:6px;padding:4px 0 2px;align-items:center;flex-wrap:wrap;}
+.pktree-addbar select{flex:1;min-width:80px;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text,#222);}
+.pktree-addbar button{font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;white-space:nowrap;color:var(--green,#2a7a4f);font-weight:600;}
+.pktree-empty{color:var(--muted,#888);font-size:12px;padding:4px 2px;}
+
+/* ── パッキングツリー実行画面 ── */
+.pack-breadcrumb{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:13px;padding:8px 12px;background:var(--border,#eee);border-radius:8px;margin-bottom:8px;}
+.pack-bc-item{color:var(--green,#2a7a4f);cursor:pointer;text-decoration:underline;}
+.pack-bc-item.current{color:var(--text,#222);text-decoration:none;cursor:default;font-weight:600;}
+.pack-bc-sep{color:var(--muted,#888);}
+.pack-tree-cont{padding:8px 0;}
+.pack-tc-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border,#eee);min-height:44px;}
+.pack-tc-item.is-container{background:#f0f4ff;cursor:pointer;}
+.pack-tc-item.is-container:active{background:#dde5ff;}
+.pack-tc-item.is-gear label{flex:1;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.pack-tc-icon{font-size:18px;flex-shrink:0;}
+.pack-tc-name{flex:1;font-size:13px;}
+.pack-tc-wt{font-size:11px;color:var(--muted,#888);white-space:nowrap;}
+.pack-tc-arrow{color:var(--muted,#888);font-size:14px;flex-shrink:0;}
+.pack-tc-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.pack-tc-badge.status-ready{background:#e6f7ee;color:#2a7a4f;}
+.pack-tc-badge.status-partial{background:#fff3e0;color:#a05000;}
+.pack-tc-badge.status-stored{background:#1f3b73;color:#fff;}
+.pack-store-btn{font-size:11px;padding:3px 10px;border:1px solid var(--green,#2a7a4f);color:var(--green,#2a7a4f);border-radius:12px;background:var(--bg);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.pack-store-btn.is-stored{background:var(--green,#2a7a4f);color:#fff;}
+.pack-cont-info{background:#f8f9ff;border:1px solid #c5d0ee;border-radius:8px;padding:8px 12px;margin:6px 10px;font-size:12px;color:#1f3b73;}
 .pack-sec-hdr{
   display:flex;align-items:center;gap:8px;
   padding:9px 14px;cursor:pointer;user-select:none;
@@ -897,6 +945,7 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
     <button id="gearTabBtn" class="tabbtn active">🎒 ギア管理</button>
     <button id="setTabBtn" class="tabbtn">🏔️ 装備セット</button>
     <button id="supplyTabBtn" class="tabbtn">🍙 消耗品</button>
+    <button id="containerTabBtn" class="tabbtn">📦 収納ケース</button>
   </div>
 
   <section id="gearSection" class="active">
@@ -1057,7 +1106,52 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
 
     </div>
   </section>
+
+  <section id="containerSection" class="panel">
+    <h2>📦 収納ケース管理</h2>
+    <div class="supply-layout">
+      <div class="supply-toolbar-row">
+        <button id="addContainerBtn" class="primary-btn">＋ 収納ケース追加</button>
+        <span style="font-size:12px;color:var(--muted);padding:4px 0;">収納ケースは装備セットのパッキングツリーで使い回せます</span>
+      </div>
+      <div id="containerList" class="container-list-wrap"></div>
+    </div>
+  </section>
 </main>
+
+<!-- 収納ケース編集モーダル -->
+<div id="containerModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" style="max-width:480px;">
+    <div class="modal-header">
+      <h2 id="containerModalTitle">収納ケース登録</h2>
+      <button class="close-btn" id="containerModalClose" aria-label="閉じる">✕</button>
+    </div>
+    <form id="containerForm" autocomplete="off">
+      <input type="hidden" id="containerEditId">
+      <div class="form-row">
+        <label class="form-label">アイコン（絵文字）</label>
+        <input type="text" id="containerIcon" class="input" value="📦" maxlength="4" style="width:72px;font-size:22px;text-align:center;padding:4px;">
+      </div>
+      <div class="form-row">
+        <label class="form-label">名称 <span style="color:#c0392b;">*</span></label>
+        <input type="text" id="containerName" class="input" required placeholder="例: フォーカス、スタッフサック、救急セット">
+      </div>
+      <div class="form-row">
+        <label class="form-label">自重 (g)</label>
+        <input type="number" id="containerSelfWeight" class="input" min="0" value="0" style="width:130px;">
+      </div>
+      <div class="form-row">
+        <label class="form-label">備考</label>
+        <textarea id="containerNotes" class="input" rows="2" placeholder="メモ（任意）" style="width:100%;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+        <button type="button" id="containerDeleteBtn" class="danger-btn" style="display:none;margin-right:auto;">🗑 削除</button>
+        <button type="button" id="containerModalClose2" class="ghost-btn">キャンセル</button>
+        <button type="submit" class="primary-btn">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <div id="gearModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="modal-content">
@@ -1386,6 +1480,7 @@ const DEFAULT_CATEGORY_LIST = [
 let state = {
   items: [],
   backpacks: [],
+  containers: [],
   categories: [],
   equipmentSets: [],
   supplies: [],
@@ -1406,9 +1501,11 @@ const els = {
   gearSection: document.getElementById('gearSection'),
   setSection: document.getElementById('setSection'),
   supplySection: document.getElementById('supplySection'),
-  gearTabBtn: document.getElementById('gearTabBtn'),
-  setTabBtn: document.getElementById('setTabBtn'),
-  supplyTabBtn: document.getElementById('supplyTabBtn'),
+  gearTabBtn:       document.getElementById('gearTabBtn'),
+  setTabBtn:        document.getElementById('setTabBtn'),
+  supplyTabBtn:     document.getElementById('supplyTabBtn'),
+  containerTabBtn:  document.getElementById('containerTabBtn'),
+  containerSection: document.getElementById('containerSection'),
 
   list: document.getElementById('gearList'),
   tableWrap: document.getElementById('gearTableWrap'),
@@ -1550,6 +1647,46 @@ function normalizeSupply(s){
   };
 }
 
+/* ── 収納ケース ── */
+function normalizeContainer(c){
+  return {
+    id:          c?.id          || Date.now(),
+    name:        c?.name        || '',
+    icon:        c?.icon        || '📦',
+    selfWeight:  Number(c?.selfWeight)||0,
+    notes:       c?.notes       || '',
+  };
+}
+
+async function loadContainers(){
+  try{
+    const db=await openDB();
+    const tx=db.transaction(STORE_CONTAINERS,'readonly');
+    const store=tx.objectStore(STORE_CONTAINERS);
+    const rows=await new Promise((res,rej)=>{
+      const req=store.getAll();
+      req.onsuccess=()=>res(req.result);
+      req.onerror=()=>rej(req.error);
+    });
+    state.containers=rows.map(normalizeContainer);
+  }catch(e){
+    console.error('[loadContainers]',e);
+    state.containers=[];
+  }
+}
+
+async function saveContainers(){
+  try{
+    const db=await openDB();
+    const tx=db.transaction(STORE_CONTAINERS,'readwrite');
+    const store=tx.objectStore(STORE_CONTAINERS);
+    store.clear();
+    for(const c of state.containers){ store.put(c); }
+    await new Promise((res,rej)=>{ tx.oncomplete=res; tx.onerror=()=>rej(tx.error); });
+  }catch(e){ console.error('[saveContainers]',e); }
+  queueSync();
+}
+
 function normalizeEquipmentSet(set){
   return {
     id: Number(set?.id) || Date.now(),
@@ -1563,7 +1700,8 @@ function normalizeEquipmentSet(set){
     memo: set?.memo || '',
     days: (Number.isFinite(Number(set?.days)) && Number(set?.days) >= 1) ? Math.min(Math.round(Number(set.days)), 14) : 1,
     mealPlan: (set?.mealPlan && typeof set.mealPlan === 'object') ? set.mealPlan : {},
-    snackPlan: (set?.snackPlan && typeof set.snackPlan === 'object') ? set.snackPlan : {}
+    snackPlan:    (set?.snackPlan    && typeof set.snackPlan    === 'object') ? set.snackPlan    : {},
+    packingPlan:  (set?.packingPlan  && typeof set.packingPlan  === 'object') ? set.packingPlan  : {}
   };
 }
 
@@ -1580,21 +1718,23 @@ function normalizeState(raw){
 }
 
 const DB_NAME = 'MountGearDB';
-const DB_VERSION = 2;
-const STORE_ITEMS    = 'items';
-const STORE_META     = 'meta';
-const STORE_SETS     = 'sets';
-const STORE_SUPPLIES = 'supplies';
+const DB_VERSION = 3;
+const STORE_ITEMS      = 'items';
+const STORE_META       = 'meta';
+const STORE_SETS       = 'sets';
+const STORE_SUPPLIES   = 'supplies';
+const STORE_CONTAINERS = 'containers';
 
 function openDB(){
   return new Promise((resolve,reject)=>{
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e)=>{
       const db = e.target.result;
-      if(!db.objectStoreNames.contains(STORE_ITEMS))    db.createObjectStore(STORE_ITEMS,   {keyPath:'id'});
-      if(!db.objectStoreNames.contains(STORE_META))     db.createObjectStore(STORE_META,    {keyPath:'key'});
-      if(!db.objectStoreNames.contains(STORE_SETS))     db.createObjectStore(STORE_SETS,    {keyPath:'id'});
-      if(!db.objectStoreNames.contains(STORE_SUPPLIES)) db.createObjectStore(STORE_SUPPLIES,{keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_ITEMS))      db.createObjectStore(STORE_ITEMS,     {keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_META))       db.createObjectStore(STORE_META,      {keyPath:'key'});
+      if(!db.objectStoreNames.contains(STORE_SETS))       db.createObjectStore(STORE_SETS,      {keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_SUPPLIES))   db.createObjectStore(STORE_SUPPLIES,  {keyPath:'id'});
+      if(!db.objectStoreNames.contains(STORE_CONTAINERS)) db.createObjectStore(STORE_CONTAINERS,{keyPath:'id'});
     };
     req.onsuccess=()=>resolve(req.result);
     req.onerror=()=>reject(req.error);
@@ -1864,6 +2004,7 @@ async function init() {
   await loadItems();
   await loadCategories();
   await loadBackpacks();
+  await loadContainers();
   const setsResult     = await loadEquipmentSets();
   const suppliesResult = await loadSupplies();
 
@@ -1876,6 +2017,7 @@ async function init() {
   syncCategorySelects();
 
   els.addBtn.addEventListener('click', () => openModal());
+  initContainerModal();
   els.closeModal.addEventListener('click', closeModal);
   els.cancelBtn.addEventListener('click', closeModal);
   els.fields.photo.addEventListener('change', handlePhotoChange);
@@ -1982,6 +2124,7 @@ async function init() {
   els.gearTabBtn.addEventListener('click', () => switchTab('gear'));
   els.setTabBtn.addEventListener('click', () => switchTab('set'));
   els.supplyTabBtn.addEventListener('click', () => switchTab('supply'));
+  if(els.containerTabBtn) els.containerTabBtn.addEventListener('click', () => switchTab('container'));
 
   els.addSetBtn.addEventListener('click', addEquipmentSet);
   // 消耗品追加はモーダルを開く
@@ -2020,10 +2163,14 @@ function switchTab(tab){
   els.gearSection.style.display = tab === 'gear' ? '' : 'none';
   els.setSection.classList.toggle('active', tab === 'set');
   els.supplySection.classList.toggle('active', tab === 'supply');
+  if(els.containerSection) els.containerSection.classList.toggle('active', tab === 'container');
 
   els.gearTabBtn.classList.toggle('active', tab === 'gear');
   els.setTabBtn.classList.toggle('active', tab === 'set');
   els.supplyTabBtn.classList.toggle('active', tab === 'supply');
+  if(els.containerTabBtn) els.containerTabBtn.classList.toggle('active', tab === 'container');
+
+  if(tab === 'container') renderContainers();
 }
 
 function importJsonBackup(file){
@@ -2042,11 +2189,13 @@ function importJsonBackup(file){
         'OK: 現在のデータを削除して復元\n\nキャンセル: 現在のデータに追加して復元'
       ) ? 'replace' : 'merge';
 
+      const incomingContainers = Array.isArray(data.containers) ? data.containers.map(normalizeContainer) : [];
       if(mode === 'replace'){
         state.items = normalized.items;
         state.categories = normalized.categories;
         state.equipmentSets = normalized.equipmentSets;
         state.supplies = normalized.supplies;
+        state.containers = incomingContainers;
       } else {
         state.items = [...state.items, ...normalized.items].map(normalizeItem);
 
@@ -2055,16 +2204,21 @@ function importJsonBackup(file){
 
         state.equipmentSets = [...(state.equipmentSets || []), ...(normalized.equipmentSets || [])].map(normalizeEquipmentSet);
         state.supplies = [...(state.supplies || []), ...(normalized.supplies || [])].map(normalizeSupply);
+        // containers: idが重複しない場合のみ追加
+        const existingCids=new Set((state.containers||[]).map(c=>c.id));
+        incomingContainers.filter(c=>!existingCids.has(c.id)).forEach(c=>state.containers.push(c));
       }
 
       await saveItems();
       await saveCategories();
       await saveEquipmentSets();
       await saveSupplies();
+      await saveContainers();
       syncCategorySelects();
       render();
       renderSupplies();
       renderEquipmentSets();
+      renderContainers();
 
       const _isPwa = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
       alert('JSON読込が完了しました。' + (_isPwa ? '' : '\n\n※ PWA版(ホーム画面アイコン)とSafariはストレージが別です。\nPWA版でも同じデータを使うには、PWA版を開いてJSON読込を実行してください。'));
@@ -3025,6 +3179,7 @@ function openSetEditor(setId){
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><button id="saveSetBtnTop">保存</button><button id="closeSetBtnTop">閉じる</button></div>';
   h += '<div id="setStats" style="position:sticky;top:0;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;margin:12px 0;font-weight:bold;z-index:20"></div>';
   h += '<div class="section-block"><h3>📝 備考</h3><textarea id="setMemo" style="width:100%;min-height:120px;resize:vertical;" placeholder="山行メモ・反省点・持ち物メモなど">' + escapeHtml(s.memo||'') + '</textarea></div>';
+  h += '<div class="section-block"><h3>📦 パッキングツリー設定</h3><div id="packingTreeBuilder" class="pktree-wrap"></div></div>';
 
   const bpOpts12=state.backpacks.map(function(b){
     const sel=(s.defaultBackpackId===b.id)?' selected':'';
@@ -3112,6 +3267,7 @@ function openSetEditor(setId){
 
   /* ===== 🍙 食料プラン (state — declared early so updateStats can use calcMealCounts) ===== */
   let localMealPlan=JSON.parse(JSON.stringify(s.mealPlan||{}));
+  let localPackingPlan=JSON.parse(JSON.stringify(s.packingPlan||{}));
   let localSnackPlan=(()=>{
     const raw=s.snackPlan||{};
     const keys=Object.keys(raw);
@@ -3586,6 +3742,171 @@ function openSetEditor(setId){
     });
   }
 
+  /* ── パッキングツリービルダー ── */
+  function renderPackingTreeBuilder(){
+    const wrap=box.querySelector('#packingTreeBuilder');
+    if(!wrap) return;
+    const bp=state.backpacks.find(b=>b.id===(box.querySelector('#setDefaultBp')?.value||s.defaultBackpackId||''))||state.backpacks[0]||null;
+    const cmps=bp?bp.compartments||[]:[];
+    if(!bp||!cmps.length){
+      wrap.innerHTML='<p style="color:var(--muted);font-size:13px;">ザックを選択するとパッキングツリーを設定できます。<br>ザック管理でコンパートメントを追加してください。</p>';
+      return;
+    }
+
+    // コンパートメントがlocalPackingPlanにない場合は初期化
+    cmps.forEach(cmp=>{ if(!localPackingPlan[cmp.id]) localPackingPlan[cmp.id]=[]; });
+
+    function buildNodeHtml(node,cmpId,pathKey){
+      if(node.type==='gear'){
+        const g=state.items.find(x=>x.id===node.id);
+        const nm=g?(g.maker?escapeHtml(g.maker)+'｜':'')+escapeHtml(g.name):'(不明)';
+        const wt=g?formatNumber(Number(g.weight)||0)+'g':'';
+        return `<div class="pktree-node is-gear" data-path="${escapeHtml(pathKey)}">
+          <span class="pktree-node-icon">🎒</span>
+          <span class="pktree-node-name">${nm}</span>
+          <span class="pktree-node-wt">${wt}</span>
+          <button class="pktree-node-del" data-path="${escapeHtml(pathKey)}" title="削除">✕</button>
+        </div>`;
+      }
+      if(node.type==='container'){
+        const cont=state.containers.find(x=>x.id===node.cid);
+        const nm=cont?escapeHtml(cont.icon||'📦')+' '+escapeHtml(cont.name):'(不明)';
+        const totalWt=calcNodeWeight(node);
+        const childPk=`${pathKey}/__cont_${node.cid}`;
+        const available=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
+        const usedGearIds=new Set(gearIdsInTree(localPackingPlan[cmpId]||[]));
+        const availGears=available.filter(g=>!usedGearIds.has(g.id));
+        const childHtml=(node.children||[]).map((ch,ci)=>buildNodeHtml(ch,cmpId,`${pathKey}/${ci}`)).join('');
+        const gearOpts=availGears.map(g=>`<option value="${g.id}">${escapeHtml((g.maker?g.maker+'｜':'')+g.name)} (${formatNumber(g.weight||0)}g)</option>`).join('');
+        return `<div class="pktree-node is-container" data-path="${escapeHtml(pathKey)}">
+          <span class="pktree-node-icon">${cont?escapeHtml(cont.icon||'📦'):'📦'}</span>
+          <span class="pktree-node-name">${cont?escapeHtml(cont.name):'(不明)'}</span>
+          <span class="pktree-node-wt">自重${cont?formatNumber(cont.selfWeight||0):0}g / 合計${formatNumber(totalWt)}g</span>
+          <button class="pktree-node-del" data-path="${escapeHtml(pathKey)}" title="削除">✕</button>
+        </div>
+        <div class="pktree-children" data-childof="${escapeHtml(pathKey)}">
+          ${childHtml}
+          <div class="pktree-addbar">
+            <select class="add-gear-sel" data-path="${escapeHtml(pathKey)}">
+              <option value="">ギア選択…</option>${gearOpts}
+            </select>
+            <button class="add-gear-btn" data-path="${escapeHtml(pathKey)}">＋ ギア追加</button>
+          </div>
+          ${!gearOpts?'<span class="pktree-empty">未割当ギアがありません</span>':''}
+        </div>`;
+      }
+      return '';
+    }
+
+    function buildCmpHtml(cmp){
+      const nodes=localPackingPlan[cmp.id]||[];
+      const usedGearIds=new Set(gearIdsInTree(nodes));
+      const available=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
+      const availGears=available.filter(g=>!usedGearIds.has(g.id));
+      const gearOpts=availGears.map(g=>`<option value="${g.id}">${escapeHtml((g.maker?g.maker+'｜':'')+g.name)} (${formatNumber(g.weight||0)}g)</option>`).join('');
+      const contOpts=state.containers.map(c=>`<option value="${c.id}">${escapeHtml(c.icon||'📦')} ${escapeHtml(c.name)}</option>`).join('');
+      const nodesHtml=nodes.map((n,i)=>buildNodeHtml(n,cmp.id,`${cmp.id}/${i}`)).join('');
+      return `<div class="pktree-comp">
+        <div class="pktree-comp-hdr">▼ ${escapeHtml(cmp.name)}</div>
+        <div class="pktree-comp-body" data-cmpid="${cmp.id}">
+          ${nodesHtml}
+          <div class="pktree-addbar">
+            <select class="add-gear-sel" data-cmpid="${cmp.id}">
+              <option value="">ギア選択…</option>${gearOpts}
+            </select>
+            <button class="add-gear-btn" data-cmpid="${cmp.id}">＋ ギア追加</button>
+            ${contOpts?`<select class="add-cont-sel" data-cmpid="${cmp.id}"><option value="">ケース選択…</option>${contOpts}</select><button class="add-cont-btn" data-cmpid="${cmp.id}">＋ ケース追加</button>`:''}
+          </div>
+          ${!gearOpts&&!contOpts?'<span class="pktree-empty">追加できるギアまたは収納ケースがありません</span>':''}
+        </div>
+      </div>`;
+    }
+
+    wrap.innerHTML=cmps.map(cmp=>buildCmpHtml(cmp)).join('');
+
+    // イベント: 削除
+    wrap.querySelectorAll('.pktree-node-del').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const path=btn.dataset.path;
+        const parts=path.split('/');
+        const cmpId=parts[0];
+        const nodes=localPackingPlan[cmpId]||[];
+        localPackingPlan[cmpId]=removeNodeAtPath(nodes,parts.slice(1).map(Number));
+        renderPackingTreeBuilder();
+      });
+    });
+
+    // イベント: ケース内ギア追加
+    wrap.querySelectorAll('.add-gear-btn[data-path]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const path=btn.dataset.path;
+        const sel=wrap.querySelector(`.add-gear-sel[data-path="${CSS.escape(path)}"]`);
+        const gearId=Number(sel?.value);
+        if(!gearId){alert('ギアを選択してください。');return;}
+        const parts=path.split('/');
+        const cmpId=parts[0];
+        const nodes=localPackingPlan[cmpId]||[];
+        insertNodeAtPath(nodes,parts.slice(1).map(Number),{type:'gear',id:gearId});
+        renderPackingTreeBuilder();
+      });
+    });
+
+    // イベント: コンパートメント直下ギア追加
+    wrap.querySelectorAll('.add-gear-btn[data-cmpid]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const cmpId=btn.dataset.cmpid;
+        const sel=wrap.querySelector(`.add-gear-sel[data-cmpid="${cmpId}"]`);
+        const gearId=Number(sel?.value);
+        if(!gearId){alert('ギアを選択してください。');return;}
+        if(!localPackingPlan[cmpId]) localPackingPlan[cmpId]=[];
+        localPackingPlan[cmpId].push({type:'gear',id:gearId});
+        renderPackingTreeBuilder();
+      });
+    });
+
+    // イベント: コンパートメント直下ケース追加
+    wrap.querySelectorAll('.add-cont-btn[data-cmpid]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const cmpId=btn.dataset.cmpid;
+        const sel=wrap.querySelector(`.add-cont-sel[data-cmpid="${cmpId}"]`);
+        const cid=Number(sel?.value);
+        if(!cid){alert('収納ケースを選択してください。');return;}
+        if(hasContainerInTree(localPackingPlan[cmpId]||[],cid)){alert('同じケースは既に追加されています。');return;}
+        if(!localPackingPlan[cmpId]) localPackingPlan[cmpId]=[];
+        localPackingPlan[cmpId].push({type:'container',cid,children:[]});
+        renderPackingTreeBuilder();
+      });
+    });
+  }
+
+  function removeNodeAtPath(nodes,idxPath){
+    if(!idxPath.length) return nodes;
+    if(idxPath.length===1){
+      return nodes.filter((_,i)=>i!==idxPath[0]);
+    }
+    return nodes.map((n,i)=>{
+      if(i!==idxPath[0]) return n;
+      if(n.type==='container') return {...n,children:removeNodeAtPath(n.children||[],idxPath.slice(1))};
+      return n;
+    });
+  }
+
+  function insertNodeAtPath(nodes,idxPath,newNode){
+    // idxPath points to container node; push newNode into its children
+    if(!idxPath.length){nodes.push(newNode);return;}
+    const n=nodes[idxPath[0]];
+    if(n&&n.type==='container'){
+      if(idxPath.length===1) n.children.push(newNode);
+      else insertNodeAtPath(n.children||[],idxPath.slice(1),newNode);
+    }
+  }
+
+  // ザック変更時にツリービルダーを再描画
+  function onBpSelectChange(){
+    renderPackingTreeBuilder();
+  }
+
   function renderMealPlanSection(){
     const daysEl=box.querySelector('#setDaysSelect');
     if(daysEl) localDays=Number(daysEl.value)||1;
@@ -3686,6 +4007,11 @@ function openSetEditor(setId){
   const daysSelEl=box.querySelector('#setDaysSelect');
   if(daysSelEl)daysSelEl.addEventListener('change',renderMealPlanSection);
 
+  // ザック変更時にツリービルダー再描画
+  box.querySelector('#setDefaultBp')?.addEventListener('change',renderPackingTreeBuilder);
+  // 初期描画
+  renderPackingTreeBuilder();
+
   const save=()=>{
     s.gearIds = getCheckedNumbers('setGearIds');
     s.supplyIds = [];
@@ -3704,6 +4030,7 @@ function openSetEditor(setId){
     s.days=localDays;
     s.mealPlan=localMealPlan;
     s.snackPlan=localSnackPlan;
+    s.packingPlan=JSON.parse(JSON.stringify(localPackingPlan));
     // 食料プランから数量を自動集計
     const mealCounts=calcMealCounts();
     Object.keys(mealCounts).forEach(id=>{
@@ -3839,16 +4166,15 @@ function openPackingMode(setId){
 
   const packingKey='mountGear.packing.'+setId;
   let packingState=JSON.parse(localStorage.getItem(packingKey)||'{}');
-
   const gears=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
   const supplies=state.supplies.filter(sp=>(s.supplyIds||[]).includes(sp.id));
   const sqty=s.supplyQuantities||{};
+  const plan=s.packingPlan||{};
+  const hasTree=Object.keys(plan).some(k=>(plan[k]||[]).length>0);
 
-  // アコーディオン開閉状態（compartmentId → bool）
-  const accordionOpen={};
-  let showUnpackedOnly=false;
+  // パンくずスタック: [{type:'root'}] or [{type:'root'},{type:'compartment',cmpId},{type:'container',node,cmpId}]
+  let breadcrumb=[{type:'root'}];
 
-  // 使用中のザックを返す
   function getActiveBp(){
     const bpId=packingState._backpackId||s.defaultBackpackId;
     return state.backpacks.find(b=>b.id===bpId)||state.backpacks[0]||null;
@@ -3856,7 +4182,6 @@ function openPackingMode(setId){
 
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
-
   const box=document.createElement('div');
   box.className='pack-box';
 
@@ -3865,100 +4190,360 @@ function openPackingMode(setId){
     renderEquipmentSets();
   }
 
+  function closeOverlay(){
+    document.body.removeChild(overlay);
+    renderEquipmentSets();
+  }
+
+  /* ── サマリー計算 ── */
+  function calcSummary(){
+    if(hasTree){
+      // ツリーモード: 全ギアのチェック状況
+      const allGearIds=[];
+      Object.values(plan).forEach(nodes=>allGearIds.push(...gearIdsInTree(nodes)));
+      const done=allGearIds.filter(id=>packingState['g_'+id]).length;
+      const totalW=gears.reduce((a,g)=>a+(Number(g.weight)||0),0);
+      const doneW=allGearIds.filter(id=>packingState['g_'+id]).reduce((a,id)=>{
+        const g=state.items.find(x=>x.id===id);
+        return a+(Number(g?.weight)||0);
+      },0);
+      return {done,total:allGearIds.length,totalW,doneW};
+    }
+    // レガシーモード
+    const done=gears.filter(g=>packingState['g_'+g.id]).length;
+    const totalW=gears.reduce((a,g)=>a+(Number(g.weight)||0),0);
+    return {done,total:gears.length,totalW,doneW:0};
+  }
+
   function updateSummary(){
     const el=box.querySelector('#packSummary');
     if(!el) return;
-    const doneG=gears.filter(g=>packingState['g_'+g.id]).length;
-    const undoneG=gears.length-doneG;
-    const doneS=supplies.filter(sp=>packingState['s_'+sp.id]).length;
+    const bp=getActiveBp();
     const locs=s.gearLocations||{};
     let wornW=0,packW=0;
-    gears.forEach(g=>{
-      const w=Number(g.weight)||0;
-      if(locs[g.id]==='worn') wornW+=w; else packW+=w;
-    });
+    gears.forEach(g=>{ const w=Number(g.weight)||0; if(locs[g.id]==='worn') wornW+=w; else packW+=w; });
     const supW=supplies.reduce((a,sp)=>{
-      const qty=sqty[String(sp.id)]||sqty[sp.id]||1;
+      const qty=sqty[String(sp.id)]||1;
       return a+(Number(sp.weight)||0)*qty;
     },0);
+    const {done,total}=calcSummary();
+    const undone=total-done;
     el.innerHTML=
       '<div class="pack-sum-grid">'+
-        '<div class="pack-sum-cell"><span class="pack-sum-lbl">収納済</span><strong>'+doneG+'/'+gears.length+'点</strong></div>'+
+        '<div class="pack-sum-cell"><span class="pack-sum-lbl">収納済</span><strong>'+done+'/'+total+'点</strong></div>'+
         '<div class="pack-sum-cell"><span class="pack-sum-lbl">パック重量</span><strong>'+(Math.round(packW+supW)).toLocaleString('ja-JP')+'g</strong></div>'+
-        (undoneG>0?'<div class="pack-sum-cell pack-sum-undone"><span class="pack-sum-lbl">未収納</span><strong>'+undoneG+'点</strong></div>':'')+
-        (supplies.length?'<div class="pack-sum-cell"><span class="pack-sum-lbl">食料</span><strong>'+doneS+'/'+supplies.length+'品</strong></div>':'')+
+        (undone>0?'<div class="pack-sum-cell pack-sum-undone"><span class="pack-sum-lbl">未収納</span><strong>'+undone+'点</strong></div>':
+          '<div class="pack-sum-cell" style="color:#2a7a4f;"><span class="pack-sum-lbl">状態</span><strong>✓ 完了</strong></div>')+
+        (supplies.length?'<div class="pack-sum-cell"><span class="pack-sum-lbl">食料</span><strong>'+supplies.filter(sp=>packingState['s_'+sp.id]).length+'/'+supplies.length+'品</strong></div>':'')+
       '</div>';
   }
 
-  function updateSectionHeaders(){
-    box.querySelectorAll('.pack-section').forEach(sec=>{
-      const rows=sec.querySelectorAll('.pack-item-row');
-      const done=sec.querySelectorAll('.pack-item-row.is-packed').length;
-      const wt=Array.from(rows).reduce((a,r)=>{
-        const n=parseInt((r.querySelector('.pack-item-wt')?.dataset.wt||'0'));
-        return a+n;
-      },0);
-      const pct=rows.length?Math.round(done/rows.length*100):0;
-      const m=sec.querySelector('.pack-sec-meta');
-      if(m) m.innerHTML='<span>'+done+'/'+rows.length+'点</span><span class="pack-sec-pct">'+pct+'%</span><span class="pack-sec-wt">'+(Math.round(wt)).toLocaleString('ja-JP')+'g</span>';
-    });
-  }
-
-  function buildSection(sectionId,label,sectionGears){
-    if(!sectionGears.length) return null;
-    const isOpen=accordionOpen[sectionId]!==false;
-    const totalW=sectionGears.reduce((a,g)=>a+(Number(g.weight)||0),0);
-    const done=sectionGears.filter(g=>packingState['g_'+g.id]).length;
-    const pct=Math.round(done/sectionGears.length*100);
-
-    const sec=document.createElement('div');
-    sec.className='pack-section';
-    sec.dataset.sid=sectionId;
-
-    const hdr=document.createElement('div');
-    hdr.className='pack-sec-hdr';
-    hdr.innerHTML=
-      '<span class="pack-sec-arrow">'+(isOpen?'▼':'▶')+'</span>'+
-      '<span class="pack-sec-name">'+label+'</span>'+
-      '<span class="pack-sec-meta">'+
-        '<span>'+done+'/'+sectionGears.length+'点</span>'+
-        '<span class="pack-sec-pct">'+pct+'%</span>'+
-        '<span class="pack-sec-wt">'+Math.round(totalW).toLocaleString('ja-JP')+'g</span>'+
-      '</span>';
-
-    const body=document.createElement('div');
-    body.className='pack-sec-body';
-    body.style.display=isOpen?'':'none';
-
-    sectionGears.forEach(g=>{
-      const ck=packingState['g_'+g.id];
-      const row=document.createElement('div');
-      row.className='pack-item-row'+(ck?' is-packed':'');
-      if(showUnpackedOnly&&ck) row.style.display='none';
-      const wt=Math.round(Number(g.weight)||0);
-      row.innerHTML=
-        '<label class="pack-item-label">'+
-          '<input type="checkbox" data-id="g_'+g.id+'"'+(ck?' checked':'')+'>'+
-          '<span class="pack-item-name">'+escapeHtml(g.name)+'</span>'+
-          '<span class="pack-item-wt" data-wt="'+wt+'">'+wt.toLocaleString('ja-JP')+'g</span>'+
-        '</label>';
-      body.appendChild(row);
-    });
-
-    sec.appendChild(hdr);
-    sec.appendChild(body);
-    return sec;
-  }
-
-  function renderPacking(){
+  /* ── パンくずHTML ── */
+  function buildBreadcrumb(){
     const bp=getActiveBp();
-    const cmps=bp?bp.compartments:[];
+    const parts=breadcrumb.map((bc,idx)=>{
+      const isCurrent=idx===breadcrumb.length-1;
+      let label='';
+      if(bc.type==='root') label='🎒 '+(bp?escapeHtml(bp.name):'ルート');
+      else if(bc.type==='compartment'){
+        const cmp=(bp?.compartments||[]).find(c=>c.id===bc.cmpId);
+        label=cmp?escapeHtml(cmp.name):'コンパートメント';
+      }
+      else if(bc.type==='container'){
+        const cont=state.containers.find(x=>x.id===bc.node.cid);
+        label=(cont?escapeHtml(cont.icon||'📦')+' '+escapeHtml(cont.name):'ケース');
+      }
+      return `<span class="pack-bc-item${isCurrent?' current':''}" data-bcidx="${idx}">${label}</span>`;
+    });
+    return '<div class="pack-breadcrumb">'+parts.join('<span class="pack-bc-sep"> › </span>')+'</div>';
+  }
+
+  /* ── コンテナステータスバッジ ── */
+  function statusBadge(node,ps){
+    const st=getContainerStatus(node,ps);
+    const cont=state.containers.find(x=>x.id===node.cid);
+    const icon=cont?escapeHtml(cont.icon||'📦'):'📦';
+    const label=st==='stored'?'収納済み':st==='ready'?'準備完了':'準備中';
+    const cls='pack-tc-badge status-'+st;
+    return {icon,label,cls,st};
+  }
+
+  /* ── ツリービュー（ルートレベル: コンパートメント一覧） ── */
+  function renderTreeRoot(bp){
+    const cmps=bp?bp.compartments||[]:[];
+    const frag=document.createDocumentFragment();
+
+    // パッキングツリーが設定されているコンパートメント
+    const configuredCmps=cmps.filter(cmp=>(plan[cmp.id]||[]).length>0);
+    const allGearIdInPlan=new Set();
+    Object.values(plan).forEach(nodes=>gearIdsInTree(nodes).forEach(id=>allGearIdInPlan.add(id)));
+
+    // ツリーモード
+    configuredCmps.forEach(cmp=>{
+      const nodes=plan[cmp.id]||[];
+      const cmpAllIds=gearIdsInTree(nodes);
+      const cmpDone=cmpAllIds.filter(id=>packingState['g_'+id]).length;
+      const cmpTotalW=nodes.reduce((a,n)=>a+calcNodeWeight(n),0);
+
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.style.cssText='cursor:pointer;';
+      hdr.innerHTML=
+        '<span class="pack-sec-arrow">▼</span>'+
+        '<span class="pack-sec-name">'+escapeHtml(cmp.name)+'</span>'+
+        '<span class="pack-sec-meta">'+
+          '<span>'+cmpDone+'/'+cmpAllIds.length+'点</span>'+
+          '<span class="pack-sec-wt">'+Math.round(cmpTotalW).toLocaleString('ja-JP')+'g</span>'+
+        '</span>';
+      frag.appendChild(hdr);
+
+      const body=document.createElement('div');
+      body.className='pack-tc-item-wrap';
+      nodes.forEach(n=>body.appendChild(buildTreeItemEl(n,cmp.id,nodes)));
+      frag.appendChild(body);
+
+      hdr.addEventListener('click',()=>{
+        const open=body.style.display!=='none';
+        body.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    });
+
+    // ツリー外のギア（コンパートメント割当あり・ツリー未登録）
+    const unplanned=gears.filter(g=>!allGearIdInPlan.has(g.id)&&(s.gearLocations||{})[g.id]!=='worn');
+    if(unplanned.length){
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span><span class="pack-sec-name">📋 ツリー未登録ギア</span><span class="pack-sec-meta"><span>'+unplanned.filter(g=>packingState['g_'+g.id]).length+'/'+unplanned.length+'点</span></span>';
+      frag.appendChild(hdr);
+      const body=document.createElement('div');
+      unplanned.forEach(g=>body.appendChild(buildGearItemEl(g)));
+      frag.appendChild(body);
+      hdr.addEventListener('click',()=>{
+        const open=body.style.display!=='none';
+        body.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    }
+
+    // 着用ギア
+    const worn=gears.filter(g=>(s.gearLocations||{})[g.id]==='worn');
+    if(worn.length){
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span><span class="pack-sec-name">👕 着用</span><span class="pack-sec-meta"><span>'+worn.filter(g=>packingState['g_'+g.id]).length+'/'+worn.length+'点</span></span>';
+      frag.appendChild(hdr);
+      const body=document.createElement('div');
+      worn.forEach(g=>body.appendChild(buildGearItemEl(g)));
+      frag.appendChild(body);
+      hdr.addEventListener('click',()=>{
+        const open=body.style.display!=='none';
+        body.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    }
+
+    return frag;
+  }
+
+  /* ── ツリーノード要素を作成 ── */
+  function buildTreeItemEl(node,cmpId,siblings){
+    if(node.type==='gear'){
+      return buildGearItemEl(state.items.find(x=>x.id===node.id));
+    }
+    if(node.type==='container'){
+      return buildContainerItemEl(node,cmpId);
+    }
+    return document.createElement('div');
+  }
+
+  function buildGearItemEl(g){
+    if(!g){const d=document.createElement('div');return d;}
+    const ck=packingState['g_'+g.id];
+    const row=document.createElement('div');
+    row.className='pack-tc-item is-gear'+(ck?' is-packed':'');
+    const wt=Math.round(Number(g.weight)||0);
+    row.innerHTML=
+      '<label class="pack-tc-item is-gear" style="width:100%;display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;padding:0;">'+
+        '<input type="checkbox" data-id="g_'+g.id+'"'+(ck?' checked':'')+'style="flex-shrink:0;width:18px;height:18px;">'+
+        '<span class="pack-tc-name">'+escapeHtml(g.name)+'</span>'+
+        '<span class="pack-tc-wt">'+wt.toLocaleString('ja-JP')+'g</span>'+
+      '</label>';
+    row.querySelector('input').addEventListener('change',function(){
+      packingState['g_'+g.id]=this.checked;
+      row.classList.toggle('is-packed',this.checked);
+      updateSummary();
+      savePacking();
+    });
+    return row;
+  }
+
+  function buildContainerItemEl(node,cmpId){
+    const cont=state.containers.find(x=>x.id===node.cid);
+    const {icon,label,cls,st}=statusBadge(node,packingState);
+    const totalWt=Math.round(calcNodeWeight(node));
+    const {total,checked}=countNodeItems(node,packingState);
+
+    const wrap=document.createElement('div');
+    wrap.dataset.contNode=node.cid;
+
+    // コンテナヘッダー行
+    const hdr=document.createElement('div');
+    hdr.className='pack-tc-item is-container';
+    hdr.innerHTML=
+      '<span class="pack-tc-icon">'+icon+'</span>'+
+      '<span class="pack-tc-name">'+(cont?escapeHtml(cont.name):'不明')+'</span>'+
+      '<span class="pack-tc-wt">'+checked+'/'+total+'点 '+totalWt.toLocaleString('ja-JP')+'g</span>'+
+      '<span class="'+cls+'">'+label+'</span>'+
+      '<span class="pack-tc-arrow">›</span>';
+    wrap.appendChild(hdr);
+
+    // コンテナ情報バー
+    const infoBar=document.createElement('div');
+    infoBar.className='pack-cont-info';
+    const storeLabel=st==='stored'?'収納解除':'収納する';
+    const storeCls=st==='stored'?'pack-store-btn is-stored':'pack-store-btn';
+    infoBar.innerHTML=
+      '<strong>'+icon+' '+(cont?escapeHtml(cont.name):'不明')+'</strong>'+
+      ' &nbsp;自重 '+(cont?formatNumber(cont.selfWeight||0):0)+'g'+
+      ' &nbsp;中身 '+checked+'/'+total+'点'+
+      ' &nbsp;<button class="'+storeCls+'" data-contcid="'+node.cid+'">'+storeLabel+'</button>';
+    infoBar.style.display='none';
+    wrap.appendChild(infoBar);
+
+    // 子要素
+    const childWrap=document.createElement('div');
+    childWrap.style.cssText='margin-left:16px;border-left:2px solid #c5d0ee;padding-left:4px;display:none;';
+    (node.children||[]).forEach(ch=>childWrap.appendChild(buildTreeItemEl(ch,cmpId,node.children||[])));
+    wrap.appendChild(childWrap);
+
+    // コンテナタップ→展開
+    hdr.addEventListener('click',()=>{
+      const isOpen=childWrap.style.display!=='none';
+      childWrap.style.display=isOpen?'none':'';
+      infoBar.style.display=isOpen?'none':'';
+      hdr.querySelector('.pack-tc-arrow').textContent=isOpen?'›':'v';
+    });
+
+    // 収納ボタン
+    infoBar.querySelector('.pack-store-btn').addEventListener('click',e=>{
+      e.stopPropagation();
+      const already=!!packingState['c_'+node.cid];
+      if(!already){
+        // 中身チェック
+        const {total:tot,checked:chk}=countNodeItems(node,packingState);
+        if(tot>0&&chk<tot){
+          const undoneCnt=tot-chk;
+          if(!confirm((cont?cont.name:'ケース')+'内に未収納アイテムが'+undoneCnt+'点あります。このまま収納しますか？')) return;
+        }
+      }
+      packingState['c_'+node.cid]=!already;
+      savePacking();
+      renderMain(); // 再描画
+    });
+
+    return wrap;
+  }
+
+  /* ── レガシーモード（ツリー未設定時）── */
+  function renderLegacy(bp){
+    const frag=document.createDocumentFragment();
+    const cmps=bp?bp.compartments||[]:[];
     const gearCmps=s.gearCompartments||{};
     const gearLocs=s.gearLocations||{};
+    const cmpMap={};
+    const unclassified=[];
+    gears.filter(g=>gearLocs[g.id]!=='worn').forEach(g=>{
+      const cid=gearCmps[g.id];
+      if(cid&&cmps.find(c=>c.id===cid)){
+        if(!cmpMap[cid]) cmpMap[cid]=[];
+        cmpMap[cid].push(g);
+      }else{
+        unclassified.push(g);
+      }
+    });
+    const worn=gears.filter(g=>gearLocs[g.id]==='worn');
 
+    function addSection(label,sectionGears){
+      if(!sectionGears.length) return;
+      const done=sectionGears.filter(g=>packingState['g_'+g.id]).length;
+      const totalW=sectionGears.reduce((a,g)=>a+(Number(g.weight)||0),0);
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span><span class="pack-sec-name">'+escapeHtml(label)+'</span><span class="pack-sec-meta"><span>'+done+'/'+sectionGears.length+'点</span><span class="pack-sec-wt">'+Math.round(totalW).toLocaleString('ja-JP')+'g</span></span>';
+      frag.appendChild(hdr);
+      const body=document.createElement('div');
+      sectionGears.forEach(g=>{
+        const ck=packingState['g_'+g.id];
+        const row=document.createElement('div');
+        row.className='pack-item-row'+(ck?' is-packed':'');
+        const wt=Math.round(Number(g.weight)||0);
+        row.innerHTML='<label class="pack-item-label"><input type="checkbox" data-id="g_'+g.id+'"'+(ck?' checked':'')+'><span class="pack-item-name">'+escapeHtml(g.name)+'</span><span class="pack-item-wt" data-wt="'+wt+'">'+wt.toLocaleString('ja-JP')+'g</span></label>';
+        row.querySelector('input').addEventListener('change',function(){
+          packingState['g_'+g.id]=this.checked;
+          row.classList.toggle('is-packed',this.checked);
+          updateSummary();
+          savePacking();
+        });
+        body.appendChild(row);
+      });
+      frag.appendChild(body);
+      hdr.addEventListener('click',()=>{
+        const op=body.style.display!=='none';
+        body.style.display=op?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=op?'▶':'▼';
+      });
+    }
+    cmps.forEach(cmp=>{ if(cmpMap[cmp.id]?.length) addSection(cmp.name,cmpMap[cmp.id]); });
+    if(worn.length) addSection('👕 着用',worn);
+    if(unclassified.length) addSection('📋 未分類',unclassified);
+    return frag;
+  }
+
+  /* ── 食料セクション（共通）── */
+  function buildSuppliesSection(){
+    const frag=document.createDocumentFragment();
+    const PACK_SUP_GROUPS=[
+      {label:'🍙 食料・燃料',filter:sp=>['食料','燃料'].includes(sp.category)},
+      {label:'🍫 行動食',filter:sp=>sp.category==='行動食'},
+      {label:'🍶 酒',filter:sp=>sp.category==='酒'},
+      {label:'🧀 つまみ',filter:sp=>sp.category==='つまみ'},
+      {label:'💧 飲料',filter:sp=>sp.category==='飲料'},
+      {label:'🩺 医療',filter:sp=>sp.category==='医療'},
+      {label:'🔋 電子機器',filter:sp=>sp.category==='電子機器'},
+      {label:'📦 その他',filter:sp=>!['食料','燃料','行動食','酒','つまみ','飲料','医療','電子機器'].includes(sp.category)},
+    ];
+    PACK_SUP_GROUPS.forEach(grp=>{
+      const list=supplies.filter(grp.filter);
+      if(!list.length) return;
+      const hdr=document.createElement('div');
+      hdr.className='pack-sup-hdr';
+      hdr.textContent=grp.label;
+      frag.appendChild(hdr);
+      list.forEach(sp=>{
+        const qty=sqty[String(sp.id)]||1;
+        const ck=packingState['s_'+sp.id];
+        const row=document.createElement('div');
+        row.className='pack-item-row'+(ck?' is-packed':'');
+        row.innerHTML='<label class="pack-item-label"><input type="checkbox" data-id="s_'+sp.id+'"'+(ck?' checked':'')+'><span class="pack-item-name">'+escapeHtml(sp.name)+' <strong style="color:#1f3b73;">×'+qty+'</strong></span></label>';
+        row.querySelector('input').addEventListener('change',function(){
+          packingState['s_'+sp.id]=this.checked;
+          row.classList.toggle('is-packed',this.checked);
+          updateSummary();
+          savePacking();
+        });
+        frag.appendChild(row);
+      });
+    });
+    return frag;
+  }
+
+  /* ── メイン描画 ── */
+  function renderMain(){
+    const bp=getActiveBp();
     box.innerHTML='';
 
-    /* ── ヘッダー ── */
+    // ヘッダー
     const bpOpts=state.backpacks.map(b=>
       '<option value="'+b.id+'"'+(bp&&b.id===bp.id?' selected':'')+'>'+escapeHtml(b.name)+'</option>'
     ).join('');
@@ -3978,98 +4563,34 @@ function openPackingMode(setId){
       '</div>';
     box.appendChild(hdrDiv);
 
-    /* ── サマリー ── */
+    // サマリー
     const sumDiv=document.createElement('div');
-    sumDiv.id='packSummary';
-    sumDiv.className='pack-summary';
+    sumDiv.id='packSummary'; sumDiv.className='pack-summary';
     box.appendChild(sumDiv);
 
-    /* ── フィルターバー ── */
+    // フィルターバー
     const filterDiv=document.createElement('div');
     filterDiv.className='pack-filter-bar';
     filterDiv.innerHTML=
-      '<label class="pack-filter-label">'+
-        '<input type="checkbox" id="unpackedToggle"'+(showUnpackedOnly?' checked':'')+'>'+
-        '<span>未収納のみ表示</span>'+
-      '</label>'+
       '<div class="pack-filter-btns">'+
+        (hasTree?'<span style="font-size:12px;color:var(--green,#2a7a4f);font-weight:600;">🌲 ツリーモード</span>':'<span style="font-size:12px;color:var(--muted);">📋 コンパートメントモード</span>')+
         '<button id="packResetBtn" class="pack-icon-btn">🔄 リセット</button>'+
         '<button id="packCloseBottomBtn" class="pack-icon-btn">閉じる</button>'+
       '</div>';
     box.appendChild(filterDiv);
 
-    /* ── コンパートメント別セクション ── */
-    const wornGears=gears.filter(g=>gearLocs[g.id]==='worn');
-    const packGears=gears.filter(g=>gearLocs[g.id]!=='worn');
-
-    // コンパートメントへのマッピング
-    const cmpMap={};
-    const unclassified=[];
-    packGears.forEach(g=>{
-      const cid=gearCmps[g.id];
-      if(cid&&cmps.find(c=>c.id===cid)){
-        if(!cmpMap[cid]) cmpMap[cid]=[];
-        cmpMap[cid].push(g);
-      }else{
-        unclassified.push(g);
-      }
-    });
-
-    // ザックのコンパートメント順で表示
-    cmps.forEach(cmp=>{
-      if(cmpMap[cmp.id]?.length){
-        const sec=buildSection(cmp.id, cmp.name, cmpMap[cmp.id]);
-        if(sec) box.appendChild(sec);
-      }
-    });
-
-    // 着用
-    if(wornGears.length){
-      const sec=buildSection('__worn__','👕 着用',wornGears);
-      if(sec) box.appendChild(sec);
+    // コンテンツ
+    const content=document.createElement('div');
+    content.id='packContent';
+    if(hasTree){
+      content.appendChild(renderTreeRoot(bp));
+    }else{
+      content.appendChild(renderLegacy(bp));
     }
+    if(supplies.length) content.appendChild(buildSuppliesSection());
+    box.appendChild(content);
 
-    // 未分類（コンパートメント未設定）
-    if(unclassified.length){
-      const sec=buildSection('__unclassified__','📋 未分類（収納先未設定）',unclassified);
-      if(sec) box.appendChild(sec);
-    }
-
-    /* ── 食料・消耗品 ── */
-    const PACK_SUP_GROUPS=[
-      {label:'🍙 食料・燃料', color:'#e8f5e9', filter:sp=>['食料','燃料'].includes(sp.category)},
-      {label:'🍫 行動食',    color:'#fff3e0', filter:sp=>sp.category==='行動食'},
-      {label:'🍶 酒',        color:'#fff0f6', filter:sp=>sp.category==='酒'},
-      {label:'🧀 つまみ',    color:'#fffbf0', filter:sp=>sp.category==='つまみ'},
-      {label:'💧 飲料',      color:'#f0f8ff', filter:sp=>sp.category==='飲料'},
-      {label:'🩺 医療',      color:'#f5fff5', filter:sp=>sp.category==='医療'},
-      {label:'🔋 電子機器',  color:'#f8f5ff', filter:sp=>sp.category==='電子機器'},
-      {label:'📦 その他',    color:'#f8f8f8', filter:sp=>!['食料','燃料','行動食','酒','つまみ','飲料','医療','電子機器'].includes(sp.category)},
-    ];
-
-    function addSupSection(label,color,supList){
-      if(!supList.length) return;
-      const hEl=document.createElement('div');
-      hEl.className='pack-sup-hdr';
-      hEl.style.background=color;
-      hEl.textContent=label;
-      box.appendChild(hEl);
-      supList.forEach(sp=>{
-        const qty=sqty[String(sp.id)]||sqty[sp.id]||1;
-        const ck=packingState['s_'+sp.id];
-        const row=document.createElement('div');
-        row.className='pack-item-row'+(ck?' is-packed':'');
-        row.innerHTML=
-          '<label class="pack-item-label">'+
-            '<input type="checkbox" data-id="s_'+sp.id+'"'+(ck?' checked':'')+'>'+
-            '<span class="pack-item-name">'+escapeHtml(sp.name)+' <strong style="color:#1f3b73;">×'+qty+'</strong></span>'+
-          '</label>';
-        box.appendChild(row);
-      });
-    }
-    PACK_SUP_GROUPS.forEach(function(g){ addSupSection(g.label,g.color,supplies.filter(g.filter)); });
-
-    /* ── 閉じるボタン（下部） ── */
+    // フッター
     const footDiv=document.createElement('div');
     footDiv.className='pack-footer';
     const footClose=document.createElement('button');
@@ -4078,76 +4599,30 @@ function openPackingMode(setId){
     footDiv.appendChild(footClose);
     box.appendChild(footDiv);
 
-    /* ── イベント付与 ── */
+    // イベント
     box.querySelector('#packCloseTopBtn').onclick=closeOverlay;
     box.querySelector('#packCloseBottomBtn').onclick=closeOverlay;
-
     box.querySelector('#packBpSel')?.addEventListener('change',function(){
       packingState._backpackId=this.value;
       savePacking();
-      renderPacking();
+      renderMain();
     });
-
-    var elQ__packBpMgrBtn=box.querySelector('#packBpMgrBtn'); if(elQ__packBpMgrBtn) elQ__packBpMgrBtn.onclick=function(){
-      openBackpackManager(function(){ renderPacking(); });
-    };
-
-    box.querySelector('#packResetBtn').onclick=function(){
-      if(!confirm('装備セット「'+s.name+'」のパッキング状態を全てリセットしますか？')) return;
-      const bpIdBackup=packingState._backpackId;
+    box.querySelector('#packBpMgrBtn')?.addEventListener('click',()=>{
+      openBackpackManager(()=>renderMain());
+    });
+    box.querySelector('#packResetBtn').onclick=()=>{
+      if(!confirm('パッキング状態を全てリセットしますか？')) return;
+      const bpBk=packingState._backpackId;
       packingState={};
-      if(bpIdBackup) packingState._backpackId=bpIdBackup;
+      if(bpBk) packingState._backpackId=bpBk;
       savePacking();
-      renderPacking();
+      renderMain();
     };
-
-    box.querySelector('#unpackedToggle').onchange=function(){
-      showUnpackedOnly=this.checked;
-      box.querySelectorAll('.pack-item-row').forEach(row=>{
-        if(showUnpackedOnly&&row.classList.contains('is-packed')) row.style.display='none';
-        else row.style.display='';
-      });
-      updateSummary();
-    };
-
-    /* アコーディオン開閉 */
-    box.querySelectorAll('.pack-sec-hdr').forEach(function(hdrEl){
-      hdrEl.onclick=function(){
-        const sec=hdrEl.parentElement;
-        const sid=sec.dataset.sid;
-        const body=sec.querySelector('.pack-sec-body');
-        const arrow=hdrEl.querySelector('.pack-sec-arrow');
-        const opening=body.style.display==='none';
-        body.style.display=opening?'':'none';
-        arrow.textContent=opening?'▼':'▶';
-        accordionOpen[sid]=opening;
-      };
-    });
-
-    /* チェックボックス */
-    box.querySelectorAll('input[type=checkbox][data-id]').forEach(function(cb){
-      cb.onchange=function(){
-        packingState[cb.dataset.id]=cb.checked;
-        const row=cb.closest('.pack-item-row');
-        if(row){
-          row.classList.toggle('is-packed',cb.checked);
-          if(showUnpackedOnly&&cb.checked) row.style.display='none';
-        }
-        updateSectionHeaders();
-        updateSummary();
-        savePacking();
-      };
-    });
 
     updateSummary();
   }
 
-  function closeOverlay(){
-    document.body.removeChild(overlay);
-    renderEquipmentSets();
-  }
-
-  renderPacking();
+  renderMain();
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 }
@@ -4188,11 +4663,12 @@ async function clearAllData(){
       // IndexedDB: 全ストアをclear
       const db=await openDB();
       await new Promise((res,rej)=>{
-        const tx=db.transaction([STORE_ITEMS,STORE_META,STORE_SETS,STORE_SUPPLIES],'readwrite');
+        const tx=db.transaction([STORE_ITEMS,STORE_META,STORE_SETS,STORE_SUPPLIES,STORE_CONTAINERS],'readwrite');
         tx.objectStore(STORE_ITEMS).clear();
         tx.objectStore(STORE_META).clear();
         tx.objectStore(STORE_SETS).clear();
         tx.objectStore(STORE_SUPPLIES).clear();
+        tx.objectStore(STORE_CONTAINERS).clear();
         tx.oncomplete=res;
         tx.onerror=()=>rej(tx.error);
       });
@@ -4204,11 +4680,13 @@ async function clearAllData(){
       state.categories=[];
       state.equipmentSets=[];
       state.supplies=[];
+      state.containers=[];
       document.body.removeChild(overlay);
       // 再描画
       renderGearList();
       renderEquipmentSets();
       renderSupplies();
+      renderContainers();
       renderCategories?.();
       alert('全データを削除しました。');
     }catch(e){
@@ -4966,6 +5444,169 @@ function importSetCsv(setId, file){
 }
 
 /* ── 装備セット PDF（チェックリスト専用レイアウト） ── */
+/* ═══════════════════════════════════════════════
+   収納ケース管理 & パッキングツリーヘルパー
+═══════════════════════════════════════════════ */
+
+/* ── 収納ケースCRUD ── */
+function renderContainers(){
+  const list=document.getElementById('containerList');
+  if(!list) return;
+  if(!state.containers.length){
+    list.innerHTML='<p style="color:var(--muted);padding:20px;text-align:center;">収納ケースがありません。<br>「＋ 収納ケース追加」から作成してください。</p>';
+    return;
+  }
+  list.innerHTML=state.containers.map(c=>{
+    const usedIn=state.equipmentSets.filter(s=>
+      Object.values(s.packingPlan||{}).some(nodes=>hasContainerInTree(nodes,c.id))
+    ).length;
+    return `<div class="container-card">
+      <span class="cont-icon">${escapeHtml(c.icon||'📦')}</span>
+      <div class="cont-info">
+        <div class="cont-name">${escapeHtml(c.name)}</div>
+        <div class="cont-meta">自重 ${formatNumber(c.selfWeight||0)}g ／ セット使用 ${usedIn}件</div>
+        ${c.notes?`<div class="cont-notes">${escapeHtml(c.notes)}</div>`:''}
+      </div>
+      <button class="icon-btn cont-edit-btn" data-cid="${c.id}">編集</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.cont-edit-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>openContainerModal(Number(btn.dataset.cid)));
+  });
+}
+
+function openContainerModal(id){
+  const modal=document.getElementById('containerModal');
+  const c=id?state.containers.find(x=>x.id===id):null;
+  document.getElementById('containerModalTitle').textContent=c?'収納ケース編集':'収納ケース登録';
+  document.getElementById('containerEditId').value=c?c.id:'';
+  document.getElementById('containerIcon').value=c?.icon||'📦';
+  document.getElementById('containerName').value=c?.name||'';
+  document.getElementById('containerSelfWeight').value=c?.selfWeight||0;
+  document.getElementById('containerNotes').value=c?.notes||'';
+  document.getElementById('containerDeleteBtn').style.display=c?'':'none';
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('containerName').focus(),50);
+}
+
+function closeContainerModal(){
+  const modal=document.getElementById('containerModal');
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden','true');
+}
+
+async function saveContainerForm(e){
+  e.preventDefault();
+  const rawId=document.getElementById('containerEditId').value;
+  const name=document.getElementById('containerName').value.trim();
+  if(!name){alert('名称を入力してください。');return;}
+  const c=normalizeContainer({
+    id:rawId?Number(rawId):Date.now(),
+    name,
+    icon:(document.getElementById('containerIcon').value.trim()||'📦').slice(0,4),
+    selfWeight:Number(document.getElementById('containerSelfWeight').value)||0,
+    notes:document.getElementById('containerNotes').value.trim(),
+  });
+  if(rawId){
+    const idx=state.containers.findIndex(x=>x.id===c.id);
+    if(idx>=0) state.containers[idx]=c; else state.containers.push(c);
+  }else{
+    state.containers.push(c);
+  }
+  await saveContainers();
+  renderContainers();
+  closeContainerModal();
+}
+
+async function deleteContainerById(id){
+  if(!confirm('この収納ケースを削除しますか？（全装備セットのパッキングツリーからも削除されます）')) return;
+  state.containers=state.containers.filter(x=>x.id!==id);
+  state.equipmentSets.forEach(s=>{
+    if(!s.packingPlan) return;
+    Object.keys(s.packingPlan).forEach(cmpId=>{
+      s.packingPlan[cmpId]=removeContainerFromTree(s.packingPlan[cmpId]||[],id);
+    });
+  });
+  await saveContainers();
+  await saveEquipmentSets();
+  renderContainers();
+  closeContainerModal();
+}
+
+/* ── パッキングツリーヘルパー ── */
+function hasContainerInTree(nodes,cid){
+  if(!Array.isArray(nodes)) return false;
+  return nodes.some(n=>{
+    if(n.type==='container'&&n.cid===cid) return true;
+    if(n.type==='container') return hasContainerInTree(n.children||[],cid);
+    return false;
+  });
+}
+
+function removeContainerFromTree(nodes,cid){
+  if(!Array.isArray(nodes)) return [];
+  return nodes
+    .filter(n=>!(n.type==='container'&&n.cid===cid))
+    .map(n=>n.type==='container'?{...n,children:removeContainerFromTree(n.children||[],cid)}:n);
+}
+
+function calcNodeWeight(node){
+  if(!node) return 0;
+  if(node.type==='gear'){
+    const g=state.items.find(x=>x.id===node.id);
+    return Number(g?.weight)||0;
+  }
+  if(node.type==='container'){
+    const cont=state.containers.find(x=>x.id===node.cid);
+    return (Number(cont?.selfWeight)||0)+(node.children||[]).reduce((a,n)=>a+calcNodeWeight(n),0);
+  }
+  return 0;
+}
+
+function countNodeItems(node,packingState){
+  if(!node) return {total:0,checked:0};
+  if(node.type==='gear') return {total:1,checked:packingState['g_'+node.id]?1:0};
+  if(node.type==='container'){
+    return (node.children||[]).reduce((acc,n)=>{
+      const c=countNodeItems(n,packingState);
+      return {total:acc.total+c.total,checked:acc.checked+c.checked};
+    },{total:0,checked:0});
+  }
+  return {total:0,checked:0};
+}
+
+function getContainerStatus(node,packingState){
+  if(packingState['c_'+node.cid]) return 'stored'; // 収納済み
+  const {total,checked}=countNodeItems(node,packingState);
+  if(total===0) return 'ready';
+  return checked>=total?'ready':'partial';
+}
+
+function gearIdsInTree(nodes){
+  const ids=[];
+  (nodes||[]).forEach(n=>{
+    if(n.type==='gear') ids.push(n.id);
+    if(n.type==='container') ids.push(...gearIdsInTree(n.children||[]));
+  });
+  return ids;
+}
+
+/* ── コンテナモーダルイベント登録（init時に呼ぶ） ── */
+function initContainerModal(){
+  document.getElementById('addContainerBtn')?.addEventListener('click',()=>openContainerModal(null));
+  document.getElementById('containerForm')?.addEventListener('submit',saveContainerForm);
+  document.getElementById('containerModalClose')?.addEventListener('click',closeContainerModal);
+  document.getElementById('containerModalClose2')?.addEventListener('click',closeContainerModal);
+  document.getElementById('containerDeleteBtn')?.addEventListener('click',()=>{
+    const id=Number(document.getElementById('containerEditId').value);
+    if(id) deleteContainerById(id);
+  });
+  document.getElementById('containerModal')?.addEventListener('click',function(e){
+    if(e.target===this) closeContainerModal();
+  });
+}
+
 function exportSetPdf(setId){
   const s=state.equipmentSets.find(x=>x.id===setId);
   if(!s){alert('セットが見つかりません。');return;}
@@ -5422,6 +6063,7 @@ async function syncToFirebase() {
       supplies:      (state.supplies || []).map(normalizeSupply),
       equipmentSets: (state.equipmentSets || []).map(normalizeEquipmentSet),
       backpacks:     state.backpacks || [],
+      containers:    (state.containers || []).map(normalizeContainer),
       updatedAt:     firebase.firestore.FieldValue.serverTimestamp()
     });
 
@@ -5482,12 +6124,16 @@ async function syncFromFirebase() {
     state.categories    = merged.categories;
     state.equipmentSets = merged.equipmentSets;
     state.supplies      = merged.supplies;
+    if(Array.isArray(data.containers)) {
+      state.containers = data.containers.map(normalizeContainer);
+    }
 
     fbSuppressSync = true;
     await saveItems();
     await saveCategories();
     await saveEquipmentSets();
     await saveSupplies();
+    await saveContainers();
     fbSuppressSync = false;
 
     // Restore packing state
@@ -5502,6 +6148,7 @@ async function syncFromFirebase() {
     render();
     renderSupplies();
     renderEquipmentSets();
+    renderContainers();
     updateSyncBadge('synced');
     console.info('[Sync] ← Firebase 取得完了');
     return true;
