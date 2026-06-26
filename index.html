@@ -684,6 +684,11 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .cont-meta{font-size:12px;color:var(--muted,#888);margin-top:2px;}
 .cont-notes{font-size:12px;color:var(--muted,#888);margin-top:2px;white-space:pre-wrap;}
 
+/* ── 収納先割り当てビルダー ── */
+.assign-row{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:8px;background:var(--bg);border:1px solid var(--border);margin:3px 0;}
+.assign-label{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.assign-row select{flex-shrink:0;max-width:140px;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text,#222);}
+
 /* ── パッキングツリービルダー（セット編集） ── */
 .pktree-wrap{padding:8px 0;}
 .pktree-comp{margin-bottom:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
@@ -741,11 +746,11 @@ input,select,textarea{max-width:100%!important;box-sizing:border-box!important;}
 .pack-item-wt{font-size:11px;color:var(--muted,#999);white-space:nowrap;flex-shrink:0;}
 .pack-sup-hdr{font-size:13px;font-weight:700;padding:8px 14px;margin-top:4px;}
 .pack-footer{padding:12px 14px;}
-/* コンパートメント選択（セット編集画面） */
-.gear-cmp-select{
+/* コンパートメント／収納ケース選択（セット編集画面） */
+.gear-cmp-select,.gear-cont-select{
   font-size:11px;padding:2px 4px;border:1px solid var(--border,#ccc);
   border-radius:5px;background:var(--surface,#f5f5f5);
-  max-width:110px;min-width:70px;color:var(--text,#333);flex-shrink:0;
+  max-width:120px;min-width:70px;color:var(--text,#333);flex-shrink:0;
 }
 @media(max-width:768px){
   .pack-box{max-height:95vh;border-radius:16px 16px 0 0;}
@@ -1120,33 +1125,33 @@ body.dark .sp-modal-box{background:var(--card);color:var(--text);}
 </main>
 
 <!-- 収納ケース編集モーダル -->
-<div id="containerModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
-  <div class="modal-content" style="max-width:480px;">
-    <div class="modal-header">
-      <h2 id="containerModalTitle">収納ケース登録</h2>
-      <button class="close-btn" id="containerModalClose" aria-label="閉じる">✕</button>
+<div id="containerModal" class="sp-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="sp-modal-box" style="max-width:440px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h3 id="containerModalTitle" style="margin:0;font-size:16px;">収納ケース登録</h3>
+      <button type="button" id="containerModalClose" class="close-btn" aria-label="閉じる" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted,#888);padding:0 4px;">✕</button>
     </div>
     <form id="containerForm" autocomplete="off">
       <input type="hidden" id="containerEditId">
       <div class="form-row">
-        <label class="form-label">アイコン（絵文字）</label>
-        <input type="text" id="containerIcon" class="input" value="📦" maxlength="4" style="width:72px;font-size:22px;text-align:center;padding:4px;">
+        <label>アイコン（絵文字）</label>
+        <input type="text" id="containerIcon" value="📦" maxlength="4" style="width:72px;font-size:22px;text-align:center;padding:6px;border:1px solid var(--border);border-radius:8px;">
       </div>
       <div class="form-row">
-        <label class="form-label">名称 <span style="color:#c0392b;">*</span></label>
-        <input type="text" id="containerName" class="input" required placeholder="例: フォーカス、スタッフサック、救急セット">
+        <label>名称 <span style="color:#c0392b;">*</span></label>
+        <input type="text" id="containerName" required placeholder="例: フォーカス、スタッフサック、救急セット" style="width:100%;">
       </div>
       <div class="form-row">
-        <label class="form-label">自重 (g)</label>
-        <input type="number" id="containerSelfWeight" class="input" min="0" value="0" style="width:130px;">
+        <label>自重 (g)</label>
+        <input type="number" id="containerSelfWeight" min="0" value="0" style="max-width:140px;">
       </div>
       <div class="form-row">
-        <label class="form-label">備考</label>
-        <textarea id="containerNotes" class="input" rows="2" placeholder="メモ（任意）" style="width:100%;resize:vertical;"></textarea>
+        <label>備考</label>
+        <textarea id="containerNotes" rows="2" placeholder="メモ（任意）" style="width:100%;resize:vertical;"></textarea>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+      <div class="sp-modal-actions">
         <button type="button" id="containerDeleteBtn" class="danger-btn" style="display:none;margin-right:auto;">🗑 削除</button>
-        <button type="button" id="containerModalClose2" class="ghost-btn">キャンセル</button>
+        <button type="button" id="containerModalClose2" class="icon-btn">キャンセル</button>
         <button type="submit" class="primary-btn">保存</button>
       </div>
     </form>
@@ -1696,6 +1701,8 @@ function normalizeEquipmentSet(set){
     supplyQuantities: set?.supplyQuantities || {},
     gearLocations: (set?.gearLocations && typeof set.gearLocations === 'object') ? set.gearLocations : {},
     gearCompartments: (set?.gearCompartments && typeof set.gearCompartments === 'object') ? set.gearCompartments : {},
+    gearContainers: (set?.gearContainers && typeof set.gearContainers === 'object') ? set.gearContainers : {},
+    containerCompartments: (set?.containerCompartments && typeof set.containerCompartments === 'object') ? set.containerCompartments : {},
     defaultBackpackId: set?.defaultBackpackId || '',
     memo: set?.memo || '',
     days: (Number.isFinite(Number(set?.days)) && Number(set?.days) >= 1) ? Math.min(Math.round(Number(set.days)), 14) : 1,
@@ -3179,8 +3186,6 @@ function openSetEditor(setId){
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><button id="saveSetBtnTop">保存</button><button id="closeSetBtnTop">閉じる</button></div>';
   h += '<div id="setStats" style="position:sticky;top:0;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;margin:12px 0;font-weight:bold;z-index:20"></div>';
   h += '<div class="section-block"><h3>📝 備考</h3><textarea id="setMemo" style="width:100%;min-height:120px;resize:vertical;" placeholder="山行メモ・反省点・持ち物メモなど">' + escapeHtml(s.memo||'') + '</textarea></div>';
-  h += '<div class="section-block"><h3>📦 パッキングツリー設定</h3><div id="packingTreeBuilder" class="pktree-wrap"></div></div>';
-
   const bpOpts12=state.backpacks.map(function(b){
     const sel=(s.defaultBackpackId===b.id)?' selected':'';
     return '<option value="'+b.id+'"'+sel+'>'+escapeHtml(b.name)+'</option>';
@@ -3206,23 +3211,22 @@ function openSetEditor(setId){
         const loc=(s.gearLocations||{})[g.id]||'pack';
         const locEmoji=loc==='worn'?'👕':'🎒';
         const makerLabel = g.maker ? escapeHtml(g.maker) + '｜' : '';
-        const activeBp12 = state.backpacks.find(function(b){ return b.id===(s.defaultBackpackId||''); }) || state.backpacks[0];
-        const gCmpId = (s.gearCompartments||{})[g.id]||'';
-        const cmpOpts12 = (activeBp12?.compartments||[]).map(function(c){
-          return '<option value="'+c.id+'"'+(c.id===gCmpId?' selected':'')+'>'+escapeHtml(c.name)+'</option>';
+        const gContId = (s.gearContainers||{})[g.id]||'';
+        const contOpts12 = state.containers.map(function(c){
+          return '<option value="'+c.id+'"'+(String(c.id)===String(gContId)?' selected':'')+'>'+escapeHtml((c.icon||'📦')+' '+c.name)+'</option>';
         }).join('');
-        const cmpVis12 = loc==='worn'?' style="display:none;"':'';
-        const activeCmpName=(gCmpId?((activeBp12?.compartments||[]).find(c=>c.id===gCmpId)||{}).name||'':'');
-        const cmpElemHide=(loc==='worn')?' style="display:none;"':'';
-        const cmpInfoTxt=(activeCmpName?'収納：'+escapeHtml(activeCmpName):'収納先：未設定')+' ▼';
+        const contVis12 = loc==='worn'?' style="display:none;"':'';
+        const activeContName=(gContId?(state.containers.find(c=>String(c.id)===String(gContId))||{}).name||'':'');
+        const contElemHide=(loc==='worn')?' style="display:none;"':'';
+        const contInfoTxt=(activeContName?'ケース：'+escapeHtml(activeContName):'ケース：なし')+' ▼';
         h += '<div class="gear-check-row">'+
           '<label class="gcr-label"><input type="checkbox" name="setGearIds" value="'+g.id+'" '+checked+'>'+
           '<span class="gcr-name">'+makerLabel+escapeHtml(g.name)+'</span>'+
           '<span class="gcr-wt">'+formatWeight(g.weight||0)+'</span></label>'+
           '<button type="button" class="loc-toggle" data-gearloc="'+g.id+'" data-loc="'+loc+'">'+locEmoji+'</button>'+
-          '<span class="gcr-cmp-info" data-gearid="'+g.id+'" role="button" tabindex="0"'+cmpElemHide+'>'+cmpInfoTxt+'</span>'+
-          '<select class="gear-cmp-select" data-gearid="'+g.id+'"'+cmpVis12+'>'+
-            '<option value="">収納先…</option>'+cmpOpts12+
+          '<span class="gcr-cmp-info" data-gearid="'+g.id+'" role="button" tabindex="0"'+contElemHide+'>'+contInfoTxt+'</span>'+
+          '<select class="gear-cont-select" data-gearid="'+g.id+'"'+contVis12+'>'+
+            '<option value="">なし</option>'+contOpts12+
           '</select>'+
           '</div>';
         /* スマホ専用カード */
@@ -3232,17 +3236,17 @@ function openSetEditor(setId){
             '<span class="sp-gear-name">'+makerLabel+escapeHtml(g.name)+'</span>'+
           '</label>'+
           '<div class="sp-gear-wt">'+formatWeight(g.weight||0)+'</div>'+
-          (activeBp12
-            ? '<div class="sp-gear-cmp" data-gearid="'+g.id+'"'+cmpElemHide+'>'+cmpInfoTxt+'</div>'+
-              '<select class="sp-gear-cmp-sel" data-gearid="'+g.id+'" style="display:none">'+
-                '<option value="">収納先…</option>'+cmpOpts12+
-              '</select>'
-            : '')+
+          '<div class="sp-gear-cmp" data-gearid="'+g.id+'"'+contElemHide+'>'+contInfoTxt+'</div>'+
+          '<select class="sp-gear-cont-sel" data-gearid="'+g.id+'" style="display:none">'+
+            '<option value="">なし</option>'+contOpts12+
+          '</select>'+
           '</div>';
       });
     });
   }
   h += '</div>';
+
+  h += '<div class="section-block"><h3>🗂 収納先割り当て</h3><div id="assignmentBuilder" class="pktree-wrap"></div></div>';
 
   h += '<div class="section-block"><h3>🍙 食料プラン</h3>';
   h += '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">山行日数：';
@@ -3268,6 +3272,8 @@ function openSetEditor(setId){
   /* ===== 🍙 食料プラン (state — declared early so updateStats can use calcMealCounts) ===== */
   let localMealPlan=JSON.parse(JSON.stringify(s.mealPlan||{}));
   let localPackingPlan=JSON.parse(JSON.stringify(s.packingPlan||{}));
+  let localContainerCompartments=JSON.parse(JSON.stringify(s.containerCompartments||{}));
+  let localGearCompartments=JSON.parse(JSON.stringify(s.gearCompartments||{}));
   let localSnackPlan=(()=>{
     const raw=s.snackPlan||{};
     const keys=Object.keys(raw);
@@ -3322,64 +3328,68 @@ function openSetEditor(setId){
   }
 
   updateStats();
-  box.querySelectorAll('input[type=checkbox]').forEach(ch=>ch.addEventListener('change',updateStats));
+  box.querySelectorAll('input[type=checkbox]').forEach(ch=>ch.addEventListener('change',()=>{updateStats();renderAssignmentBuilder();}));
   box.querySelectorAll('.loc-toggle').forEach(btn=>btn.addEventListener('click',()=>{
     const newLoc=btn.dataset.loc==='pack'?'worn':'pack';
     btn.dataset.loc=newLoc;
     btn.textContent=newLoc==='worn'?'👕':'🎒';
     const gid=btn.dataset.gearloc;
-    const cmpSel=box.querySelector('.gear-cmp-select[data-gearid="'+gid+'"]');
-    const cmpInfo=box.querySelector('.gcr-cmp-info[data-gearid="'+gid+'"]');
-    const cmpBtn=box.querySelector('.gcr-cmp-btn[data-gearid="'+gid+'"]');
+    const contSel=box.querySelector('.gear-cont-select[data-gearid="'+gid+'"]');
+    const contInfo=box.querySelector('.gcr-cmp-info[data-gearid="'+gid+'"]');
+    const spCont=box.querySelector('.sp-gear-cmp[data-gearid="'+gid+'"]');
+    const spContSel=box.querySelector('.sp-gear-cont-sel[data-gearid="'+gid+'"]');
     if(newLoc==='worn'){
-      if(cmpSel){cmpSel.style.display='none';cmpSel.classList.remove('cmp-open');}
-      if(cmpInfo)cmpInfo.style.display='none';
-      if(cmpBtn)cmpBtn.style.display='none';
+      if(contSel){contSel.style.display='none';contSel.classList.remove('cmp-open');}
+      if(contInfo)contInfo.style.display='none';
+      if(spCont)spCont.style.display='none';
+      if(spContSel)spContSel.style.display='none';
     }else{
-      if(cmpSel)cmpSel.style.display='';
-      if(cmpInfo)cmpInfo.style.display='';
-      if(cmpBtn)cmpBtn.style.display='';
+      if(contSel)contSel.style.display='';
+      if(contInfo)contInfo.style.display='';
+      if(spCont)spCont.style.display='';
     }
     updateStats();
+    renderAssignmentBuilder();
   }));
-  // 収納先タップで展開（スマホ専用）
+  // 収納ケース選択タップ（スマホ）→ セレクト展開
   box.querySelectorAll('.gcr-cmp-info').forEach(info=>info.addEventListener('click',()=>{
-    const sel=box.querySelector('.gear-cmp-select[data-gearid="'+info.dataset.gearid+'"]');
+    const sel=box.querySelector('.gear-cont-select[data-gearid="'+info.dataset.gearid+'"]');
     if(sel)sel.classList.toggle('cmp-open');
   }));
-  // 収納先変更時にラベルテキスト更新
-  box.querySelectorAll('.gear-cmp-select').forEach(sel=>sel.addEventListener('change',()=>{
+  // 収納ケース変更 → ラベル更新
+  box.querySelectorAll('.gear-cont-select').forEach(sel=>sel.addEventListener('change',()=>{
     const info=box.querySelector('.gcr-cmp-info[data-gearid="'+sel.dataset.gearid+'"]');
     if(!info)return;
     const opt=sel.options[sel.selectedIndex];
-    info.textContent=((opt&&opt.value)?'収納：'+opt.text:'収納先：未設定')+' ▼';
+    info.textContent=((opt&&opt.value)?'ケース：'+opt.text:'ケース：なし')+' ▼';
+    renderAssignmentBuilder();
   }));
 
   /* ── スマホ専用カード: イベントハンドラ ── */
-  // sp-cb チェック → PC checkbox に同期 → updateStats
   box.querySelectorAll('.sp-cb').forEach(cb=>cb.addEventListener('change',()=>{
     const pcCb=box.querySelector('input[name="setGearIds"][value="'+cb.dataset.gearid+'"]');
     if(pcCb){pcCb.checked=cb.checked;}
     updateStats();
+    renderAssignmentBuilder();
   }));
   // sp-gear-cmp タップ → セレクト展開
   box.querySelectorAll('.sp-gear-cmp').forEach(div=>div.addEventListener('click',()=>{
-    const sel=box.querySelector('.sp-gear-cmp-sel[data-gearid="'+div.dataset.gearid+'"]');
+    const sel=box.querySelector('.sp-gear-cont-sel[data-gearid="'+div.dataset.gearid+'"]');
     if(!sel)return;
     sel.style.display=sel.style.display==='none'?'':'none';
   }));
-  // sp-gear-cmp-sel 変更 → ラベル更新 + PC select 同期 + 自動クローズ
-  box.querySelectorAll('.sp-gear-cmp-sel').forEach(sel=>sel.addEventListener('change',()=>{
+  // sp-gear-cont-sel 変更 → ラベル更新 + PC select 同期 + 自動クローズ + 再描画
+  box.querySelectorAll('.sp-gear-cont-sel').forEach(sel=>sel.addEventListener('change',()=>{
     const gid=sel.dataset.gearid;
     const info=box.querySelector('.sp-gear-cmp[data-gearid="'+gid+'"]');
     if(info){
       const opt=sel.options[sel.selectedIndex];
-      info.textContent=((opt&&opt.value)?'収納：'+opt.text:'収納先：未設定')+' ▼';
+      info.textContent=((opt&&opt.value)?'ケース：'+opt.text:'ケース：なし')+' ▼';
     }
-    // PC select に同期（保存時に gear-cmp-select を読むため）
-    const pcSel=box.querySelector('.gear-cmp-select[data-gearid="'+gid+'"]');
+    const pcSel=box.querySelector('.gear-cont-select[data-gearid="'+gid+'"]');
     if(pcSel)pcSel.value=sel.value;
-    sel.style.display='none'; // 自動クローズ
+    sel.style.display='none';
+    renderAssignmentBuilder();
   }));
 
   /* ===== 🍙 食料プラン (functions) ===== */
@@ -3742,169 +3752,87 @@ function openSetEditor(setId){
     });
   }
 
-  /* ── パッキングツリービルダー ── */
-  function renderPackingTreeBuilder(){
-    const wrap=box.querySelector('#packingTreeBuilder');
+  /* ── 収納先割り当てビルダー ── */
+  function renderAssignmentBuilder(){
+    const wrap=box.querySelector('#assignmentBuilder');
     if(!wrap) return;
     const bp=state.backpacks.find(b=>b.id===(box.querySelector('#setDefaultBp')?.value||s.defaultBackpackId||''))||state.backpacks[0]||null;
     const cmps=bp?bp.compartments||[]:[];
+
     if(!bp||!cmps.length){
-      wrap.innerHTML='<p style="color:var(--muted);font-size:13px;">ザックを選択するとパッキングツリーを設定できます。<br>ザック管理でコンパートメントを追加してください。</p>';
+      wrap.innerHTML='<p style="color:var(--muted);font-size:13px;">ザックを選択すると収納先を割り当てられます。<br>ザック管理でコンパートメントを追加してください。</p>';
       return;
     }
 
-    // コンパートメントがlocalPackingPlanにない場合は初期化
-    cmps.forEach(cmp=>{ if(!localPackingPlan[cmp.id]) localPackingPlan[cmp.id]=[]; });
+    // 現在チェックされているギアIDを取得
+    const checkedGearIds=new Set([...box.querySelectorAll('input[name="setGearIds"]:checked')].map(x=>Number(x.value)));
 
-    function buildNodeHtml(node,cmpId,pathKey){
-      if(node.type==='gear'){
-        const g=state.items.find(x=>x.id===node.id);
-        const nm=g?(g.maker?escapeHtml(g.maker)+'｜':'')+escapeHtml(g.name):'(不明)';
-        const wt=g?formatNumber(Number(g.weight)||0)+'g':'';
-        return `<div class="pktree-node is-gear" data-path="${escapeHtml(pathKey)}">
-          <span class="pktree-node-icon">🎒</span>
-          <span class="pktree-node-name">${nm}</span>
-          <span class="pktree-node-wt">${wt}</span>
-          <button class="pktree-node-del" data-path="${escapeHtml(pathKey)}" title="削除">✕</button>
-        </div>`;
+    // 各ギアに選択された収納ケースIDを取得
+    const gearContMap={};
+    box.querySelectorAll('.gear-cont-select').forEach(sel=>{
+      const gid=Number(sel.dataset.gearid);
+      if(gid) gearContMap[gid]=sel.value?Number(sel.value):null;
+    });
+
+    // 着用ギアを除外
+    const wornGearIds=new Set([...box.querySelectorAll('.loc-toggle')].filter(b=>b.dataset.loc==='worn').map(b=>Number(b.dataset.gearloc)));
+
+    // 使用中の収納ケースIDセット
+    const usedContIds=new Set();
+    checkedGearIds.forEach(gid=>{ if(!wornGearIds.has(gid)&&gearContMap[gid]) usedContIds.add(gearContMap[gid]); });
+
+    // 収納ケースなしのギア（チェック済み・未着用・ケース未選択）
+    const bareGearIds=[...checkedGearIds].filter(gid=>!wornGearIds.has(gid)&&!gearContMap[gid]);
+
+    const cmpOpts=cmps.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+
+    let html='';
+
+    if(!usedContIds.size&&!bareGearIds.length){
+      html='<p style="color:var(--muted);font-size:13px;">ギアをチェックして収納ケースを選ぶと、ここで収納先を割り当てられます。</p>';
+    }else{
+      // 収納ケースの割り当て
+      if(usedContIds.size){
+        html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin:6px 0 4px;">📦 収納ケース → 収納先</div>';
+        usedContIds.forEach(cid=>{
+          const cont=state.containers.find(c=>c.id===cid);
+          if(!cont)return;
+          const saved=localContainerCompartments[cid]||'';
+          const opts=`<option value="">未設定</option>`+cmps.map(c=>`<option value="${c.id}"${c.id===saved?' selected':''}>` +escapeHtml(c.name)+`</option>`).join('');
+          html+=`<div class="assign-row"><span class="assign-label">${escapeHtml(cont.icon||'📦')} ${escapeHtml(cont.name)}</span>`+
+            `<select class="assign-cmp-sel" data-contid="${cid}">${opts}</select></div>`;
+        });
       }
-      if(node.type==='container'){
-        const cont=state.containers.find(x=>x.id===node.cid);
-        const nm=cont?escapeHtml(cont.icon||'📦')+' '+escapeHtml(cont.name):'(不明)';
-        const totalWt=calcNodeWeight(node);
-        const childPk=`${pathKey}/__cont_${node.cid}`;
-        const available=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
-        const usedGearIds=new Set(gearIdsInTree(localPackingPlan[cmpId]||[]));
-        const availGears=available.filter(g=>!usedGearIds.has(g.id));
-        const childHtml=(node.children||[]).map((ch,ci)=>buildNodeHtml(ch,cmpId,`${pathKey}/${ci}`)).join('');
-        const gearOpts=availGears.map(g=>`<option value="${g.id}">${escapeHtml((g.maker?g.maker+'｜':'')+g.name)} (${formatNumber(g.weight||0)}g)</option>`).join('');
-        return `<div class="pktree-node is-container" data-path="${escapeHtml(pathKey)}">
-          <span class="pktree-node-icon">${cont?escapeHtml(cont.icon||'📦'):'📦'}</span>
-          <span class="pktree-node-name">${cont?escapeHtml(cont.name):'(不明)'}</span>
-          <span class="pktree-node-wt">自重${cont?formatNumber(cont.selfWeight||0):0}g / 合計${formatNumber(totalWt)}g</span>
-          <button class="pktree-node-del" data-path="${escapeHtml(pathKey)}" title="削除">✕</button>
-        </div>
-        <div class="pktree-children" data-childof="${escapeHtml(pathKey)}">
-          ${childHtml}
-          <div class="pktree-addbar">
-            <select class="add-gear-sel" data-path="${escapeHtml(pathKey)}">
-              <option value="">ギア選択…</option>${gearOpts}
-            </select>
-            <button class="add-gear-btn" data-path="${escapeHtml(pathKey)}">＋ ギア追加</button>
-          </div>
-          ${!gearOpts?'<span class="pktree-empty">未割当ギアがありません</span>':''}
-        </div>`;
+
+      // ケースなしギアの割り当て
+      if(bareGearIds.length){
+        html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin:10px 0 4px;">🎒 収納ケースなしのギア → 収納先</div>';
+        bareGearIds.forEach(gid=>{
+          const g=state.items.find(x=>x.id===gid);
+          if(!g)return;
+          const saved=localGearCompartments[gid]||'';
+          const opts=`<option value="">未設定</option>`+cmps.map(c=>`<option value="${c.id}"${c.id===saved?' selected':''}>` +escapeHtml(c.name)+`</option>`).join('');
+          const nm=(g.maker?escapeHtml(g.maker)+'｜':'')+escapeHtml(g.name);
+          html+=`<div class="assign-row"><span class="assign-label">🎒 ${nm}</span>`+
+            `<select class="assign-cmp-sel" data-gearid="${gid}">${opts}</select></div>`;
+        });
       }
-      return '';
     }
 
-    function buildCmpHtml(cmp){
-      const nodes=localPackingPlan[cmp.id]||[];
-      const usedGearIds=new Set(gearIdsInTree(nodes));
-      const available=state.items.filter(g=>(s.gearIds||[]).includes(g.id));
-      const availGears=available.filter(g=>!usedGearIds.has(g.id));
-      const gearOpts=availGears.map(g=>`<option value="${g.id}">${escapeHtml((g.maker?g.maker+'｜':'')+g.name)} (${formatNumber(g.weight||0)}g)</option>`).join('');
-      const contOpts=state.containers.map(c=>`<option value="${c.id}">${escapeHtml(c.icon||'📦')} ${escapeHtml(c.name)}</option>`).join('');
-      const nodesHtml=nodes.map((n,i)=>buildNodeHtml(n,cmp.id,`${cmp.id}/${i}`)).join('');
-      return `<div class="pktree-comp">
-        <div class="pktree-comp-hdr">▼ ${escapeHtml(cmp.name)}</div>
-        <div class="pktree-comp-body" data-cmpid="${cmp.id}">
-          ${nodesHtml}
-          <div class="pktree-addbar">
-            <select class="add-gear-sel" data-cmpid="${cmp.id}">
-              <option value="">ギア選択…</option>${gearOpts}
-            </select>
-            <button class="add-gear-btn" data-cmpid="${cmp.id}">＋ ギア追加</button>
-            ${contOpts?`<select class="add-cont-sel" data-cmpid="${cmp.id}"><option value="">ケース選択…</option>${contOpts}</select><button class="add-cont-btn" data-cmpid="${cmp.id}">＋ ケース追加</button>`:''}
-          </div>
-          ${!gearOpts&&!contOpts?'<span class="pktree-empty">追加できるギアまたは収納ケースがありません</span>':''}
-        </div>
-      </div>`;
-    }
+    wrap.innerHTML=html;
 
-    wrap.innerHTML=cmps.map(cmp=>buildCmpHtml(cmp)).join('');
-
-    // イベント: 削除
-    wrap.querySelectorAll('.pktree-node-del').forEach(btn=>{
-      btn.addEventListener('click',e=>{
-        e.stopPropagation();
-        const path=btn.dataset.path;
-        const parts=path.split('/');
-        const cmpId=parts[0];
-        const nodes=localPackingPlan[cmpId]||[];
-        localPackingPlan[cmpId]=removeNodeAtPath(nodes,parts.slice(1).map(Number));
-        renderPackingTreeBuilder();
-      });
+    // 変更時にlocalに即時反映
+    wrap.querySelectorAll('.assign-cmp-sel[data-contid]').forEach(sel=>{
+      sel.addEventListener('change',()=>{ localContainerCompartments[Number(sel.dataset.contid)]=sel.value; });
     });
-
-    // イベント: ケース内ギア追加
-    wrap.querySelectorAll('.add-gear-btn[data-path]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const path=btn.dataset.path;
-        const sel=wrap.querySelector(`.add-gear-sel[data-path="${CSS.escape(path)}"]`);
-        const gearId=Number(sel?.value);
-        if(!gearId){alert('ギアを選択してください。');return;}
-        const parts=path.split('/');
-        const cmpId=parts[0];
-        const nodes=localPackingPlan[cmpId]||[];
-        insertNodeAtPath(nodes,parts.slice(1).map(Number),{type:'gear',id:gearId});
-        renderPackingTreeBuilder();
-      });
-    });
-
-    // イベント: コンパートメント直下ギア追加
-    wrap.querySelectorAll('.add-gear-btn[data-cmpid]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const cmpId=btn.dataset.cmpid;
-        const sel=wrap.querySelector(`.add-gear-sel[data-cmpid="${cmpId}"]`);
-        const gearId=Number(sel?.value);
-        if(!gearId){alert('ギアを選択してください。');return;}
-        if(!localPackingPlan[cmpId]) localPackingPlan[cmpId]=[];
-        localPackingPlan[cmpId].push({type:'gear',id:gearId});
-        renderPackingTreeBuilder();
-      });
-    });
-
-    // イベント: コンパートメント直下ケース追加
-    wrap.querySelectorAll('.add-cont-btn[data-cmpid]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const cmpId=btn.dataset.cmpid;
-        const sel=wrap.querySelector(`.add-cont-sel[data-cmpid="${cmpId}"]`);
-        const cid=Number(sel?.value);
-        if(!cid){alert('収納ケースを選択してください。');return;}
-        if(hasContainerInTree(localPackingPlan[cmpId]||[],cid)){alert('同じケースは既に追加されています。');return;}
-        if(!localPackingPlan[cmpId]) localPackingPlan[cmpId]=[];
-        localPackingPlan[cmpId].push({type:'container',cid,children:[]});
-        renderPackingTreeBuilder();
-      });
+    wrap.querySelectorAll('.assign-cmp-sel[data-gearid]').forEach(sel=>{
+      sel.addEventListener('change',()=>{ localGearCompartments[Number(sel.dataset.gearid)]=sel.value; });
     });
   }
 
-  function removeNodeAtPath(nodes,idxPath){
-    if(!idxPath.length) return nodes;
-    if(idxPath.length===1){
-      return nodes.filter((_,i)=>i!==idxPath[0]);
-    }
-    return nodes.map((n,i)=>{
-      if(i!==idxPath[0]) return n;
-      if(n.type==='container') return {...n,children:removeNodeAtPath(n.children||[],idxPath.slice(1))};
-      return n;
-    });
-  }
-
-  function insertNodeAtPath(nodes,idxPath,newNode){
-    // idxPath points to container node; push newNode into its children
-    if(!idxPath.length){nodes.push(newNode);return;}
-    const n=nodes[idxPath[0]];
-    if(n&&n.type==='container'){
-      if(idxPath.length===1) n.children.push(newNode);
-      else insertNodeAtPath(n.children||[],idxPath.slice(1),newNode);
-    }
-  }
-
-  // ザック変更時にツリービルダーを再描画
+  // ザック変更時に再描画
   function onBpSelectChange(){
-    renderPackingTreeBuilder();
+    renderAssignmentBuilder();
   }
 
   function renderMealPlanSection(){
@@ -4008,9 +3936,9 @@ function openSetEditor(setId){
   if(daysSelEl)daysSelEl.addEventListener('change',renderMealPlanSection);
 
   // ザック変更時にツリービルダー再描画
-  box.querySelector('#setDefaultBp')?.addEventListener('change',renderPackingTreeBuilder);
+  box.querySelector('#setDefaultBp')?.addEventListener('change',renderAssignmentBuilder);
   // 初期描画
-  renderPackingTreeBuilder();
+  renderAssignmentBuilder();
 
   const save=()=>{
     s.gearIds = getCheckedNumbers('setGearIds');
@@ -4021,8 +3949,20 @@ function openSetEditor(setId){
     box.querySelectorAll('.loc-toggle').forEach(btn=>{
       s.gearLocations[btn.dataset.gearloc]=btn.dataset.loc;
     });
+    // 収納ケース割り当て（ギアテーブルから）
+    s.gearContainers={};
+    box.querySelectorAll('.gear-cont-select').forEach(function(sel){
+      const gid=Number(sel.dataset.gearid);
+      if(sel.value&&gid) s.gearContainers[gid]=Number(sel.value);
+    });
+    // 収納先割り当て（収納先割り当てビルダーから）
+    s.containerCompartments={};
     s.gearCompartments={};
-    box.querySelectorAll('.gear-cmp-select').forEach(function(sel){
+    box.querySelectorAll('.assign-cmp-sel[data-contid]').forEach(function(sel){
+      const cid=Number(sel.dataset.contid);
+      if(sel.value&&cid) s.containerCompartments[cid]=sel.value;
+    });
+    box.querySelectorAll('.assign-cmp-sel[data-gearid]').forEach(function(sel){
       const gid=Number(sel.dataset.gearid);
       if(sel.value&&gid) s.gearCompartments[gid]=sel.value;
     });
@@ -4268,6 +4208,159 @@ function openPackingMode(setId){
     return {icon,label,cls,st};
   }
 
+  /* ── 新階層ビュー: 収納先→ケース→ギア ── */
+  function renderNewHierarchy(bp){
+    const cmps=bp?bp.compartments||[]:[];
+    const frag=document.createDocumentFragment();
+    const locs=s.gearLocations||{};
+    const gearConts=s.gearContainers||{};
+    const contCmps=s.containerCompartments||{};
+    const gearCmps=s.gearCompartments||{};
+
+    // パックするギア（着用以外）
+    const packGears=gears.filter(g=>locs[g.id]!=='worn');
+
+    // 収納先ごとにまとめる
+    // まず各コンパートメントに属するコンテナとベアギアを収集
+    const cmpContMap={};  // {cmpId: Set<containerId>}
+    const cmpBareMap={};  // {cmpId: [gearId]}
+
+    packGears.forEach(g=>{
+      const contId=gearConts[g.id]?Number(gearConts[g.id]):null;
+      if(contId){
+        const cmpId=contCmps[contId]||'__unset__';
+        if(!cmpContMap[cmpId]) cmpContMap[cmpId]=new Set();
+        cmpContMap[cmpId].add(contId);
+      }else{
+        const cmpId=gearCmps[g.id]||'__unset__';
+        if(!cmpBareMap[cmpId]) cmpBareMap[cmpId]=[];
+        cmpBareMap[cmpId].push(g.id);
+      }
+    });
+
+    function makeSection(label,bodyEl){
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.style.cursor='pointer';
+      hdr.appendChild(document.createTextNode(''));
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span><span class="pack-sec-name">'+label+'</span>';
+      frag.appendChild(hdr);
+      frag.appendChild(bodyEl);
+      hdr.addEventListener('click',()=>{
+        const open=bodyEl.style.display!=='none';
+        bodyEl.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    }
+
+    // コンパートメントごとに描画
+    const processedCmps=new Set();
+    cmps.forEach(cmp=>{
+      processedCmps.add(cmp.id);
+      const contIds=cmpContMap[cmp.id]?[...cmpContMap[cmp.id]]:[];
+      const bareIds=cmpBareMap[cmp.id]||[];
+      if(!contIds.length&&!bareIds.length) return;
+
+      // コンパートメント数カウント
+      let total=0,done=0;
+      contIds.forEach(cid=>{
+        const node={type:'container',cid,children:gears.filter(g=>Number(gearConts[g.id])===cid).map(g=>({type:'gear',id:g.id}))};
+        const c=countNodeItems(node,packingState);
+        total+=c.total; done+=c.checked;
+      });
+      bareIds.forEach(gid=>{ total++; if(packingState['g_'+gid]) done++; });
+      const totalW=contIds.reduce((a,cid)=>{
+        const gList=gears.filter(g=>Number(gearConts[g.id])===cid);
+        const cont=state.containers.find(x=>x.id===cid);
+        return a+(Number(cont?.selfWeight)||0)+gList.reduce((b,g)=>b+(Number(g.weight)||0),0);
+      },0)+bareIds.reduce((a,gid)=>{const g=gears.find(x=>x.id===gid);return a+(Number(g?.weight)||0);},0);
+
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.style.cursor='pointer';
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span>'+
+        '<span class="pack-sec-name">'+escapeHtml(cmp.name)+'</span>'+
+        '<span class="pack-sec-meta"><span>'+done+'/'+total+'点</span><span class="pack-sec-wt">'+Math.round(totalW).toLocaleString('ja-JP')+'g</span></span>';
+      frag.appendChild(hdr);
+
+      const body=document.createElement('div');
+      body.className='pack-tc-item-wrap';
+
+      // 収納ケースを描画
+      contIds.forEach(cid=>{
+        const gList=gears.filter(g=>Number(gearConts[g.id])===cid);
+        const fakeNode={type:'container',cid,children:gList.map(g=>({type:'gear',id:g.id}))};
+        body.appendChild(buildContainerItemEl(fakeNode,cmp.id));
+      });
+
+      // 収納ケースなしのギアをまとめて描画
+      if(bareIds.length){
+        const bareHdr=document.createElement('div');
+        bareHdr.style.cssText='font-size:12px;color:var(--muted,#888);padding:6px 8px 2px;font-weight:600;';
+        bareHdr.textContent='─ 収納ケースなし ─';
+        body.appendChild(bareHdr);
+        bareIds.forEach(gid=>{
+          const g=gears.find(x=>x.id===gid);
+          if(g) body.appendChild(buildGearItemEl(g));
+        });
+      }
+
+      frag.appendChild(body);
+      hdr.addEventListener('click',()=>{
+        const open=body.style.display!=='none';
+        body.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    });
+
+    // 収納先未設定のコンテナ・ギア
+    const unsetContIds=cmpContMap['__unset__']?[...cmpContMap['__unset__']]:[];
+    const unsetBareIds=cmpBareMap['__unset__']||[];
+    if(unsetContIds.length||unsetBareIds.length){
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.style.cursor='pointer';
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span><span class="pack-sec-name">📋 収納先未設定</span>';
+      frag.appendChild(hdr);
+      const body=document.createElement('div');
+      body.className='pack-tc-item-wrap';
+      unsetContIds.forEach(cid=>{
+        const gList=gears.filter(g=>Number(gearConts[g.id])===cid);
+        const fakeNode={type:'container',cid,children:gList.map(g=>({type:'gear',id:g.id}))};
+        body.appendChild(buildContainerItemEl(fakeNode,'__unset__'));
+      });
+      unsetBareIds.forEach(gid=>{
+        const g=gears.find(x=>x.id===gid);
+        if(g) body.appendChild(buildGearItemEl(g));
+      });
+      frag.appendChild(body);
+      hdr.addEventListener('click',()=>{
+        const open=body.style.display!=='none';
+        body.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    }
+
+    // 着用
+    const worn=gears.filter(g=>locs[g.id]==='worn');
+    if(worn.length){
+      const hdr=document.createElement('div');
+      hdr.className='pack-sec-hdr';
+      hdr.innerHTML='<span class="pack-sec-arrow">▼</span><span class="pack-sec-name">👕 着用</span><span class="pack-sec-meta"><span>'+worn.filter(g=>packingState['g_'+g.id]).length+'/'+worn.length+'点</span></span>';
+      frag.appendChild(hdr);
+      const body=document.createElement('div');
+      worn.forEach(g=>body.appendChild(buildGearItemEl(g)));
+      frag.appendChild(body);
+      hdr.addEventListener('click',()=>{
+        const open=body.style.display!=='none';
+        body.style.display=open?'none':'';
+        hdr.querySelector('.pack-sec-arrow').textContent=open?'▶':'▼';
+      });
+    }
+
+    return frag;
+  }
+
   /* ── ツリービュー（ルートレベル: コンパートメント一覧） ── */
   function renderTreeRoot(bp){
     const cmps=bp?bp.compartments||[]:[];
@@ -4276,13 +4369,19 @@ function openPackingMode(setId){
     // パッキングツリーが設定されているコンパートメント
     const configuredCmps=cmps.filter(cmp=>(plan[cmp.id]||[]).length>0);
     const allGearIdInPlan=new Set();
-    Object.values(plan).forEach(nodes=>gearIdsInTree(nodes).forEach(id=>allGearIdInPlan.add(id)));
+    const allSupplyIdInPlan=new Set();
+    Object.values(plan).forEach(nodes=>{
+      gearIdsInTree(nodes).forEach(id=>allGearIdInPlan.add(id));
+      supplyIdsInTree(nodes).forEach(id=>allSupplyIdInPlan.add(id));
+    });
 
     // ツリーモード
     configuredCmps.forEach(cmp=>{
       const nodes=plan[cmp.id]||[];
-      const cmpAllIds=gearIdsInTree(nodes);
-      const cmpDone=cmpAllIds.filter(id=>packingState['g_'+id]).length;
+      const cmpGearIds=gearIdsInTree(nodes);
+      const cmpSupIds=supplyIdsInTree(nodes);
+      const cmpAllIds=[...cmpGearIds,...cmpSupIds];
+      const cmpDone=cmpGearIds.filter(id=>packingState['g_'+id]).length+cmpSupIds.filter(id=>packingState['s_'+id]).length;
       const cmpTotalW=nodes.reduce((a,n)=>a+calcNodeWeight(n),0);
 
       const hdr=document.createElement('div');
@@ -4351,10 +4450,35 @@ function openPackingMode(setId){
     if(node.type==='gear'){
       return buildGearItemEl(state.items.find(x=>x.id===node.id));
     }
+    if(node.type==='supply'){
+      return buildSupplyItemEl(state.supplies.find(x=>x.id===node.id));
+    }
     if(node.type==='container'){
       return buildContainerItemEl(node,cmpId);
     }
     return document.createElement('div');
+  }
+
+  function buildSupplyItemEl(sp){
+    if(!sp){const d=document.createElement('div');return d;}
+    const ck=packingState['s_'+sp.id];
+    const row=document.createElement('div');
+    row.className='pack-tc-item is-gear'+(ck?' is-packed':'');
+    const wt=Math.round(Number(sp.weight)||0);
+    row.innerHTML=
+      '<label class="pack-tc-item is-gear" style="width:100%;display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;padding:0;">'+
+        '<input type="checkbox" data-id="s_'+sp.id+'"'+(ck?' checked':'')+'style="flex-shrink:0;width:18px;height:18px;">'+
+        '<span style="font-size:15px;">🍙</span>'+
+        '<span class="pack-tc-name">'+escapeHtml(sp.name)+'</span>'+
+        '<span class="pack-tc-wt">'+wt.toLocaleString('ja-JP')+'g</span>'+
+      '</label>';
+    row.querySelector('input').addEventListener('change',function(){
+      packingState['s_'+sp.id]=this.checked;
+      row.classList.toggle('is-packed',this.checked);
+      updateSummary();
+      savePacking();
+    });
+    return row;
   }
 
   function buildGearItemEl(g){
@@ -4383,54 +4507,24 @@ function openPackingMode(setId){
     const {icon,label,cls,st}=statusBadge(node,packingState);
     const totalWt=Math.round(calcNodeWeight(node));
     const {total,checked}=countNodeItems(node,packingState);
+    const storeLabel=st==='stored'?'▣ 収納解除':'□ 収納する';
+    const storeBtnCls='pack-store-btn'+(st==='stored'?' is-stored':'');
 
     const wrap=document.createElement('div');
-    wrap.dataset.contNode=node.cid;
-
-    // コンテナヘッダー行
-    const hdr=document.createElement('div');
-    hdr.className='pack-tc-item is-container';
-    hdr.innerHTML=
-      '<span class="pack-tc-icon">'+icon+'</span>'+
-      '<span class="pack-tc-name">'+(cont?escapeHtml(cont.name):'不明')+'</span>'+
-      '<span class="pack-tc-wt">'+checked+'/'+total+'点 '+totalWt.toLocaleString('ja-JP')+'g</span>'+
-      '<span class="'+cls+'">'+label+'</span>'+
-      '<span class="pack-tc-arrow">›</span>';
-    wrap.appendChild(hdr);
-
-    // コンテナ情報バー
-    const infoBar=document.createElement('div');
-    infoBar.className='pack-cont-info';
-    const storeLabel=st==='stored'?'収納解除':'収納する';
-    const storeCls=st==='stored'?'pack-store-btn is-stored':'pack-store-btn';
-    infoBar.innerHTML=
-      '<strong>'+icon+' '+(cont?escapeHtml(cont.name):'不明')+'</strong>'+
-      ' &nbsp;自重 '+(cont?formatNumber(cont.selfWeight||0):0)+'g'+
-      ' &nbsp;中身 '+checked+'/'+total+'点'+
-      ' &nbsp;<button class="'+storeCls+'" data-contcid="'+node.cid+'">'+storeLabel+'</button>';
-    infoBar.style.display='none';
-    wrap.appendChild(infoBar);
-
-    // 子要素
-    const childWrap=document.createElement('div');
-    childWrap.style.cssText='margin-left:16px;border-left:2px solid #c5d0ee;padding-left:4px;display:none;';
-    (node.children||[]).forEach(ch=>childWrap.appendChild(buildTreeItemEl(ch,cmpId,node.children||[])));
-    wrap.appendChild(childWrap);
-
-    // コンテナタップ→展開
-    hdr.addEventListener('click',()=>{
-      const isOpen=childWrap.style.display!=='none';
-      childWrap.style.display=isOpen?'none':'';
-      infoBar.style.display=isOpen?'none':'';
-      hdr.querySelector('.pack-tc-arrow').textContent=isOpen?'›':'v';
-    });
+    wrap.style.cssText='border-left:3px solid #8fa8d8;margin:4px 0;border-radius:0 8px 8px 0;background:#f0f4ff;display:flex;align-items:center;gap:6px;padding:8px 10px;';
+    wrap.innerHTML=
+      '<span style="font-size:18px;flex-shrink:0;">'+icon+'</span>'+
+      '<span style="flex:1;font-size:13px;font-weight:600;">'+(cont?escapeHtml(cont.name):'不明')+'</span>'+
+      '<span style="font-size:11px;color:var(--muted,#888);white-space:nowrap;">'+checked+'/'+total+'点<br>'+totalWt.toLocaleString('ja-JP')+'g</span>'+
+      '<span class="'+cls+'" style="flex-shrink:0;">'+label+'</span>'+
+      '<button type="button" class="'+storeBtnCls+'" style="flex-shrink:0;">'+storeLabel+'</button>'+
+      '<button type="button" class="pack-drill-btn" style="flex-shrink:0;background:#dce6f9;border:none;border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;" title="開く">＞</button>';
 
     // 収納ボタン
-    infoBar.querySelector('.pack-store-btn').addEventListener('click',e=>{
+    wrap.querySelector('.pack-store-btn').addEventListener('click',function(e){
       e.stopPropagation();
       const already=!!packingState['c_'+node.cid];
       if(!already){
-        // 中身チェック
         const {total:tot,checked:chk}=countNodeItems(node,packingState);
         if(tot>0&&chk<tot){
           const undoneCnt=tot-chk;
@@ -4439,10 +4533,100 @@ function openPackingMode(setId){
       }
       packingState['c_'+node.cid]=!already;
       savePacking();
-      renderMain(); // 再描画
+      renderMain();
+    });
+
+    // ドリルインボタン
+    wrap.querySelector('.pack-drill-btn').addEventListener('click',function(e){
+      e.stopPropagation();
+      breadcrumb.push({type:'container',node,cmpId});
+      renderMain();
     });
 
     return wrap;
+  }
+
+  /* ── コンテナ内部ビュー ── */
+  function renderContainerDetail(node,cmpId){
+    const cont=state.containers.find(x=>x.id===node.cid);
+    const {icon,label,cls,st}=statusBadge(node,packingState);
+    const totalWt=Math.round(calcNodeWeight(node));
+    const selfWt=cont?Number(cont.selfWeight)||0:0;
+    const {total,checked}=countNodeItems(node,packingState);
+    const storeLabel=st==='stored'?'▣ 収納解除':'□ 収納する';
+    const storeBtnCls='pack-store-btn'+(st==='stored'?' is-stored':'');
+
+    const frag=document.createDocumentFragment();
+
+    // ケース情報ヘッダー
+    const infoCard=document.createElement('div');
+    infoCard.style.cssText='background:#e8eeff;border-radius:10px;padding:12px 14px;margin-bottom:10px;';
+    infoCard.innerHTML=
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+        '<span style="font-size:28px;">'+icon+'</span>'+
+        '<div style="flex:1;">'+
+          '<div style="font-size:15px;font-weight:700;">'+(cont?escapeHtml(cont.name):'不明')+'</div>'+
+          '<div style="font-size:12px;color:var(--muted,#888);">自重 '+selfWt.toLocaleString('ja-JP')+'g ／ 合計 '+totalWt.toLocaleString('ja-JP')+'g</div>'+
+        '</div>'+
+        '<span class="'+cls+'">'+label+'</span>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;">'+
+        '<span style="font-size:13px;">'+checked+' / '+total+' 点収納済み</span>'+
+        '<button type="button" class="'+storeBtnCls+'" style="font-size:12px;">'+storeLabel+'</button>'+
+      '</div>';
+
+    infoCard.querySelector('.pack-store-btn').addEventListener('click',function(){
+      const already=!!packingState['c_'+node.cid];
+      if(!already){
+        const {total:tot,checked:chk}=countNodeItems(node,packingState);
+        if(tot>0&&chk<tot){
+          const undoneCnt=tot-chk;
+          if(!confirm((cont?cont.name:'ケース')+'内に未収納アイテムが'+undoneCnt+'点あります。このまま収納しますか？')) return;
+        }
+      }
+      packingState['c_'+node.cid]=!already;
+      savePacking();
+      renderMain();
+    });
+    frag.appendChild(infoCard);
+
+    // 中身リスト
+    const listHdr=document.createElement('div');
+    listHdr.style.cssText='font-size:12px;font-weight:600;color:var(--muted,#888);margin:8px 0 4px;';
+    listHdr.textContent='── 中身 ──';
+    frag.appendChild(listHdr);
+
+    if(!node.children||!node.children.length){
+      const empty=document.createElement('p');
+      empty.style.cssText='font-size:13px;color:var(--muted,#888);padding:8px;text-align:center;';
+      empty.textContent='（アイテム未登録）';
+      frag.appendChild(empty);
+    }else{
+      node.children.forEach(ch=>frag.appendChild(buildTreeItemEl(ch,cmpId,node.children)));
+    }
+
+    // 収納先
+    const bp=getActiveBp();
+    let storedIn='';
+    if(breadcrumb.length>=2){
+      const parent=breadcrumb[breadcrumb.length-2];
+      if(parent.type==='root'){
+        // 直接コンパートメントに入っている
+        const cmp=(bp?.compartments||[]).find(c=>c.id===cmpId);
+        if(cmp) storedIn=escapeHtml(cmp.name);
+      }else if(parent.type==='container'){
+        const pc=state.containers.find(x=>x.id===parent.node.cid);
+        if(pc) storedIn=escapeHtml(pc.icon||'📦')+' '+escapeHtml(pc.name);
+      }
+    }
+    if(storedIn){
+      const locDiv=document.createElement('div');
+      locDiv.style.cssText='margin-top:12px;font-size:12px;color:var(--muted,#888);border-top:1px solid #c5d0ee;padding-top:8px;';
+      locDiv.innerHTML='収納先: <strong>'+storedIn+'</strong>';
+      frag.appendChild(locDiv);
+    }
+
+    return frag;
   }
 
   /* ── レガシーモード（ツリー未設定時）── */
@@ -4579,15 +4763,38 @@ function openPackingMode(setId){
       '</div>';
     box.appendChild(filterDiv);
 
+    // パンくず（ルート以外で表示）
+    if(breadcrumb.length>1){
+      const bcDiv=document.createElement('div');
+      bcDiv.innerHTML=buildBreadcrumb();
+      box.appendChild(bcDiv);
+      bcDiv.querySelectorAll('.pack-bc-item').forEach(el=>{
+        el.style.cursor='pointer';
+        el.addEventListener('click',()=>{
+          const idx=Number(el.dataset.bcidx);
+          breadcrumb=breadcrumb.slice(0,idx+1);
+          renderMain();
+        });
+      });
+    }
+
     // コンテンツ
     const content=document.createElement('div');
     content.id='packContent';
-    if(hasTree){
+    const hasNewHierarchy=Object.keys(s.gearContainers||{}).length>0||Object.keys(s.containerCompartments||{}).length>0||Object.keys(s.gearCompartments||{}).length>0;
+    const cur=breadcrumb[breadcrumb.length-1];
+    if(cur.type==='container'){
+      content.appendChild(renderContainerDetail(cur.node,cur.cmpId));
+    }else if(hasNewHierarchy){
+      content.appendChild(renderNewHierarchy(bp));
+      if(supplies.length) content.appendChild(buildSuppliesSection());
+    }else if(hasTree){
       content.appendChild(renderTreeRoot(bp));
+      if(supplies.length) content.appendChild(buildSuppliesSection());
     }else{
       content.appendChild(renderLegacy(bp));
+      if(supplies.length) content.appendChild(buildSuppliesSection());
     }
-    if(supplies.length) content.appendChild(buildSuppliesSection());
     box.appendChild(content);
 
     // フッター
@@ -5485,14 +5692,14 @@ function openContainerModal(id){
   document.getElementById('containerSelfWeight').value=c?.selfWeight||0;
   document.getElementById('containerNotes').value=c?.notes||'';
   document.getElementById('containerDeleteBtn').style.display=c?'':'none';
-  modal.classList.add('active');
+  modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
   setTimeout(()=>document.getElementById('containerName').focus(),50);
 }
 
 function closeContainerModal(){
   const modal=document.getElementById('containerModal');
-  modal.classList.remove('active');
+  modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
 }
 
@@ -5557,6 +5764,10 @@ function calcNodeWeight(node){
     const g=state.items.find(x=>x.id===node.id);
     return Number(g?.weight)||0;
   }
+  if(node.type==='supply'){
+    const s=state.supplies.find(x=>x.id===node.id);
+    return Number(s?.weight)||0;
+  }
   if(node.type==='container'){
     const cont=state.containers.find(x=>x.id===node.cid);
     return (Number(cont?.selfWeight)||0)+(node.children||[]).reduce((a,n)=>a+calcNodeWeight(n),0);
@@ -5567,6 +5778,7 @@ function calcNodeWeight(node){
 function countNodeItems(node,packingState){
   if(!node) return {total:0,checked:0};
   if(node.type==='gear') return {total:1,checked:packingState['g_'+node.id]?1:0};
+  if(node.type==='supply') return {total:1,checked:packingState['s_'+node.id]?1:0};
   if(node.type==='container'){
     return (node.children||[]).reduce((acc,n)=>{
       const c=countNodeItems(n,packingState);
@@ -5590,6 +5802,26 @@ function gearIdsInTree(nodes){
     if(n.type==='container') ids.push(...gearIdsInTree(n.children||[]));
   });
   return ids;
+}
+
+function supplyIdsInTree(nodes){
+  const ids=[];
+  (nodes||[]).forEach(n=>{
+    if(n.type==='supply') ids.push(n.id);
+    if(n.type==='container') ids.push(...supplyIdsInTree(n.children||[]));
+  });
+  return ids;
+}
+
+function containerCidsInTree(nodes){
+  const cids=[];
+  (nodes||[]).forEach(n=>{
+    if(n.type==='container'){
+      cids.push(n.cid);
+      cids.push(...containerCidsInTree(n.children||[]));
+    }
+  });
+  return cids;
 }
 
 /* ── コンテナモーダルイベント登録（init時に呼ぶ） ── */
